@@ -34,6 +34,7 @@ DS1_ENCODER_BUTTONS = [25, 26, 27, 28]
 
 DS1_SIDE_DIALS = [50, 51, 52, 53]
 
+KNOBS_ARE_SENDS = False
 
 
 class DS1Colors:
