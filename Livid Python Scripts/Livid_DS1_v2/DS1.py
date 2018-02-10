@@ -73,7 +73,7 @@ class DS1SessionComponent(SessionComponent):
 		if buttons:
 			for button, (x, _) in buttons.iterbuttons():
 				scene = self.scene(x)
-				debug('setting scene launch for button:', button, 'scene:', scene)
+				#debug('setting scene launch for button:', button, 'scene:', scene)
 				scene.set_launch_button(button)
 
 		else:
@@ -92,7 +92,9 @@ class DS1SessionNavigationComponent(SessionNavigationComponent):
 
 	@listens('value')
 	def _on_track_select_dial_value(self, value):
-		self._can_bank_left() and self._bank_left() if value == 127 else self._can_bank_right() and self._bank_right()
+		#debug('_on_track_select_dial_value:', value)
+		#self._can_bank_left() and self._bank_left() if value == 127 else self._can_bank_right() and self._bank_right()
+		self._horizontal_banking.can_scroll_up() and self._horizontal_banking.scroll_up() if value == 127 else self._horizontal_banking.can_scroll_down() and self._horizontal_banking.scroll_down()
 	
 
 class DS1TransportComponent(TransportComponent):

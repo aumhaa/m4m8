@@ -1,0 +1,42 @@
+{
+	"author" : "amounra",
+	"authors" : [  ],
+	"description" : "Mod implementation for Ableton Live 10 and Max 8.",
+	"displayname" : "",
+	"extends" : "",
+	"extensible" : 0,
+	"homepatcher" : "mod_entry.maxpat",
+	"max_version_max" : "none",
+	"max_version_min" : "7.1",
+	"name" : "m4m8",
+	"os" : 	{
+		"macintosh" : 		{
+			"platform" : [ "ia32", "x64" ],
+			"min_version" : "none"
+		}
+,
+		"windows" : 		{
+			"platform" : [ "ia32", "x64" ],
+			"min_version" : "none"
+		}
+
+	}
+,
+	"package_extra" : 	{
+		"reverse_domain" : "com.aumhaa",
+		"copyright" : "Copyright (c) 2018 aumhaa"
+	}
+,
+	"tags" : [ "Max for Live", "Python Scripts", "Generative" ],
+	"version" : "0.9.9.9",
+	"website" : "https://aumhaa.com",
+	"filelist" : 	{
+		"examples" : [ ],
+		"externals" : [ ],
+		"patchers" : [ ],
+		"help" : [ ],
+		"docs" : [ ],
+		"code" : [ ],
+		"extras" : [ ]
+	}
+}

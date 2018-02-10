@@ -111,7 +111,8 @@ class CntrlrSessionNavigationComponent(SessionNavigationComponent):
 	@listens('value')
 	def _on_scene_bank_dial_value(self, value):
 		#debug('_on_scene_bank_dial_value', value)
-		self._can_scroll_page_up() and self._scroll_page_up() if value == 127 else self._can_scroll_page_down() and self._scroll_page_down()
+		#self._can_scroll_page_up() and self._scroll_page_up() if value == 127 else self._can_scroll_page_down() and self._scroll_page_down()
+		self._vertical_paginator.can_scroll_up() and self._vertical_paginator.scroll_up() if value == 127 else self._vertical_paginator.can_scroll_down() and self._vertical_paginator.scroll_down()
 	
 
 	def set_track_bank_dial(self, dial):
@@ -121,7 +122,8 @@ class CntrlrSessionNavigationComponent(SessionNavigationComponent):
 	@listens('value')
 	def _on_track_bank_dial_value(self, value):
 		#debug('_on_track_bank_dial_value', value)
-		self._can_scroll_page_left() and self._scroll_page_left() if value == 127 else self._can_scroll_page_right() and self._scroll_page_right()
+		#self._can_scroll_page_left() and self._scroll_page_left() if value == 127 else self._can_scroll_page_right() and self._scroll_page_right()
+		self._horizontal_paginator.can_scroll_up() and self._horizontal_paginator.scroll_up() if value == 127 else self._horizontal_paginator.can_scroll_down() and self._horizontal_paginator.scroll_down()
 	
 
 	def set_scene_nav_dial(self, dial):
@@ -131,7 +133,7 @@ class CntrlrSessionNavigationComponent(SessionNavigationComponent):
 	@listens('value')
 	def _on_scene_nav_dial_value(self, value):
 		#debug('_on_scene_nav_dial_value', value)
-		self._can_bank_up() and self._bank_up() if value == 127 else self._can_bank_down() and self._bank_down()
+		self._vertical_banking.can_scroll_up() and self._vertical_banking.scroll_up() if value == 127 else self._vertical_banking.can_scroll_down() and self._vertical_banking.scroll_down()
 	
 
 	def set_track_nav_dial(self, dial):
@@ -140,8 +142,8 @@ class CntrlrSessionNavigationComponent(SessionNavigationComponent):
 
 	@listens('value')
 	def _on_track_nav_dial_value(self, value):
-		#debug('_on_track_nav_dial_value', value)
-		self._can_bank_left() and self._bank_left() if value == 127 else self._can_bank_right() and self._bank_right()
+	#	debug('_on_track_nav_dial_value', value)
+		self._horizontal_banking.can_scroll_up() and self._horizontal_banking.scroll_up() if value == 127 else self._horizontal_banking.can_scroll_down() and self._horizontal_banking.scroll
 	
 
 
