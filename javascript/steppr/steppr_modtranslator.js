@@ -20,6 +20,7 @@ aumhaa.init(this);
 var DEBUG_UPDT = false;
 var DEBUG_LCD = false;
 var DEBUG_NEW = false;
+var FLASH_NOTE = true;
 
 var unique = jsarguments[1];
 
@@ -48,6 +49,7 @@ var keys_to_mutes = false;
 var mgate = 0;
 var live = 0;
 var shifted = false;
+var Alive = false;
 
 var BUTTON_COLORS = [1, 1, 2, 2, 3, 4, 5, 5];
 
@@ -110,7 +112,7 @@ function alive(val)
 	initialize(val);
 	if(val)
 	{
-		Alive = 1;
+		Alive = true;
 	}
 }
 
@@ -702,7 +704,7 @@ function ctlout(){
 	var keyout = a[0];
 	var valout = a[1];
 	//debug('ctlout', keyout, valout);
-	mod.Send('receive_translation', keyout, 'value', valout);
+	Alive&&mod.Send('receive_translation', keyout, 'value', valout);
 	
 }
 
@@ -1250,7 +1252,7 @@ function mask()
 			mod.Send('receive_translation', args[1]<16 ? 'keys_'+(args[1]%16) : 'keys2_'+(args[1]%16), 'mask', args[2]);
 			break;
 		case 'grid':
-			mod.Send('receive_translation', 'pads_'+(args[1] + (args[2]*4)), args[3]);
+			FLASH_NOTE && mod.Send('receive_translation', 'pads_'+(args[1] + (args[2]*4)), 'mask', args[3]);
 			break;
 	}
 }
