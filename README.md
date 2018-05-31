@@ -9,7 +9,7 @@ How to make this work:
 2) Download this repository.  Put the “m4m8” or “m4m8-master” folder
 inside Max’s packages folder, which can either be in ~/Documents/Max 8/packages
 
-3) Copy all the FOLDERS* from inside the m4m7/Python Scripts/ folder to Live’s MIDI Remote Scripts folder. 
+3) Copy all the FOLDERS* from inside the m4m8/Python Scripts/ folder to Live’s MIDI Remote Scripts folder. 
 (The individual scripts require the "aumhaa" and "Debug" folders in order to work)
 
 4) If you are using a Livid controller, you'll also want to copy all the FOLDERS* from the 
