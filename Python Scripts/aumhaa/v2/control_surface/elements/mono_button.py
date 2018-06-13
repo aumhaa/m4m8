@@ -1,11 +1,11 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 9.6 release on 021516
+# written against Live 10.0.3b1 on 061218
 
 from __future__ import absolute_import, print_function
 
 import Live
 
-from ableton.v2.control_surface.elements.button import ButtonElement, ON_VALUE, OFF_VALUE
+from ableton.v2.control_surface.elements.button import ButtonElement
 from ableton.v2.control_surface.skin import Skin, SkinColorMissingError
 from aumhaa.v2.control_surface.elements.mono_bridge import MonoBridgeProxy
 from aumhaa.v2.base.debug import initialize_debug

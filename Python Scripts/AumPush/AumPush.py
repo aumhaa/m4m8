@@ -1,4 +1,5 @@
-# by amounra 0915 : http://www.aumhaa.com
+# by amounra 0618 : http://www.aumhaa.com
+# written against Live 10.0.3b1 on 061218
 
 from __future__ import with_statement
 import Live
@@ -25,6 +26,7 @@ from ableton.v2.control_surface.components import ViewControlComponent, Backgrou
 from ableton.v2.control_surface.elements import adjust_string, ButtonElement, ButtonMatrixElement, ChoosingElement, ComboElement, DoublePressContext, MultiElement, OptionalElement, to_midi_value
 from ableton.v2.control_surface.mode import CompoundMode, AddLayerMode, ModesComponent
 from ableton.v2.control_surface.input_control_element import ParameterSlot
+from ableton.v2.control_surface.elements import ButtonElement
 
 from Push.push import Push
 from Push.device_navigation_component import DeviceNavigationComponent
@@ -36,7 +38,7 @@ from Push.mode_behaviours import CancellableBehaviour
 from Push import sysex
 
 from pushbase.value_component import ValueComponent, ParameterValueComponent, ValueDisplayComponent, ParameterValueDisplayComponent
-from pushbase.configurable_button_element import ConfigurableButtonElement
+#from pushbase.configurable_button_element import ConfigurableButtonElement
 from pushbase.instrument_component import InstrumentComponent
 from pushbase.step_seq_component import StepSeqComponent
 from pushbase.loop_selector_component import LoopSelectorComponent
@@ -804,7 +806,7 @@ class AumPush(Push):
 		#self._session_recording.layer = Layer(new_button=OptionalElement(self._new_button, self._settings['workflow'], False), scene_list_new_button=OptionalElement(self._new_button, self._settings[SETTING_WORKFLOW], True), record_button=self._record_button, automation_button=self._automation_button, new_scene_button=ComboElement(self._new_button, [self._shift_button]), re_enable_automation_button=ComboElement(self._automation_button, [self._shift_button]), delete_automation_button=ComboElement(self._automation_button, [self._delete_button]), length_button=self._fixed_length_button)
 		self._session_recording.layer = Layer(new_button=OptionalElement(self.elements.new_button, self._settings['workflow'], False), scene_list_new_button=OptionalElement(self.elements.new_button, self._settings['workflow'], True), record_button='record_button', automation_button='automation_button', new_scene_button=self._with_shift('new_button'), re_enable_automation_button=self._with_shift('automation_button'), delete_automation_button=ComboElement('automation_button', 'delete_button'),)  ##foot_switch_button=self.elements.foot_pedal_button.single_press, _uses_foot_pedal='foot_pedal_button')
 		for control in self.controls:
-			if isinstance(control, ConfigurableButtonElement) and control._original_identifier is 69:
+			if isinstance(control, ButtonElement) and control._original_identifier is 69:
 				debug('found control: ' + str(control))
 				self.controls.remove(control)
 				break
