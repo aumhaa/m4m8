@@ -1,3 +1,4 @@
+# written against Live 10.0.3b8 RC on 083018
 
 from __future__ import absolute_import, print_function, unicode_literals
 from functools import partial
@@ -7,7 +8,7 @@ from ableton.v2.base.util import clamp
 from ableton.v2.base import depends
 #from _Framework.Dependency import depends
 from ableton.v2.control_surface.components import MixerComponent, ChannelStripComponent
-from ableton.v2.control_surface.components.mixer import simple_track_assigner
+from ableton.v2.control_surface.components.mixer import SimpleTrackAssigner
 #from _Framework.MixerComponent import MixerComponent
 #from _Framework.ChannelStripComponent import ChannelStripComponent
 from ableton.v2.control_surface.control import RadioButtonControl, RadioButtonGroup, ControlList
@@ -43,7 +44,7 @@ class SpecialMixerComponent(MixerComponent):
     send_select_buttons = SpecialRadioButtonGroup()
 
     @depends(layout_setup=None)
-    def __init__(self, track_assigner = simple_track_assigner, layout_setup = None, *a, **k):
+    def __init__(self, track_assigner = SimpleTrackAssigner(), layout_setup = None, *a, **k):
         self._layout_setup = layout_setup
         super(SpecialMixerComponent, self).__init__(*a, **k)
         self.on_num_sends_changed()

@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 9.6 release on 021516
+# written against Live 10.0.3b8 RC on 083018
 
 from __future__ import absolute_import, print_function
 import Live
@@ -167,7 +167,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		else:
 			self.select_button.color = self.empty_color
 		self._update_track_button()
-		self._update_device_selection()	
+		self._update_device_selection()
 	
 
 	def set_track(self, track):

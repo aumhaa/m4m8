@@ -1,5 +1,5 @@
 # by amounra 0218 : http://www.aumhaa.com
-# written against Live 10.01 
+# written against Live 10.0.3b8 RC on 083018
 
 from __future__ import absolute_import, print_function
 import Live
@@ -11,7 +11,7 @@ from ableton.v2.base import inject, listens, listens_group, inject
 from ableton.v2.control_surface import ControlSurface, ControlElement, Layer, Skin, PrioritizedResource, Component, ClipCreator, DeviceBankRegistry
 from ableton.v2.control_surface.elements import ButtonMatrixElement, DoublePressElement, MultiElement, DisplayDataSource, SysexElement
 from ableton.v2.control_surface.components import ClipSlotComponent, SceneComponent, SessionComponent, TransportComponent, BackgroundComponent, ViewControlComponent, SessionRingComponent, SessionRecordingComponent, SessionNavigationComponent, SessionOverviewComponent, MixerComponent, PlayableComponent
-from ableton.v2.control_surface.components.mixer import simple_track_assigner
+from ableton.v2.control_surface.components.mixer import SimpleTrackAssigner
 from ableton.v2.control_surface.mode import AddLayerMode, ModesComponent, DelayMode, CompoundMode
 from ableton.v2.control_surface.elements.physical_display import PhysicalDisplayElement
 from ableton.v2.control_surface.components.session_recording import *
@@ -102,11 +102,11 @@ def special_parameter_bank_names(device, bank_name_dict = BANK_NAME_DICT):
 		banks = special_number_of_parameter_banks(device)
 		def _default_bank_name(bank_index):
 			return 'Bank ' + str(bank_index + 1)
-		
+
 		if device.class_name in MAX_DEVICES and banks != 0:
 			def _is_ascii(c):
 				return ord(c) < 128
-			
+
 			def _bank_name(bank_index):
 				try:
 					name = device.get_bank_name(bank_index)
@@ -116,7 +116,7 @@ def special_parameter_bank_names(device, bank_name_dict = BANK_NAME_DICT):
 					return str(filter(_is_ascii, name))
 				else:
 					return _default_bank_name(bank_index)
-			
+
 			return map(_bank_name, range(0, banks))
 		else:
 			return map(_default_bank_name, range(0, banks))
@@ -131,7 +131,7 @@ def special_parameter_banks(device, device_dict = DEVICE_DICT):
 		elif device.class_name in device_dict.keys():
 			def names_to_params(bank):
 				return map(partial(get_parameter_by_name, device), bank)
-			
+
 			return group([i for i in flatten(map(names_to_params, device_dict[device.class_name]))], 12)
 		else:
 			if device.class_name in MAX_DEVICES:
@@ -149,7 +149,7 @@ def special_parameter_banks(device, device_dict = DEVICE_DICT):
 							return [ None for i in range(0, 32) ]
 						else:
 							return [ (device.parameters[i] if i != -1 else None) for i in parameter_indices ]
-					
+
 					return map(_bank_parameters, range(0, banks))
 			return group(device_parameters_to_map(device), 12)
 	return []
@@ -164,11 +164,11 @@ class CntrlrDeviceSelector(DeviceSelectorComponent):
 		has_entry = False
 		preset = None
 		if index < len(self._device_registry):
-			preset = self._device_registry[index] 
+			preset = self._device_registry[index]
 		if not preset is None and isinstance(preset, Live.Device.Device):
 			has_entry = not self._script.monomodular.is_mod(preset) is None
 		return has_entry
-	
+
 
 	def select_device(self, index):
 		if self.is_enabled():
@@ -177,7 +177,7 @@ class CntrlrDeviceSelector(DeviceSelectorComponent):
 			debug('reg:', self._device_registry)
 			preset = None
 			if index < len(self._device_registry):
-				preset = self._device_registry[index] 
+				preset = self._device_registry[index]
 			if not preset is None and isinstance(preset, Live.Device.Device):
 				self.song.view.select_device(preset)
 				self._script._device_provider.device = preset
@@ -193,7 +193,7 @@ class CntrlrDeviceSelector(DeviceSelectorComponent):
 					pass
 			else:
 				self._script.modhandler.select_mod()
-	
+
 
 	def scan_all(self):
 		debug('scan all--------------------------------')
@@ -211,11 +211,11 @@ class CntrlrDeviceSelector(DeviceSelectorComponent):
 					elif (device.name.startswith('*' +key+' ') or device.name == ('*' +key))  and device.can_have_chains and len(device.chains) and len(device.chains[0].devices):
 						self._device_registry[index] = device.chains[0].devices[0]
 		debug('device registry: ' + str(self._device_registry))
-	
+
 
 	def update(self):
 		pass
-	
+
 
 
 class CancellableBehaviour(ModeButtonBehaviour):
@@ -236,16 +236,16 @@ class CancellableBehaviour(ModeButtonBehaviour):
 		else:
 			self.remember_previous_mode(component)
 			component.push_mode(mode)
-	
+
 
 	def remember_previous_mode(self, component):
 		self._previous_mode = component.active_modes[0] if component.active_modes else None
-	
+
 
 	def restore_previous_mode(self, component):
 		if len(component.active_modes) == 0 and self._previous_mode is not None:
 			component.push_mode(self._previous_mode)
-	
+
 
 
 class SpecialCntrlrDeviceComponent(DeviceComponent):
@@ -254,7 +254,7 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 	def __init__(self, script, *a, **k):
 		self._script = script
 		super(SpecialCntrlrDeviceComponent, self).__init__(*a, **k)
-	
+
 
 	def display_device(self):
 		track = self.find_track(livedevice(self._get_device()))
@@ -264,7 +264,7 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 		if ((not self.application.view.is_view_visible('Detail')) or (not self.application.view.is_view_visible('Detail/DeviceChain'))):
 			self.application.view.show_view('Detail')
 			self.application.view.show_view('Detail/DeviceChain')
-	
+
 
 	def find_track(self, obj):
 		if obj != None:
@@ -276,19 +276,19 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 				return self.find_track(obj.canonical_parent)
 		else:
 			return None
-	
+
 
 	def update(self):
 		super(SpecialCntrlrDeviceComponent, self).update()
-	
+
 
 	def set_nav_prev_button(self, prev_button):
 		self._on_nav_prev_value.subject = prev_button
-	
+
 
 	def set_nav_next_button(self, next_button):
 		self._on_nav_next_value.subject = next_button
-	
+
 
 	@listens('value')
 	def _on_nav_prev_value(self, value):
@@ -301,7 +301,7 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 				self.application.view.scroll_view(direction, 'Detail/DeviceChain', True)
 				self.update()"""
 		pass
-	
+
 
 	@listens('value')
 	def _on_nav_next_value(self, value):
@@ -310,7 +310,7 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 			self.application.view.scroll_view(direction, 'Detail/DeviceChain', True)
 			self.update()"""
 		pass
-	
+
 
 	def _current_bank_details(self):
 		bank_name = self._bank_name
@@ -328,19 +328,19 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 				bank_name = 'Best of Parameters'
 		#debug('current_bank_details:', bank_name, bank)
 		return (bank_name, bank)
-	
+
 
 	def _parameter_banks(self):
 		return special_parameter_banks(self._get_device())
-	
+
 
 	def _parameter_bank_names(self):
 		return special_parameter_bank_names(self._get_device())
-	
+
 
 	def _number_of_parameter_banks(self):
 		return special_number_of_parameter_banks(self._get_device())
-	
+
 
 	def _release_parameters(self, controls):
 		if controls != None:
@@ -348,7 +348,7 @@ class SpecialCntrlrDeviceComponent(DeviceComponent):
 				if control != None:
 					control.release_parameter()
 					control.reset()
-	
+
 
 
 class CntrlrTransportComponent(TransportComponent):
@@ -356,7 +356,7 @@ class CntrlrTransportComponent(TransportComponent):
 
 	def _update_stop_button_color(self):
 		self._stop_button.color = 'Transport.StopOn' if self._play_toggle.is_toggled else 'Transport.StopOff'
-	
+
 
 
 class CntrlrViewControlComponent(ViewControlComponent):
@@ -367,27 +367,27 @@ class CntrlrViewControlComponent(ViewControlComponent):
 		self._basic_scroll_scenes = self.register_component(ScrollComponent(BasicSceneScroller()))
 		self.register_slot(self.song, self._basic_scroll_scenes.update, 'scenes')
 		self.register_slot(self.song.view, self._basic_scroll_scenes.update, 'selected_scene')
-	
+
 
 	def set_scene_select_dial(self, dial):
 		self._on_scene_select_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_scene_select_dial_value(self, value):
 		#debug('_on_scene_select_dial_value', value)
 		self._basic_scroll_scenes.scroll_up() if value == 127 else self._basic_scroll_scenes.scroll_down()
-	
+
 
 	def set_track_select_dial(self, dial):
 		self._on_track_select_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_track_select_dial_value(self, value):
 		#debug('_on_scene_select_dial_value', value)
 		self._scroll_tracks.scroll_up() if value == 127 else self._scroll_tracks.scroll_down()
-	
+
 
 
 class CntrlrResetSendsComponent(ResetSendsComponent):
@@ -398,7 +398,7 @@ class CntrlrResetSendsComponent(ResetSendsComponent):
 		for index in range(len(track._send_controls)):
 			if track._send_controls[index].mapped_parameter()!=None:
 				track._send_controls[index].mapped_parameter().value = 0
-	
+
 
 
 class CntrlrSessionNavigationComponent(SessionNavigationComponent):
@@ -406,45 +406,45 @@ class CntrlrSessionNavigationComponent(SessionNavigationComponent):
 
 	def set_scene_bank_dial(self, dial):
 		self._on_scene_bank_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_scene_bank_dial_value(self, value):
 		#debug('_on_scene_bank_dial_value', value)
 		#self._can_scroll_page_up() and self._scroll_page_up() if value == 127 else self._can_scroll_page_down() and self._scroll_page_down()
 		self._vertical_paginator.can_scroll_up() and self._vertical_paginator.scroll_up() if value == 127 else self._vertical_paginator.can_scroll_down() and self._vertical_paginator.scroll_down()
-	
+
 
 	def set_track_bank_dial(self, dial):
 		self._on_track_bank_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_track_bank_dial_value(self, value):
 		#debug('_on_track_bank_dial_value', value)
 		#self._can_scroll_page_left() and self._scroll_page_left() if value == 127 else self._can_scroll_page_right() and self._scroll_page_right()
 		self._horizontal_paginator.can_scroll_up() and self._horizontal_paginator.scroll_up() if value == 127 else self._horizontal_paginator.can_scroll_down() and self._horizontal_paginator.scroll_down()
-	
+
 
 	def set_scene_nav_dial(self, dial):
 		self._on_scene_nav_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_scene_nav_dial_value(self, value):
 		#debug('_on_scene_nav_dial_value', value)
 		self._vertical_banking.can_scroll_up() and self._vertical_banking.scroll_up() if value == 127 else self._vertical_banking.can_scroll_down() and self._vertical_banking.scroll_down()
-	
+
 
 	def set_track_nav_dial(self, dial):
 		self._on_track_nav_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_track_nav_dial_value(self, value):
 	#	debug('_on_track_nav_dial_value', value)
 		self._horizontal_banking.can_scroll_up() and self._horizontal_banking.scroll_up() if value == 127 else self._horizontal_banking.can_scroll_down() and self._horizontal_banking.scroll
-	
+
 
 
 """We need to add an extra mode to the instrument to deal with session shifting, thus the _matrix_modes and extra functions."""
@@ -460,7 +460,7 @@ class CntrlrAutoArmComponent(AutoArmComponent):
 
 	def _update_notification(self):
 		pass
-	
+
 
 
 class CntrlrDeviceComponent(DeviceComponent):
@@ -471,7 +471,7 @@ class CntrlrDeviceComponent(DeviceComponent):
 	def __init__(self, script = None, *a, **k):
 		self._script = script
 		super(CntrlrDeviceComponent, self).__init__(*a, **k)
-	
+
 
 
 class Cntrlr(LividControlSurface):
@@ -511,11 +511,11 @@ class Cntrlr(LividControlSurface):
 			self._setup_mod()
 			self._setup_modswitcher()
 			self._setup_translations()
-			self._setup_modes() 
+			self._setup_modes()
 			self._setup_m4l_interface()
 			self._on_device_changed.subject = self.song
 			#self.set_feedback_channels(range(14, 15))
-	
+
 
 	def _initialize_script(self):
 		super(Cntrlr, self)._initialize_script()
@@ -529,23 +529,23 @@ class Cntrlr(LividControlSurface):
 		self._session_ring.track_offset = 0
 		if liveobj_valid(self.song.visible_tracks[0]):
 			self.song.view.selected_track = self.song.visible_tracks[0]
-	
+
 
 	def _initialize_hardware(self):
 		super(Cntrlr, self)._initialize_hardware()
 		for index in range(4):
 			self._encoder[index].send_value(0)
-	
+
 
 	def port_settings_changed(self):
 		self._main_modes.selected_mode = 'disabled'
 		super(Cntrlr, self).port_settings_changed()
-	
+
 
 	def _setup_monobridge(self):
 		self._monobridge = MonoBridgeElement(self)
 		self._monobridge.name = 'MonoBridge'
-	
+
 
 	def _setup_controls(self):
 		is_momentary = True
@@ -554,8 +554,8 @@ class Cntrlr(LividControlSurface):
 		self._fader = [MonoEncoderElement(msg_type = MIDI_CC_TYPE, channel = CHANNEL, identifier = CNTRLR_FADERS[index], name = 'Fader_' + str(index), num = index, script = self,  optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(8)]
 		self._dial_left = [MonoEncoderElement(msg_type = MIDI_CC_TYPE, channel = CHANNEL, identifier = CNTRLR_KNOBS_LEFT[index], name = 'Dial_Left_' + str(index), num = CNTRLR_KNOBS_LEFT[index], script = self, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(12)]
 		self._dial_right = [MonoEncoderElement(msg_type = MIDI_CC_TYPE, channel = CHANNEL, identifier = CNTRLR_KNOBS_RIGHT[index], name = 'Dial_Right_' + str(index), num = CNTRLR_KNOBS_RIGHT[index], script = self, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(12)]
-		self._encoder = [CodecEncoderElement(msg_type = MIDI_CC_TYPE, channel = CHANNEL, identifier = CNTRLR_DIALS[index], name = 'Encoder_' + str(index), num = CNTRLR_DIALS[index], script = self, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(12)] 
-		self._encoder_button = [MonoButtonElement(is_momentary = is_momentary, msg_type = MIDI_NOTE_TYPE, channel = CHANNEL, identifier = CNTRLR_DIAL_BUTTONS[index], name = 'Encoder_Button_' + str(index), script = self, skin = self._skin, color_map = COLOR_MAP, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(12)]	
+		self._encoder = [CodecEncoderElement(msg_type = MIDI_CC_TYPE, channel = CHANNEL, identifier = CNTRLR_DIALS[index], name = 'Encoder_' + str(index), num = CNTRLR_DIALS[index], script = self, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(12)]
+		self._encoder_button = [MonoButtonElement(is_momentary = is_momentary, msg_type = MIDI_NOTE_TYPE, channel = CHANNEL, identifier = CNTRLR_DIAL_BUTTONS[index], name = 'Encoder_Button_' + str(index), script = self, skin = self._skin, color_map = COLOR_MAP, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(12)]
 		self._grid = [MonoButtonElement(is_momentary = is_momentary, msg_type = MIDI_NOTE_TYPE, channel = CHANNEL, identifier = CNTRLR_GRID[index], name = 'Grid_' + str(index), script = self, skin = self._skin, color_map = COLOR_MAP, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(16)]
 		self._button = [MonoButtonElement(is_momentary = is_momentary,msg_type = MIDI_NOTE_TYPE, channel = CHANNEL, identifier = CNTRLR_BUTTONS[index], name = 'Button_' + str(index), script = self, skin = self._skin, color_map = COLOR_MAP, optimized_send_midi = optimized, resource_type = resource, monobridge = self._monobridge) for index in range(32)]
 		self._knobs = self._dial_left + self._dial_right
@@ -567,22 +567,22 @@ class Cntrlr(LividControlSurface):
 		self._dial_matrix = ButtonMatrixElement(name = 'Dial_Matrix', rows = [self._encoder[index*4:(index*4)+4] for index in range(3)])
 		self._dial_button_matrix = ButtonMatrixElement(name = 'Dial_Button_Matrix', rows = [self._encoder_button[index*4:(index*4)+4] for index in range(1,3)])
 		self._key_matrix = ButtonMatrixElement(name = 'Key_Matrix', rows = [self._button[0:16], self._button[16:32]])
-		
+
 		self._translated_controls = self._grid + self._button
-	
+
 
 	def _setup_background(self):
 		self._background = BackgroundComponent(name = 'Background')
 		self._background.layer = Layer(priority = 3, matrix = self._matrix.submatrix[:,:], faders = self._fader_matrix.submatrix[:,:], left_knobs = self._knob_left_matrix.submatrix[:,:], right_knobs = self._knob_right_matrix.submatrix[:,:], dials = self._dial_matrix, dial_buttons = self._dial_button_matrix.submatrix[:,:], keys = self._key_matrix.submatrix[:,:])
 		self._background.set_enabled(True)
-	
+
 
 	def _define_sysex(self):
-		self.encoder_navigation_on = SendLividSysexMode(livid_settings = self._livid_settings, call = 'set_encoder_encosion_mode', message = [0, 0, 0, 0]) 
-	
+		self.encoder_navigation_on = SendLividSysexMode(livid_settings = self._livid_settings, call = 'set_encoder_encosion_mode', message = [0, 0, 0, 0])
+
 
 	def _setup_transport_control(self):
-		self._transport = CntrlrTransportComponent(name = 'Transport') 
+		self._transport = CntrlrTransportComponent(name = 'Transport')
 		self._transport._play_toggle.view_transform = lambda value: 'Transport.PlayOn' if value else 'Transport.PlayOff'
 		self._transport._record_toggle.view_transform = lambda value: 'Transport.RecordOn' if value else 'Transport.RecordOff'
 		self._transport.layer = Layer(priority = 4,
@@ -590,13 +590,13 @@ class Cntrlr(LividControlSurface):
 									stop_button = self._button[29],
 									record_button = self._button[30])
 		self._transport.set_enabled(False)
-	
+
 
 	def _setup_autoarm(self):
 		self._auto_arm = CntrlrAutoArmComponent(name='Auto_Arm')
 		#self._auto_arm._update_notification = lambda a: None
 		self._auto_arm.can_auto_arm_track = self._can_auto_arm_track
-	
+
 
 	def _setup_session_recording_component(self):
 		self._clip_creator = ClipCreator()
@@ -605,7 +605,7 @@ class Cntrlr(LividControlSurface):
 		self._recorder.main_layer = AddLayerMode(self._recorder, Layer(priority = 4, record_button = self._button[29]))
 		self._recorder.shift_layer = AddLayerMode(self._recorder, Layer(priority = 4, automation_button = self._button[29]))
 		self._recorder.set_enabled(False)
-	
+
 
 	def _setup_session_control(self):
 		self._session_ring = SessionRingComponent(num_tracks = 4, num_scenes = 4)
@@ -639,16 +639,16 @@ class Cntrlr(LividControlSurface):
 		self._session_zoom = SessionOverviewComponent(name = 'SessionZoom', session_ring = self._session_ring, enable_skinning = True)
 		self._session_zoom.layer = Layer(priority = 4, button_matrix = self._matrix.submatrix[:,:])
 		self._session_zoom.set_enabled(False)
-	
+
 
 	def _setup_send_reset_controls(self):
 		self._send_reset = ResetSendsComponent(script = self)
 		self._send_reset.layer = Layer(priority = 4, buttons = self._key_matrix.submatrix[8:12, :1])
 		self._send_reset.set_enabled(False)
-	
+
 
 	def _setup_mixer_control(self):
-		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2,tracks_provider = self._session_ring, track_assigner = simple_track_assigner, invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2,tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
 		self._mixer.fader_layer = AddLayerMode(self._mixer, Layer(priority = 4, volume_controls = self._fader_matrix.submatrix[:4, :],
 											return_controls = self._fader_matrix.submatrix[4:6, :],
 											prehear_volume_control = self._fader[6],
@@ -662,7 +662,7 @@ class Cntrlr(LividControlSurface):
 		self._mixer.master_strip().layer = Layer(priority = 4, volume_control = self._fader[7],)
 
 		self._mixer.set_enabled(False)
-	
+
 
 	def _setup_device_control(self):
 		self._device_selection_follows_track_selection = FOLLOW
@@ -676,17 +676,17 @@ class Cntrlr(LividControlSurface):
 
 		self._device_navigator = DeviceNavigator(self._device_provider, self._mixer, self)
 		self._device_navigator.name = 'Device_Navigator'
-		self._device_navigator.layer = Layer(priority = 4, 
-											prev_button = self._encoder_button[10], 
+		self._device_navigator.layer = Layer(priority = 4,
+											prev_button = self._encoder_button[10],
 											next_button = self._encoder_button[11],)
 		self._device_navigator.set_enabled(False)
-	
+
 
 	def _setup_mod_device_control(self):
 		self._mod_device = SpecialCntrlrDeviceComponent(script = self, name = 'Device_Component', device_provider = self._device_provider, device_bank_registry = DeviceBankRegistry())
 		self._mod_device.layer = Layer(priority = 4, parameter_controls = self._dial_matrix.submatrix[:, :],)
 		self._mod_device.set_enabled(False)
-	
+
 
 	def _setup_device_selector(self):
 		self._device_selector = CntrlrDeviceSelector(self)
@@ -695,7 +695,7 @@ class Cntrlr(LividControlSurface):
 		#self._device_selector.select_layer = AddLayerMode(self._device_selector, Layer(priority = 6, matrix = ButtonMatrixElement(rows = [self._grid[:4],self._grid[4:8],self._grid[8:12],self._grid[12:14]])))
 		#self._device_selector.assign_layer = AddLayerMode(self._device_selector, Layer(priority = 7, assign_button = self._grid[14]))
 		self._device_selector.set_enabled(False)
-	
+
 
 	def _setup_translations(self):
 		self._translations = TranslationComponent(self._translated_controls, user_channel_offset = 4, channel = 4)	# is_enabled = False)
@@ -707,13 +707,13 @@ class Cntrlr(LividControlSurface):
 
 		#self._optional_translations = CompoundMode(TranslationComponent(controls = self._fader, user_channel_offset = 4, channel = 4, name = 'FaderTranslation', is_enabled = False, layer = Layer(priority = 10)) if FADER_BANKING else None
 		#TranslationComponent(controls = self._knobs, user_channel_offset = 4, channel = 4, name = 'DialTranslation', is_enabled = False, layer = Layer(priority = 10)) if DIAL_BANKING else None)
-	
+
 
 	def _setup_mod(self):
 		self.monomodular = get_monomodular(self)
 		self.monomodular.name = 'monomodular_switcher'
 		self.modhandler = CntrlrModHandler(self, device_provider = self._device_provider) # is_enabled = False)
-		self.modhandler.name = 'ModHandler' 
+		self.modhandler.name = 'ModHandler'
 		self.modhandler.lock_layer = AddLayerMode(self.modhandler, Layer(priority=8, lock_button=self._grid[15]))
 		self.modhandler.layer = Layer(priority = 8,
 										cntrlr_encoder_button_grid = self._dial_button_matrix.submatrix[:,:],
@@ -721,38 +721,38 @@ class Cntrlr(LividControlSurface):
 										cntrlr_keys = self._key_matrix.submatrix[:,:],)
 										#parameter_controls = self._dial_matrix.submatrix[:,:])
 		self.modhandler.set_enabled(False)
-	
+
 
 	def _setup_modswitcher(self):
 		self._modswitcher = ModesComponent(name = 'ModSwitcher')  # is_enabled = False)
 		self._modswitcher.set_enabled(False)
-	
+
 
 	def _setup_viewcontrol(self):
 		self._view_control = CntrlrViewControlComponent(name='View_Control')
 		self._view_control.main_layer = AddLayerMode(self._view_control, Layer(scene_select_dial = self._encoder[2],
 																				track_select_dial = self._encoder[3],))
-		#self._view_control.main_layer = AddLayerMode(self._view_control, Layer(prev_track_button=self._button[24], 
-		#											next_track_button= self._button[25], 
-		#											next_scene_button=self._button[27], 
+		#self._view_control.main_layer = AddLayerMode(self._view_control, Layer(prev_track_button=self._button[24],
+		#											next_track_button= self._button[25],
+		#											next_scene_button=self._button[27],
 		#											prev_scene_button = self._button[26]))
 		self._view_control.set_enabled(False)
-	
+
 
 	def _setup_modes(self):
 
 		self._modswitcher = ModesComponent(name = 'ModSwitcher')
 		self._modswitcher.add_mode('mod', [self._mixer,
 													self._mixer.fader_layer,
-													self.modhandler, 
-													self._mod_device, 
+													self.modhandler,
+													self._mod_device,
 													self._device_selector,])
-		self._modswitcher.add_mode('translations', [self._translations, 
+		self._modswitcher.add_mode('translations', [self._translations,
 													self._device,
 													self._mixer,
 													self._mixer.fader_layer,
 													self._device_navigator,
-													self._device_selector]) 
+													self._device_selector])
 		self._modswitcher.selected_mode = 'translations'
 		self._modswitcher.set_enabled(False)
 
@@ -784,7 +784,7 @@ class Cntrlr(LividControlSurface):
 													self._choose_mod,
 													DelayMode(self._update_modswitcher, delay = .1, parent_task_group = self._task_group),
 													DelayMode(self.modhandler.update, delay = .2, parent_task_group = self._task_group)],
-													behaviour = DefaultedBehaviour(default_mode = 'MixMode'))	
+													behaviour = DefaultedBehaviour(default_mode = 'MixMode'))
 		self._main_modes.add_mode('ModMode3', [self._modswitcher,
 													self._choose_mod,
 													DelayMode(self._update_modswitcher, delay = .1, parent_task_group = self._task_group),
@@ -795,11 +795,11 @@ class Cntrlr(LividControlSurface):
 													DelayMode(self._update_modswitcher, delay = .1, parent_task_group = self._task_group),
 													DelayMode(self.modhandler.update, delay = .2, parent_task_group = self._task_group)],
 													behaviour = DefaultedBehaviour(default_mode = 'MixMode'))
-		
-		self._main_modes.layer = Layer(priority = 4, ModMode1_button = self._encoder_button[0], ModMode2_button = self._encoder_button[1], ModMode3_button = self._encoder_button[2], ModMode4_button = self._encoder_button[3]) #, 
+
+		self._main_modes.layer = Layer(priority = 4, ModMode1_button = self._encoder_button[0], ModMode2_button = self._encoder_button[1], ModMode3_button = self._encoder_button[2], ModMode4_button = self._encoder_button[3]) #,
 		self._main_modes.selected_mode = 'disabled'
 		self._main_modes.set_enabled(True)
-	
+
 
 	def _choose_mod(self):
 		modes = ('ModMode1', 'ModMode2', 'ModMode3', 'ModMode4')
@@ -810,7 +810,7 @@ class Cntrlr(LividControlSurface):
 			self._translations._channel = index + self._translations._user_channel_offset
 			self._translations.update()
 			self._device_selector.select_device(index)
-	
+
 
 	def _setup_m4l_interface(self):
 		self._m4l_interface = M4LInterfaceComponent(controls=self.controls, component_guard=self.component_guard, priority = 10)
@@ -819,25 +819,25 @@ class Cntrlr(LividControlSurface):
 		self.get_control = self._m4l_interface.get_control
 		self.grab_control = self._m4l_interface.grab_control
 		self.release_control = self._m4l_interface.release_control
-	
+
 
 	def _can_auto_arm_track(self, track):
 		routing = track.current_input_routing
 		return routing == 'Ext: All Ins' or routing == 'All Ins' or routing.startswith('Cntrlr Input')
-	
+
 
 	@listens('appointed_device')
 	def _on_device_changed(self):
 		debug('appointed device changed, script')
 		#self._main_modes.selected_mode is 'ModSwitcher' and self._update_modswitcher()
-	
+
 
 	def _on_selected_track_changed(self):
 		super(Cntrlr, self)._on_selected_track_changed()
 		#self._drum_group_finder.device_parent = self.song.veiw.selected_track
 		#if not len(self.song.view.selected_track.devices):
 		#	self._main_modes.selected_mode is 'ModSwitcher' and self._update_modswitcher()
-	
+
 
 	def _update_modswitcher(self):
 		debug('update modswitcher', self.modhandler.active_mod())
@@ -845,19 +845,19 @@ class Cntrlr(LividControlSurface):
 			self._modswitcher.selected_mode = 'mod'
 		else:
 			self._modswitcher.selected_mode = 'translations'
-	
+
 
 	def update_display(self):
 		super(Cntrlr, self).update_display()
 		self.modhandler.send_ring_leds()
-	
+
 
 	def restart_monomodular(self):
 		#debug('restart monomodular')
 		self.modhandler.disconnect()
 		with self.component_guard():
 			self._setup_mod()
-	
+
 
 
 class CntrlrModHandler(ModHandler):
@@ -880,13 +880,13 @@ class CntrlrModHandler(ModHandler):
 		super(CntrlrModHandler, self).__init__(addresses = addresses, *a, **k)
 		self._color_type = 'RGB'
 		self.nav_box = self.register_component(NavigationBox(self, 16, 16, 4, 4, self.set_offset))
-	
+
 
 	def _receive_cntrlr_grid(self, x, y, value = -1, *a, **k):
 		#debug('_receive_cntrlr_grid:', x, y, value)
 		if self.is_enabled() and self._active_mod and not self._active_mod.legacy and not self._cntrlr_grid is None and x < 4 and y < 4:
 			value > -1 and self._cntrlr_grid.send_value(x, y, self._colors[value], True)
-	
+
 
 	def _receive_cntrlr_encoder_grid(self, x, y, value = -1, mode = None, green = None, custom = None, local = None, relative = None, *a, **K):
 		#debug('_receive_cntrlr_encoder_grid:', x, y, value, mode, green, custom, local, relative)
@@ -903,19 +903,19 @@ class CntrlrModHandler(ModHandler):
 				custom and button.set_custom(custom)
 			not local is None and self._receive_cntrlr_encoder_grid_local(local)
 			not relative is None and self._receive_cntrlr_encoder_grid_relative(relative)
-	
+
 
 	def _receive_cntrlr_encoder_button_grid(self, x, y, value, *a, **k):
 		if self.is_enabled() and self._active_mod:
 			if not self._cntrlr_encoder_button_grid is None:
 				self._cntrlr_encoder_button_grid.send_value(x, y, self._colors[value], True)
-	
+
 
 	def _receive_cntrlr_encoder_grid_relative(self, value, *a):
 		#debug('_receive_cntrlr_encoder_grid_relative:', value)
 		if self.is_enabled() and self._active_mod:
 			value and self._script._send_midi(tuple([240, 0, 1, 97, 8, 17, 127, 127, 127, 127, 247])) or self._script._send_midi(tuple([240, 0, 1, 97, 8, 17, 15, 0, 0, 0, 247]))
-	
+
 
 	def _receive_cntrlr_encoder_grid_local(self, value, *a):
 		#debug('_receive_cntrlr_encoder_grid_local:', value)
@@ -923,34 +923,34 @@ class CntrlrModHandler(ModHandler):
 			self.clear_rings()
 			self._local = value
 			value and self._script._send_midi(tuple([240, 0, 1, 97, 8, 8, 72, 247])) or self._script._send_midi(tuple([240, 0, 1, 97, 8, 8, 64, 247]))
-	
+
 
 	def _receive_cntrlr_encoders_to_device(self, value, *a):
 		debug('_receive_cntrlr_encoders_to_device:', value)
 		if self.is_enabled() and self._active_mod:
 			self._encoders_to_device = bool(value)
 			self._script._device.set_parameter_controls(self._cntrlr_encoder_grid if value else None)
-	
+
 
 	def _receive_cntrlr_key(self, x, y=0, value=0, *a):
 		#debug('_receive_cntrlr_key:', x, y, value)
 		if self.is_enabled() and self._active_mod and not self._active_mod.legacy:
 			if not self._cntrlr_keys is None:
 				self._cntrlr_keys.send_value(x, y, self._colors[value], True)
-	
+
 
 	def _receive_grid(self, x, y, value = -1, *a, **k):
 		if self.is_enabled() and self._active_mod and self._active_mod.legacy:
 			if not self._cntrlr_grid is None:
 				if (x - self.x_offset) in range(4) and (y - self.y_offset) in range(4):
 					self._cntrlr_grid.send_value(x - self.x_offset, y - self.y_offset, self._colors[value], True)
-	
+
 
 
 	def set_cntrlr_grid(self, grid):
 		self._cntrlr_grid = grid
 		self._cntrlr_grid_value.subject = self._cntrlr_grid
-	
+
 
 	def set_cntrlr_encoder_grid(self, grid):
 		self._cntrlr_encoder_grid = grid
@@ -965,12 +965,12 @@ class CntrlrModHandler(ModHandler):
 			self.set_cntrlr_encoder_grid and self.set_cntrlr_encoder_grid.reset()
 			self.set_cntrlr_encoder_grid_value.subject = self.set_cntrlr_encoder_grid
 		#self.log_message('parameter controls are: ' + str(self._parameter_controls))
-	
+
 
 	def set_cntrlr_encoder_button_grid(self, buttons):
 		self._cntrlr_encoder_button_grid = buttons
 		self._cntrlr_encoder_button_grid_value.subject = self._cntrlr_encoder_button_grid
-	
+
 
 	def set_cntrlr_keys(self, keys):
 		self._cntrlr_keys = keys
@@ -978,7 +978,7 @@ class CntrlrModHandler(ModHandler):
 			for key, _ in keys.iterbuttons():
 				key and key.set_darkened_value(0)
 		self._cntrlr_keys_value.subject = self._cntrlr_keys
-	
+
 
 
 	@listens('value')
@@ -986,7 +986,7 @@ class CntrlrModHandler(ModHandler):
 		#debug('_cntrlr_keys_value:', x, y, value)
 		if self._active_mod:
 			self._active_mod.send('cntrlr_key', x, y, value)
-	
+
 
 	@listens('value')
 	def _cntrlr_grid_value(self, value, x, y, *a, **k):
@@ -996,21 +996,21 @@ class CntrlrModHandler(ModHandler):
 				self._active_mod.send('grid', x + self.x_offset, y + self.y_offset, value)
 			else:
 				self._active_mod.send('cntrlr_grid', x, y, value)
-	
+
 
 	@listens('value')
 	def _cntrlr_encoder_grid_value(self, value, x, y, *a, **k):
 		#debug('_cntrlr_encoder_grid_value:', x, y, value)
 		if self._active_mod:
 			self._active_mod.send('cntrlr_encoder_grid', x, y, value)
-	
+
 
 	@listens('value')
 	def _cntrlr_encoder_button_grid_value(self, value, x, y, *a, **k):
 		#debug('_cntrlr_encoder_button_grid_value:', x, y, value)
 		if self._active_mod:
 			self._active_mod.send('cntrlr_encoder_button_grid', x, y, value)
-	
+
 
 	def update(self, *a, **k):
 		mod = self.active_mod()
@@ -1031,7 +1031,7 @@ class CntrlrModHandler(ModHandler):
 				self._cntrlr_keys_value.subject.reset()
 		if not self._on_lock_value.subject is None:
 			self._on_lock_value.subject.send_value((not mod is None) + ((not mod is None) and self.is_locked() * 4))
-	
+
 
 	def send_ring_leds(self):
 		if self.is_enabled() and self._active_mod and not self._local and self._cntrlr_encoder_grid:
@@ -1044,10 +1044,10 @@ class CntrlrModHandler(ModHandler):
 			if not leds==self._last_sent_leds:
 				self._script._send_midi(tuple(leds))
 				self._last_sent_leds = leds
-	
+
 
 	def clear_rings(self):
 		self._last_sent_leds = 1
-	
+
 
 #	a
