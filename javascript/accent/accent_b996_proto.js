@@ -23,11 +23,11 @@ inlets = 5;
 
 aumhaa = require('_base');
 
-var FORCELOAD = true;
+var FORCELOAD = false;
 var NEW_DEBUG = false;
 var DEBUG = false;
 var DEBUG_NEW = false;
-var DEBUG_LCD = 1;
+var DEBUG_LCD = 0;
 var DEBUG_PTR = 0;
 var DEBUG_STEP = 0;
 var DEBUG_BLINK = 0;
