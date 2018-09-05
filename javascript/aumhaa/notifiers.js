@@ -137,7 +137,7 @@ Scales.prototype.set_grid_function = function(func){self.grid_function = func;}
 
 /////////////////////////////////////////////////////////////////////////
 //Base Class that allows automatic binding of prototypal properties based on
-//the _bound_properties array.  
+//the _bound_properties array.
 
 
 Bindable = function(name, args)
@@ -187,9 +187,9 @@ exports.Bindable = Bindable;
 
 
 /////////////////////////////////////////////////////////////////////////
-//This is the root object to be used for all controls, or objects that 
+//This is the root object to be used for all controls, or objects that
 //will serve as notifiers to other objects.  It maintains a list of listeners as well as a
-//"target_stack" that can be used to push/pop targets to be notified when its value changes 
+//"target_stack" that can be used to push/pop targets to be notified when its value changes
 //(only the first target in the stack is notified).  Notifier is "subclassed" by many other prototypes.
 
 NotifierClass = function(name, args)
@@ -398,7 +398,7 @@ exports.GUI_Element = GUI_Element;
 
 
 //////////////////////////////////////////////////////////////////////////
-//A Notifier representing a physical control that can send and receive MIDI 
+//A Notifier representing a physical control that can send and receive MIDI
 
 ControlClass = function(identifier, name, args)
 {
@@ -695,7 +695,7 @@ GridClass.prototype.add_control = function(x, y, button)
 		}
 	}
 }
-	
+
 GridClass.prototype.send = function(x, y, value)
 {
 	this._grid[x][y].send(value);
@@ -1012,7 +1012,7 @@ ModeClass.prototype.update = function()
 	{
 		if (i == this._value)
 		{
-			
+
 			this.mode_buttons[i].turn_on();
 		}
 		else
@@ -1036,7 +1036,7 @@ ModeClass.prototype.add_mode = function(mode, callback)
 
 ModeClass.prototype.set_mode_buttons = function(buttons)
 {
-	//lcl_debug('set_mode_buttons:', buttons ? 'buttons length:' + buttons.length : 'incoming buttons undefined', this._mode_callbacks.length); 
+	//lcl_debug('set_mode_buttons:', buttons ? 'buttons length:' + buttons.length : 'incoming buttons undefined', this._mode_callbacks.length);
 	if (((buttons == undefined)||(buttons.length == this._mode_callbacks.length))&&(buttons != this.mode_buttons))
 	{
 		for (var i in this.mode_buttons)
@@ -1299,7 +1299,7 @@ ToggledParameter.prototype._Callback = function(obj)
 			this.receive(Math.abs(this._value - 1));
 		}
 	}
-} 
+}
 
 ToggledParameter.prototype.update_control = function(value)
 {
@@ -1968,7 +1968,7 @@ TaskServer = function(script, interval)
 
 TaskServer.prototype.addTask = function(callback, arguments, interval, repeat, name)
 {
-//	lcl_debug('addTask', arguments, interval, repeat, name);
+	//lcl_debug('addTask', arguments, interval, repeat, name);
 	if(typeof(callback)==='function')
 	{
 		interval = interval||1;
@@ -1976,6 +1976,11 @@ TaskServer.prototype.addTask = function(callback, arguments, interval, repeat, n
 		if(!name){name = 'task_'+this._queue.length;}
 		this._queue[name] = {'callback':callback, 'arguments':arguments, 'interval':interval, 'repeat':repeat, 'ticks':0};
 	}
+}
+
+TaskServer.prototype.schedule = function(callback, name)
+{
+	this.addTask(callback, {}, 1, false, name)
 }
 
 TaskServer.prototype.resetTask = function(name)
@@ -2291,7 +2296,7 @@ DictModule = function(name, args)
 
 inherits(DictModule, Bindable);
 
-DictModule.prototype._initialize = function() 
+DictModule.prototype._initialize = function()
 {
 	//this._dict.clear();
 	debug('names:', this._dict.getnames());
@@ -2330,6 +2335,31 @@ DictModule.prototype.set = function(address, value)
 	}
 }
 
+DictModule.prototype.setMember = function(address, member, value)
+{
+	debug('address:', address, 'member:', member, 'value:', value);
+	try
+	{
+		var strng_val = JSON.stringify(value);
+		debug('strng_val:', strng_val);
+		this._dict.setparse(member, strng_val);
+		//var sub = this._dict.get(address);
+		//debug('sub is:', sub, typeof(sub));
+		//for(var i in sub)
+		//{
+		//	debug(i, sub[i]);
+		//}
+		//sub.setparse(member, value);
+		//sub.replace(member, value);
+		//this._dict.replace(
+		return true;
+	}
+	catch(err)
+	{
+		return false;
+	}
+}
+
 DictModule.prototype.get = function(address)
 {
 	var value = this._dict.get(address);
@@ -2355,6 +2385,19 @@ DictModule.prototype.refresh_window = function()
 {
 	//VIEW_DEVICEDICT&&this._obj.message('wclose');
 	//VIEW_DEVICEDICT&&this._obj.message('edit');
+}
+
+DictModule.prototype.remove = function(address)
+{
+	if(this.hasKey(address))
+	{
+		this._dict.remove(address);
+	}
+}
+
+DictModule.prototype.getKeys = function()
+{
+	return this._dict.getkeys();
 }
 
 exports.DictModule = DictModule;
@@ -2384,7 +2427,7 @@ DefaultPageStackBehaviourWithModeShift = function(parent_mode_object)
 	this.press_delayed = function(button)
 	{
 		//debug('press_delayed');
-		
+
 	}
 	this.release_immediate = function(button)
 	{
@@ -2440,4 +2483,3 @@ ModeSwitchablePage.prototype._mode_button_value = function(obj)
 }
 
 exports.ModeSwitchablePage = ModeSwitchablePage;
-

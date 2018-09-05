@@ -11,14 +11,14 @@ exports.inherits = inherits;
 
 function extend(destination, source)
 {
-	for (var k in source) 
+	for (var k in source)
 	{
 		if (source.hasOwnProperty(k))
 		{
 			destination[k] = source[k];
 		}
 	}
-	return destination; 
+	return destination;
 }
 
 exports.extend = extend;
@@ -162,12 +162,12 @@ Debug = function()
 			args[i] = args[i].join(' ');
 		}
 	}
-	post('debug->', args, '\n');
+	post(typeof(debug_prefix)=='string'?debug_prefix:'debug->', args, '\n');
 }
 
 exports.Debug = Debug;
 
-//used to reinitialize the script immediately on saving; 
+//used to reinitialize the script immediately on saving;
 //can be turned on by changing FORCELOAD to 1
 //should only be turned on while editing
 //Setup in js by:
@@ -234,15 +234,15 @@ function dict_to_jsobj(dict) {
 		for (var i = 0; i < keys.length; i++)
 		{
 			var value = dict.get(keys[i]);
-			
+
 			if (value && value instanceof Dict) {
 				value = dict_to_jsobj(value);
 			}
 			o[keys[i]] = value;
-		}		
+		}
 	} else {
 		var value = dict.get(keys);
-		
+
 		if (value && value instanceof Dict) {
 			value = dict_to_jsobj(value);
 		}
@@ -262,9 +262,9 @@ function jsobj_to_dict(o)
 	for (var keyIndex in o)
 	{
 		var value = o[keyIndex];
-		if(typeof value === "object") 
+		if(typeof value === "object")
 		{
-			switch (value.constructor.name) 
+			switch (value.constructor.name)
 			{
 				case "String" :
 					value = value.toString();
@@ -277,7 +277,7 @@ function jsobj_to_dict(o)
 					break;
 			}
 		}
-		// convert primitive boolean to int 
+		// convert primitive boolean to int
 		if(typeof value === "boolean")
 		{
 			value = (value) ?	 1 : 0;
@@ -360,3 +360,38 @@ function get_patcher_script_names(patcher)
 }
 
 exports.get_patcher_script_names = get_patcher_script_names;
+
+function find_patcher_objects(container, patcher, names)
+{
+	for(var i in names)
+	{
+		container[names[i]] = patcher.getnamed(names[i]);
+	}
+}
+
+exports.find_patcher_objects = find_patcher_objects;
+
+function introspect(obj, deep, level){
+	var current_level = level + 1;
+	for(var i in obj)
+	{
+		var indent = [];
+		for(var j=0;j<current_level;j++)
+		{
+			indent.push("-");
+		}
+		debug(indent, i, obj[i]);
+		if(deep)
+		{
+			introspect(obj[i], current_level)
+		}
+	}
+}
+
+function introspect_object(object, deep)
+{
+	debug('introspect', object);
+	introspect(object, deep, 0);
+}
+
+exports.introspect_object = introspect_object;
