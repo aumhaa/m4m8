@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 9.6 release on 021516
+# written against Live 10.0.3b8 RC on 083018
 
 from __future__ import absolute_import, print_function
 import Live
@@ -12,7 +12,7 @@ from ableton.v2.base import inject, listens, listens_group
 from ableton.v2.control_surface import ControlSurface, ControlElement, Layer, Skin, PrioritizedResource, Component, ClipCreator, DeviceBankRegistry
 from ableton.v2.control_surface.elements import ComboElement, ButtonMatrixElement, DoublePressElement, MultiElement, DisplayDataSource, SysexElement
 from ableton.v2.control_surface.components import ClipSlotComponent, SceneComponent, SessionComponent, TransportComponent, BackgroundComponent, ViewControlComponent, SessionRingComponent, SessionRecordingComponent, SessionNavigationComponent, MixerComponent, PlayableComponent
-from ableton.v2.control_surface.components.mixer import simple_track_assigner
+from ableton.v2.control_surface.components.mixer import SimpleTrackAssigner
 from ableton.v2.control_surface.control import control_color
 from ableton.v2.control_surface.mode import AddLayerMode, ModesComponent, DelayMode
 from ableton.v2.control_surface.elements.physical_display import PhysicalDisplayElement
@@ -80,7 +80,7 @@ class DS1SessionComponent(SessionComponent):
 			for x in xrange(self._session_ring.num_scenes):
 				scene = self.scene(x)
 				scene.set_launch_button(None)
-	
+
 
 
 class DS1SessionNavigationComponent(SessionNavigationComponent):
@@ -88,21 +88,21 @@ class DS1SessionNavigationComponent(SessionNavigationComponent):
 
 	def set_track_select_dial(self, dial):
 		self._on_track_select_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_track_select_dial_value(self, value):
 		#debug('_on_track_select_dial_value:', value)
 		#self._can_bank_left() and self._bank_left() if value == 127 else self._can_bank_right() and self._bank_right()
 		self._horizontal_banking.can_scroll_up() and self._horizontal_banking.scroll_up() if value == 127 else self._horizontal_banking.can_scroll_down() and self._horizontal_banking.scroll_down()
-	
+
 
 class DS1TransportComponent(TransportComponent):
 
 
 	def _update_stop_button_color(self):
 		self._stop_button.color = 'Transport.StopOn' if self._play_toggle.is_toggled else 'Transport.StopOff'
-	
+
 
 
 
@@ -127,20 +127,20 @@ class DS1(LividControlSurface):
 			self._setup_device_control()
 			self._setup_session_recording_component()
 			self._setup_main_modes()
-	
+
 
 	def _initialize_script(self):
 		super(DS1, self)._initialize_script()
 		self._main_modes.set_enabled(True)
 		self._main_modes.selected_mode = 'Main'
-	
+
 
 	def _initialize_hardware(self):
 		super(DS1, self)._initialize_hardware()
 		self.local_control_off.enter_mode()
 		self.encoder_absolute_mode.enter_mode()
 		self.encoder_speed_sysex.enter_mode()
-	
+
 
 
 	def _define_sysex(self):
@@ -148,7 +148,7 @@ class DS1(LividControlSurface):
 		self.encoder_absolute_mode = SendLividSysexMode(livid_settings = self._livid_settings, call = 'set_encoder_encosion_mode', message = [2])
 		self.local_control_off = SendLividSysexMode(livid_settings = self._livid_settings, call = 'set_local_control', message = [0])
 
-	
+
 
 	def _setup_controls(self):
 		is_momentary = True
@@ -173,11 +173,11 @@ class DS1(LividControlSurface):
 		self._encoder_button_matrix = ButtonMatrixElement(name = 'EncoderButtonMatrix', rows = [self._encoder_button])
 		self._grid_matrix = ButtonMatrixElement(name = 'GridMatrix', rows = self._grid)
 		self._selected_parameter_controls = ButtonMatrixElement(name = 'SelectedParameterControls', rows = [self._dummy + self._encoder[:1] + self._encoder[2:]])
-	
+
 
 	def _setup_background(self):
 		self._background = BackgroundComponent(name = 'Background')
-		self._background.layer = Layer(priority = 0, fader_matrix = self._fader_matrix, 
+		self._background.layer = Layer(priority = 0, fader_matrix = self._fader_matrix,
 													top_buttons = self._top_buttons,
 													bottom_buttons = self._bottom_buttons,
 													dial_matrix = self._dial_matrix,
@@ -185,16 +185,16 @@ class DS1(LividControlSurface):
 													encoder_button_matrix = self._encoder_button_matrix,
 													grid_matrix = self._grid_matrix)
 		self._background.set_enabled(True)
-	
+
 
 	def _setup_autoarm(self):
 		self._auto_arm = AutoArmComponent(name='Auto_Arm')
 		self._auto_arm.can_auto_arm_track = self._can_auto_arm_track
-	
+
 
 	def _tracks_to_use(self):
 		return self.song.visible_tracks + self.song.return_tracks
-	
+
 
 	def _setup_session_control(self):
 		self._session_ring = SessionRingComponent(num_tracks = 8, num_scenes = 1, tracks_to_use = self._tracks_to_use)
@@ -207,17 +207,17 @@ class DS1(LividControlSurface):
 		self._session_navigation._horizontal_banking.scroll_down_button.color = 'Session.NavigationButtonOn'
 		self._session_navigation.layer = Layer(priority = 4, track_select_dial = ComboElement(control = self._encoder[1], modifier = [self._encoder_button[1]] ), up_button = self._grid[0][1], down_button = self._grid[0][2])
 		self._session_navigation.set_enabled(False)
-		
+
 		self._session = DS1SessionComponent(session_ring = self._session_ring, auto_name = True)
 		hasattr(self._session, '_enable_skinning') and self._session._enable_skinning()
 		self._session.layer = Layer(priority = 4, scene_launch_buttons = self._grid_matrix.submatrix[1:2, 1:2])
 		self._session.clips_layer = AddLayerMode(self._session, Layer(priority = 4, clip_launch_buttons = self._top_buttons, stop_track_clip_buttons = self._bottom_buttons))
 		self._session.set_enabled(False)
-	
+
 
 	def _setup_mixer_control(self):
 
-		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2, tracks_provider = self._session_ring, track_assigner = simple_track_assigner, invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2, tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
 		self._mixer.master_strip().set_volume_control(self._master_fader)
 		self._mixer.set_prehear_volume_control(self._side_dial[3])
 		self._mixer.layer = Layer(volume_controls = self._fader_matrix, track_select_dial = self._encoder[1])
@@ -232,9 +232,9 @@ class DS1(LividControlSurface):
 		self._mixer.master_strip().layer = Layer(priority = 4, parameter_controls = self._side_dial_matrix.submatrix[:3, :])
 		self._mixer.main_layer = AddLayerMode(self._mixer, Layer(priority = 4, solo_buttons = self._bottom_buttons, mute_buttons = self._top_buttons))
 		self._mixer.select_layer = AddLayerMode(self._mixer, Layer(priority = 4, arm_buttons = self._bottom_buttons, track_select_buttons = self._top_buttons))
-		self.song.view.selected_track = self._mixer.channel_strip(0)._track 
+		self.song.view.selected_track = self._mixer.channel_strip(0)._track
 		self._mixer.set_enabled(False)
-	
+
 
 	def _setup_transport_control(self):
 		self._transport = DS1TransportComponent()
@@ -242,14 +242,14 @@ class DS1(LividControlSurface):
 		self._transport._record_toggle.view_transform = lambda value: 'Transport.RecordOn' if value else 'Transport.RecordOff'
 		self._transport.layer = Layer(priority = 4, stop_button = self._grid[1][0], play_button = self._grid[0][0], record_button = self._grid[2][0])
 		self._transport.set_enabled(True)
-	
+
 
 	def _setup_device_control(self):
 		self._device = DeviceComponent(name = 'Device_Component', device_provider = self._device_provider, device_bank_registry = DeviceBankRegistry())
 
 		self._device_navigator = DeviceNavigator(self._device_provider, self._mixer, self)
 		self._device_navigator.name = 'Device_Navigator'
-	
+
 
 	def _setup_session_recording_component(self):
 		self._clip_creator = ClipCreator()
@@ -257,7 +257,7 @@ class DS1(LividControlSurface):
 		self._recorder = SessionRecordingComponent(ViewControlComponent())
 		self._recorder.set_enabled(True)
 		self._recorder.layer = Layer(priority = 4, automation_button = self._grid[1][2], record_button  = self._grid[2][1],)
-	
+
 
 	def _setup_m4l_interface(self):
 		self._m4l_interface = M4LInterfaceComponent(controls=self.controls, component_guard=self.component_guard, priority = 10)
@@ -266,7 +266,7 @@ class DS1(LividControlSurface):
 		self.get_control = self._m4l_interface.get_control
 		self.grab_control = self._m4l_interface.grab_control
 		self.release_control = self._m4l_interface.release_control
-	
+
 
 	def _setup_translations(self):
 		controls = []
@@ -275,7 +275,7 @@ class DS1(LividControlSurface):
 		self._translations = TranslationComponent(controls, 10)
 		self._translations.name = 'TranslationComponent'
 		self._translations.set_enabled(False)
-	
+
 
 	def _setup_main_modes(self):
 		self._main_modes = ModesComponent(name = 'MainModes')
@@ -285,12 +285,12 @@ class DS1(LividControlSurface):
 		self._main_modes.layer = Layer(priority = 4, cycle_mode_button = self._grid[2][2])
 		self._main_modes.selected_mode = 'Main'
 		self._main_modes.set_enabled(False)
-	
+
 
 	def _can_auto_arm_track(self, track):
 		routing = track.current_input_routing
 		return routing == 'Ext: All Ins' or routing == 'All Ins' or routing.startswith('DS1 Input')
 		#self._main_modes.selected_mode in ['Sends', 'Device'] and
-	
+
 
 #	a

@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 9.6 release on 021516
+# written against Live 10.0.3b8 RC on 083018
 
 from __future__ import with_statement
 import sys
@@ -40,7 +40,7 @@ def unpack_values(values):
 		return values[0]
 	else:
 		return values
-	
+
 
 
 def unpack_items(values):
@@ -108,7 +108,7 @@ class SpecialInputSignal(Signal):
 	def __init__(self, sender = None, *a, **k):
 		super(SpecialInputSignal, self).__init__(sender=sender, *a, **k)
 		self._input_control = sender
-	
+
 
 	@contextlib.contextmanager
 	def _listeners_update(self):
@@ -117,22 +117,22 @@ class SpecialInputSignal(Signal):
 		diff_count = self.count - old_count
 		self._input_control._input_signal_listener_count += diff_count
 		listener_count = self._input_control._input_signal_listener_count
-	
+
 
 	def connect(self, *a, **k):
 		with self._listeners_update():
 			super(SpecialInputSignal, self).connect(*a, **k)
-	
+
 
 	def disconnect(self, *a, **k):
 		with self._listeners_update():
 			super(SpecialInputSignal, self).disconnect(*a, **k)
-	
+
 
 	def disconnect_all(self, *a, **k):
 		with self._listeners_update():
 			super(SpecialInputSignal, self).disconnect_all(*a, **k)
-	
+
 
 
 class ElementTranslation(object):
@@ -143,7 +143,7 @@ class ElementTranslation(object):
 		self._name = name
 		self._targets = {}
 		self._last_received = None
-	
+
 
 	def set_enabled(self, name, enabled):
 		try:
@@ -157,25 +157,25 @@ class ElementTranslation(object):
 					pass
 		except:
 			pass
-	
+
 
 	def is_enabled(self, name):
 		try:
 			return self._targets[name]['Enabled']
 		except:
 			return False
-	
+
 
 	def target(self, name):
 		try:
 			return self._targets[name]['Target']
 		except:
 			return None
-	
+
 
 	def add_target(self, name, target, *args, **k):
 		self._targets[name] = {'Target':target, 'Arguments':args, 'Enabled':True}
-	
+
 
 	def receive(self, method, *values):
 		#debug(str(self._name) + ' receive: ' + str(method) + ' ' + str(values))
@@ -188,7 +188,7 @@ class ElementTranslation(object):
 				except:
 					pass
 		self._last_received = values
-	
+
 
 
 class StoredElement(object):
@@ -199,21 +199,21 @@ class StoredElement(object):
 		self._value = 0
 		for name, attribute in attributes.iteritems():
 			setattr(self, name, attribute)
-	
+
 
 	def value(self, value):
 		self._value = value
 		self.update_element()
-	
+
 
 	def update_element(self):
 		for handler in self._active_handlers():
 			handler.receive_address(self._name, value = self._value)
-	
+
 
 	def restore(self):
 		self.update_element()
-	
+
 
 
 class Grid(object):
@@ -225,63 +225,63 @@ class Grid(object):
 		self._width = width
 		self._height = height
 		self._cell = [[StoredElement(active_handlers, _name = self._name + '_' + str(x) + '_' + str(y), _x = x, _y = y , *a, **k) for y in range(height)] for x in range(width)]
-	
+
 
 	def restore(self):
 		for column in self._cell:
 			for element in column:
 				self.update_element(element)
-	
+
 
 	def update_element(self, element):
 		for handler in self._active_handlers():
 			handler.receive_address(self._name, element._x, element._y, value = element._value)
-	
+
 
 	def value(self, x, y, value, *a):
 		element = self._cell[x][y]
 		element._value = value
 		self.update_element(element)
-	
+
 
 	def row(self, row, value, *a):
 		for column in range(len(self._cell)):
 			self.value(column, row, value)
-	
+
 
 	def column(self, column, value, *a):
 		for row in range(len(self._cell[column])):
 			self.value(column, row, value)
-	
+
 
 	def clear(self, value, *a):
 		self.all(0)
-	
+
 
 	def all(self, value, *a):
 		for column in range(len(self._cell)):
 			for row in range(len(self._cell[column])):
 				self.value(column, row, value)
-	
+
 
 	def batch_row(self, row, *values):
 		width = len(self._cell)
 		for index in range(len(values)):
 			self.value(index%width, row + int(index/width), values[index])
-	
+
 
 	def batch_column(self, column, *values):
 		for row in range(len(self._cell[column])):
 			if values[row]:
 				self.value(column, row, values[row])
-	
+
 
 	def batch_all(self, *values):
 		for column in range(len(self._cell)):
 			for row in range(len(self._cell[column])):
 				if values[column + (row*self._width)]:
 					self.value(column, row, values[column + (row*len(self._cell))])
-	
+
 
 	def mask(self, x, y, value, *a):
 		element = self._cell[x][y]
@@ -290,54 +290,54 @@ class Grid(object):
 				handler.receive_address(self._name, element._x, element._y, value = value)
 		else:
 			self.update_element(element)
-	
+
 
 	def mask_row(self, row, value, *a):
 		for column in range(len(self._cell[row])):
 			self.mask(column, row, value)
-	
+
 
 	def mask_column(self, column, value, *a):
 		for row in range(len(self._cell)):
 			self.mask(column, row, value)
-	
+
 
 	def mask_all(self, value, *a):
 		for column in range(len(self._cell)):
 			for row in range(len(self._cell[column])):
 				self.mask(column, row, value)
-	
+
 
 	def batch_mask_row(self, row, *values):
 		width = len(self._cell)
 		for index in range(len(values)):
 			self.mask(index%width, row + int(index/width), values[index])
-	
+
 
 	def batch_mask_column(self, column, *values):
 		for row in range(len(self._cell[column])):
 			if values[row]:
 				self.mask(column, row, values[row])
-	
+
 
 	def batch_mask_all(self, *values):
 		for column in range(len(self._cell)):
 			for row in range(len(self._cell[column])):
 				if values[column + (row*len(self._cell))]:
 					self.mask(column, row, values[column + (row*self._width)])
-	
+
 
 	def batch_row_fold(self, row, end, *values):
 		width = min(len(self._cell), end)
 		for index in range(len(values)):
 			self.value(index%width, row + int(index/width), values[index])
-	
+
 
 	def batch_column_fold(self, column, end, *values):
 		height = min(len(self._cell[0] if hasattr(self._cell, len) else 0, end))
 		for index in range(len(values)):
 			self.value(column + int(index/height), index%height, values[index])
-	
+
 
 	def map(self, x_offset, y_offset, *values):
 		if len(values) is 8:
@@ -345,19 +345,19 @@ class Grid(object):
 				for row in range(8):
 					for column in range(8):
 						self.value(x_offset+column, y_offset+row, (values[row]>>column)&1)
-	
+
 
 	def monome_row(self, x_offset, y, value = 0, *a):
 		if x_offset % 8 is 0:
 			for column in range(8):
 				self.value(x_offset+column, y, (value>>column)&1)
-	
+
 
 	def monome_col(self, y_offset, x, value = 0, *a):
 		if y_offset % 8 is 0:
 			for row in range(8):
 				self.value(x, y_offset+row, (value>>row)&1)
-	
+
 
 	def mask_next_empty_x(self, x, y, value, *a):
 		debug('mask_next_empty_x', x, y, value)
@@ -377,7 +377,7 @@ class Grid(object):
 				else:
 					element = self._cell[next_empty_x + x + x_off][y + y_off]
 					handler.receive_address(self._name, element._x, element._y, value = element._value)
-	
+
 
 	def mask_next_empty_y(self, x, y, value, *a):
 		for handler in self._active_handlers():
@@ -394,7 +394,7 @@ class Grid(object):
 				else:
 					element = self._cell[x + x_off][next_empty_y + y + y_off]
 					handler.receive_address(self._name, element._x, element._y, value = element._value)
-	
+
 
 
 class ButtonGrid(Grid):
@@ -404,24 +404,24 @@ class ButtonGrid(Grid):
 		self._active_handlers = active_handlers
 		self._name = name
 		self._cell = [[StoredElement(active_handlers, _name = self._name + '_' + str(x) + '_' + str(y), _x = x, _y = y, _identifier = -1, _channel = -1 ) for y in range(height)] for x in range(width)]
-	
+
 
 	def identifier(self, x, y, identifier = -1, *a):
 		element = self._cell[x][y]
 		element._identifier = min(127, max(-1, identifier))
 		self.update_element(element)
-	
+
 
 	def channel(self, x, y, channel = -1, *a):
 		element = self._cell[x][y]
 		element._channel = min(15, max(-1, channel))
 		self.update_element(element)
-	
+
 
 	def update_element(self, element):
 		for handler in self._active_handlers():
 			handler.receive_address(self._name, element._x, element._y, value = element._value, identifier = element._identifier, channel = element._channel)
-	
+
 
 
 class Array(object):
@@ -431,28 +431,28 @@ class Array(object):
 		self._active_handlers = active_handlers
 		self._name = name
 		self._cell = [StoredElement(self._name + '_' + str(num), _num = num, *a, **k) for num in range(size)]
-	
+
 
 	def restore(self):
 		for element in self._cell:
 			self.update_element(element)
-	
+
 
 	def update_element(self, element):
 		for handler in self._active_handlers():
 			handler.receive_address(self._name, element._num, value = element._value)
-	
+
 
 	def value(self, num, value):
 		element = self._cell[num]
 		element._value = value
 		self.update_element(element)
-	
+
 
 	def all(self, value):
 		for num in range(len(self.cell)):
 			self.value(num, value)
-	
+
 
 	def mask(self, num, value):
 		control = self.cell[num]
@@ -461,12 +461,12 @@ class Array(object):
 				handler.receive_address(self.name, element._num, value)
 		else:
 			self._update_element(element)
-	
+
 
 	def mask_all(self, value):
 		for num in range(len(self.cell)):
 			self.mask(num, value)
-	
+
 
 
 class RadioArray(Array):
@@ -476,7 +476,7 @@ class RadioArray(Array):
 		for element in self._cell:
 			element._value = int(element is self._cell[num])
 			self.update_element(element)
-	
+
 
 
 class RingedStoredElement(StoredElement):
@@ -487,30 +487,30 @@ class RingedStoredElement(StoredElement):
 		self._mode = 0
 		self._custom = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		super(RingedStoredElement, self).__init__(active_handlers, *a, **attributes)
-	
+
 
 	def mode(self, value):
 		self._mode = value
 		self.update_element()
-	
+
 
 	def green(self, value):
 		self._green = value
 		self.update_element()
-	
+
 
 	def custom(self, *values):
 		self._custom = values
 		self.update_element()
-	
+
 
 	def update_element(self):
 		for handler in self._active_handlers():
 			handler.receive_address(self._name, value = self._value)
 			handler.receive_address(self._name, green = self._green)
 			handler.receive_address(self._name, mode = self._mode)
-			handler.receive_address(self._name, custom = self._custom)	
-	
+			handler.receive_address(self._name, custom = self._custom)
+
 
 
 class RingedGrid(Grid):
@@ -524,44 +524,44 @@ class RingedGrid(Grid):
 		self._relative = False
 		self._local = True
 		self._cell = [[RingedStoredElement(active_handlers, _name = self._name + '_' + str(x) + '_' + str(y), _x = x, _y = y , *a, **k) for y in range(height)] for x in range(width)]
-	
+
 
 	def green(self, x, y, value):
 		element = self._cell[x][y]
 		element._green = value
 		self.update_element(element)
-	
+
 
 	def led(self, x, y, value):
 		element = self._cell[x][y]
 		element._led = value
 		self.update_element(element)
-	
+
 
 	def mode(self, x, y, value):
 		element = self._cell[x][y]
 		element._mode = value
 		self.update_element(element)
-	
+
 
 	def custom(self, x, y, *values):
 		element = self._cell[x][y]
 		element._custom = values
 		self.update_element(element)
-	
+
 
 	def relative(self, value):
 		#if not self._relative == value:
 		self._relative = bool(value)
 		self.restore()
-	
+
 
 	def local(self, value):
 		#if not self._local == bool(value):
 		#debug(self._name, 'internal receive local', value)
 		self._local = bool(value)
 		self.restore()
-	
+
 
 	def restore(self):
 		for handler in self._active_handlers():
@@ -570,12 +570,12 @@ class RingedGrid(Grid):
 			handler.receive_address(self._name, 0, 0, relative = self._relative)
 			handler.receive_address(self._name, 0, 0, local = self._local)
 		super(RingedGrid, self).restore()
-	
+
 
 	def update_element(self, element):
 		for handler in self._active_handlers():
 			handler.receive_address(self._name, element._x, element._y, value = element._value, green = element._green, mode = element._mode, custom = element._custom)
-	
+
 
 
 class ModHandler(CompoundComponent):
@@ -616,19 +616,19 @@ class ModHandler(CompoundComponent):
 		self.modrouter.register_handler(self)
 		self._on_device_changed.subject = self._device_provider
 		self.modrouter._task_group.add(sequence(delay(5), self.select_appointed_device))
-	
+
 
 	def disconnect(self, *a, **k):
 		self._active_mod = None
 		super(ModHandler, self).disconnect(*a, **k)
-	
+
 
 	def _initialize_receive_methods(self):
 		addresses = self._addresses
 		for address, Dict in addresses.iteritems():
 			if not address in self._receive_methods.keys():
 				self._receive_methods[address] = Dict['method']
-	
+
 
 	def _register_addresses(self, client):
 		addresses = self._addresses
@@ -636,19 +636,19 @@ class ModHandler(CompoundComponent):
 			if not address in client._addresses.keys():
 				client._addresses[address] = copy.deepcopy(Dict['obj'])
 				client._addresses[address]._active_handlers = client.active_handlers
-	
+
 
 	def receive_address(self, address_name, *a, **k):
 		#debug('receive_address ' + str(address_name) + str(a))
 		if address_name in self._receive_methods.keys():
 			self._receive_methods[address_name](*a, **k)
-	
+
 
 	def update(self, *a, **k):
 		if self._active_mod:
 			self._active_mod.restore()
 		self.update_buttons()
-	
+
 
 	def select_mod(self, mod = None):
 		self._active_mod = mod
@@ -665,11 +665,11 @@ class ModHandler(CompoundComponent):
 			self._active_mod.report_active_handlers()
 			self._active_mod.restore()
 		self.update()
-	
+
 
 	def active_mod(self, *a, **k):
 		return self._active_mod
-	
+
 
 	@listens('device')
 	def _on_device_changed(self):
@@ -677,31 +677,31 @@ class ModHandler(CompoundComponent):
 		if not self.is_locked() or self.active_mod() is None:
 			debug('ModHandler _on_device_changed()')
 			self.select_appointed_device()
-	
+
 
 	def on_selected_track_changed(self):
 		#debug('modhandler on_selected_track_changed()')
 		if not self.is_locked() or self.active_mod() is None:
 			self.select_appointed_device()
-	
+
 
 	def select_appointed_device(self, *a):
 		debug('select_appointed_device' + str(a))
 		self.select_mod(self.modrouter.is_mod(self._device_provider.device))
-	
+
 
 	def update_buttons(self):
 		self._shift_value.subject and self._shift_value.subject.send_value(7 + self.is_shifted()*7)
 		self._on_shiftlock_value.subject and self._on_shiftlock_value.subject.send_value(3 + self.is_shiftlocked()*7)
 		self._on_lock_value.subject and self._on_lock_value.subject.send_value(1 + self.is_locked()*7)
 		self._alt_value.subject and self._alt_value.subject.send_value(2 + self.is_alted()*7)
-	
+
 
 	def set_mod_nav_buttons(self, buttons):
 		self._mod_nav_buttons = buttons
 		self._on_mod_nav_button_value.replace_subjects(buttons)
 		self._update_mod_nav_buttons()
-	
+
 
 	@listens_group('value')
 	def _on_mod_nav_button_value(self, value, sender):
@@ -711,14 +711,14 @@ class ModHandler(CompoundComponent):
 				self.nav_mod_up()
 			else:
 				self.nav_mod_down()
-	
+
 
 	def _update_mod_nav_buttons(self):
 		if not self._mod_nav_buttons is None:
 			for button in self._mod_nav_buttons:
 				if not button is None:
 					button.turn_on()
-	
+
 
 	def nav_mod_down(self):
 		new_mod = self.modrouter.get_previous_mod(self.active_mod())
@@ -730,7 +730,7 @@ class ModHandler(CompoundComponent):
 				self.song.view.select_device(device)
 				#debug('selected: ' + str(device))
 				self.select_mod(new_mod)
-	
+
 
 	def nav_mod_up(self):
 		new_mod = self.modrouter.get_next_mod(self.active_mod())
@@ -740,12 +740,12 @@ class ModHandler(CompoundComponent):
 			if isinstance(device, Live.Device.Device):
 				self.song.view.select_device(device)
 				self.select_mod(new_mod)
-	
+
 
 	def show_mod_in_live(self):
 		if isinstance(self.active_mod(), Live.Device.Device):
 			self.song.view.select_device(self.active_mod().linked_device)
-	
+
 
 	def set_grid(self, grid):
 		#debug('set grid:' + str(grid))
@@ -755,13 +755,16 @@ class ModHandler(CompoundComponent):
 			for button, _ in grid.iterbuttons():
 				if not button == None:
 					button.use_default_message()
-					button.set_enabled(True)
+					if hasattr(button, 'set_enabled'):
+ 						button.set_enabled(True)
+					elif hasattr(button, 'suppress_script_forwarding'):
+						button.suppress_script_forwarding = False
 		self.update()
-	
+
 
 	def _receive_grid(self, *a, **k):
 		debug('receive grid:  this should be overridden')
-	
+
 
 	@listens('value')
 	def _grid_value(self, value, x, y, *a, **k):
@@ -771,61 +774,61 @@ class ModHandler(CompoundComponent):
 				x += self.x_offset
 				y += self.y_offset
 			self._active_mod.send('grid', x, y, value)
-	
+
 
 	def set_key_buttons(self, keys):
 		self._keys_value.subject = keys
 		if self.active_mod():
 			self.active_mod()._addresses['key'].restore()
-	
+
 
 	def _receive_key(self, x, value):
 		#debug('_receive_key: %s %s' % (x, value))
 		if not self._keys_value.subject is None:
 			self._keys_value.subject.send_value(x, 0, self._colors[value], True)
-	
+
 
 	@listens('value')
 	def _keys_value(self, value, x, y, *a, **k):
 		if self._active_mod:
 			self._active_mod.send('key', x, value)
-	
+
 
 
 	def set_channel_buttons(self, buttons):
 		self._channel_value.subject = buttons
 		if self.active_mod():
 			self.active_mod()._addresses['channel'].restore()
-	
+
 
 	def _receive_channel(self, x, value):
 		#debug('_receive_channel:', x, value)
 		if not self._channel_value.subject is None and x < self._channel_value.subject.width():
 			self._channel_value.subject.send_value(x, 0, self._colors[value], True)
-	
+
 
 	@listens('value')
 	def _channel_value(self, value, x, y, *a, **k):
 		#debug('_channel_value: %s %s' % (x, value))
 		if value and self._active_mod:
 			self._active_mod.send('channel', x)
-	
+
 
 
 	def set_shift_button(self, button):
 		self._shift_value.subject = button
 		if button:
 			button.send_value(self.is_shifted())
-	
+
 
 	def is_shifted(self):
 		return self._is_shifted
-	
+
 
 	def _receive_shift(self, value):
 		if not self._shift_value.subject is None:
 			self._shift_value.subject.send_value(value)
-	
+
 
 	@listens('value')
 	def _shift_value(self, value, *a, **k):
@@ -833,22 +836,22 @@ class ModHandler(CompoundComponent):
 		if self.active_mod():
 			self._active_mod.send('shift', value)
 		self.update()
-	
+
 
 	def set_alt_button(self, button):
 		self._alt_value.subject = button
 		if button:
 			button.send_value(self.is_alted())
-	
+
 
 	def is_alted(self):
 		return self._is_alted
-	
+
 
 	def _receive_alt(self, value):
 		if not self._alt_value.subject is None:
 			self._alt_value.subject.send_value(value)
-	
+
 
 	@listens('value')
 	def _alt_value(self, value, *a, **k):
@@ -862,38 +865,38 @@ class ModHandler(CompoundComponent):
 			#mod._param_component.update()
 			#self.update_device()
 		self.update()
-	
+
 
 
 	def set_lock_button(self, button):
 		self._on_lock_value.subject = button
 		self.update()
-	
+
 
 	def is_locked(self):
 		return self._is_locked
-	
+
 
 	def set_lock(self, value):
 		self._is_locked = value > 0
 		self.select_appointed_device()
-	
+
 
 	@listens('value')
 	def _on_lock_value(self, value):
 		if value>0:
 			self.set_lock(not self.is_locked())
 		self.update()
-	
+
 
 
 	def set_shiftlock_button(self, button):
 		self._on_shiftlock_value.subject = button
-	
+
 
 	def is_shiftlocked(self):
 		return self._is_shiftlocked
-	
+
 
 	@listens('value')
 	def _on_shiftlock_value(self, value):
@@ -901,7 +904,7 @@ class ModHandler(CompoundComponent):
 		if value>0:
 			self._is_shiftlocked = not self.is_shiftlocked()
 			self.update()
-	
+
 
 
 	def set_offset(self, x, y):
@@ -911,19 +914,19 @@ class ModHandler(CompoundComponent):
 		if self._active_mod and self._active_mod.legacy:
 			self._active_mod.send('offset', self.x_offset, self.y_offset)
 			self.update()
-	
+
 
 	def _display_nav_box(self):
 		pass
-	
+
 
 	def set_device_selector_matrix(self, matrix):
 		self._device_selector and self._device_selector.set_matrix(matrix)
-	
+
 
 	def set_nav_matrix(self, matrix):
 		self.nav_box and self.nav_box.set_matrix(matrix)
-	
+
 
 	def set_nav_buttons(self, buttons):
 		assert buttons is None or len(buttons)==4
@@ -933,33 +936,33 @@ class ModHandler(CompoundComponent):
 		self.set_nav_down_button(buttons[1])
 		self.set_nav_left_button(buttons[2])
 		self.set_nav_right_button(buttons[3])
-	
+
 
 	def set_nav_up_button(self, button):
 		if not self.nav_box is None:
 			self.nav_box.set_nav_up_button(button)
-	
+
 
 	def set_nav_down_button(self, button):
 		if not self.nav_box is None:
 			self.nav_box.set_nav_down_button(button)
-	
+
 
 	def set_nav_left_button(self, button):
 		if not self.nav_box is None:
 			self.nav_box.set_nav_left_button(button)
-	
+
 
 	def set_nav_right_button(self, button):
 		if not self.nav_box is None:
 			self.nav_box.set_nav_right_button(button)
-	
+
 
 	def on_enabled_changed(self):
 		super(ModHandler, self).on_enabled_changed()
 		#if not self.is_enabled():
 		#	self._instrument and self._instrument.set_enabled(False)
-	
+
 
 
 class NavigationBox(Component):
@@ -987,15 +990,15 @@ class NavigationBox(Component):
 		self._task_group = TaskGroup(auto_kill=False)
 		self._task_group.add(totask(self._on_timer))
 		#self._register_timer_callback(self._on_timer)
-	
+
 
 	def width(self):
 		return self._width
-	
+
 
 	def height(self):
 		return self._height
-	
+
 
 	def set_matrix(self, matrix):
 		#if matrix:
@@ -1010,7 +1013,7 @@ class NavigationBox(Component):
 			self._y_inc = 0
 		#debug('incs: ' + str(self._x_inc) + ' ' + str(self._y_inc))
 		self.update()
-	
+
 
 	def set_nav_buttons(self, buttons):
 		assert buttons is None or len(buttons)==4
@@ -1020,27 +1023,27 @@ class NavigationBox(Component):
 		self.set_nav_down_button(buttons[1])
 		self.set_nav_left_button(buttons[2])
 		self.set_nav_right_button(buttons[3])
-	
+
 
 	def set_nav_up_button(self, button):
 		#button and button.set_on_off_values('Mod.Nav.OnValue', 'Mod.Nav.OffValue')
 		self._on_nav_up_value.subject = button
-	
+
 
 	def set_nav_down_button(self, button):
 		#button and button.set_on_off_values('Mod.Nav.OnValue', 'Mod.Nav.OffValue')
 		self._on_nav_down_value.subject = button
-	
+
 
 	def set_nav_left_button(self, button):
 		#button and button.set_on_off_values('Mod.Nav.OnValue', 'Mod.Nav.OffValue')
 		self._on_nav_left_value.subject = button
-	
+
 
 	def set_nav_right_button(self, button):
 		#button and button.set_on_off_values('Mod.Nav.OnValue', 'Mod.Nav.OffValue')
 		self._on_nav_right_value.subject = button
-	
+
 
 	@listens('value')
 	def _on_navigation_value(self, value, x, y, *a, **k):
@@ -1068,7 +1071,7 @@ class NavigationBox(Component):
 			#new_y = y * self._y_inc
 			debug('new offsets:', new_x, new_y)
 			self.set_offset(new_x, new_y)
-	
+
 
 	@listens('value')
 	def _on_nav_up_value(self, value):
@@ -1079,7 +1082,7 @@ class NavigationBox(Component):
 				#self.update()
 		else:
 			self._scroll_up_ticks_delay = -1
-	
+
 
 	@listens('value')
 	def _on_nav_down_value(self, value):
@@ -1090,7 +1093,7 @@ class NavigationBox(Component):
 				#self.update()
 		else:
 			self._scroll_down_ticks_delay = -1
-	
+
 
 	@listens('value')
 	def _on_nav_left_value(self, value):
@@ -1101,7 +1104,7 @@ class NavigationBox(Component):
 				#self.update()
 		else:
 			self._scroll_left_ticks_delay = -1
-	
+
 
 	@listens('value')
 	def _on_nav_right_value(self, value):
@@ -1112,7 +1115,7 @@ class NavigationBox(Component):
 				#self.update()
 		else:
 			self._scroll_right_ticks_delay = -1
-	
+
 
 	def update(self):
 		nav_grid = self._on_navigation_value.subject
@@ -1135,7 +1138,7 @@ class NavigationBox(Component):
 		right_button and right_button.set_light(xoff<(self.width()-self._window_x))
 		up_button and up_button.set_light('Mod.Nav.OnValue' if yoff>0 else 'Mod.Nav.OffValue')
 		down_button and down_button.set_light(yoff<(self.height()-self._window_y))
-	
+
 
 	def set_offset(self, x, y):
 		self.x_offset = min(x, self.width() - self._window_x)
@@ -1143,11 +1146,11 @@ class NavigationBox(Component):
 		self.update()
 		if self._callback:
 			self._callback(x, y)
-	
+
 
 	def _is_scrolling(self):
 		return (0 in (self._scroll_up_ticks_delay, self._scroll_down_ticks_delay, self._scroll_right_ticks_delay, self._scroll_left_ticks_delay))
-	
+
 
 	def _on_timer(self):
 		if self.is_enabled():
@@ -1183,11 +1186,11 @@ class NavigationBox(Component):
 				if ((new_x_offset != self.x_offset) or (new_y_offset != self.y_offset)):
 					self.set_offset(new_x_offset, new_y_offset)
 					self.update()
-	
+
 
 
 class ParamHolder(ControlManager, EventObject):
-	
+
 	__doc__ = ' Simple class to hold the owner of a Device.parameter and forward its value when receiving updates from Live, or update its value from a mod '
 
 
@@ -1199,16 +1202,16 @@ class ParamHolder(ControlManager, EventObject):
 		self._index = index
 		self._control_name = control_prefix+'_'+str(index)
 		self._parent = parent
-	
+
 
 	def set_control_prefix(self, control_prefix):
 		self._control_name = str(control_prefix)+'_'+str(self._index)
-	
+
 
 	@listenable_property
 	def parameter(self):
 		return self._parameter
-	
+
 
 	@parameter.setter
 	def parameter(self, parameter, *a):
@@ -1223,14 +1226,14 @@ class ParamHolder(ControlManager, EventObject):
 
 		#self._value_change.subject = parameter
 		#self.notify_parameter()
-	
+
 
 	#@listens('value')
 	def _value_change(self, *a):
 		control_name = self._control_name
 		self._parent._params_value_change(self._parameter, control_name, self._feedback)
 		self._feedback = self._report
-	
+
 
 	def _change_value(self, value):
 		if(self._parameter != None):
@@ -1239,11 +1242,11 @@ class ParamHolder(ControlManager, EventObject):
 				newval = float(float(float(value)/127) * float(self._parameter.max - self._parameter.min)) + self._parameter.min
 				#debug('newval:', newval)
 				self._parameter.value = newval
-	
+
 
 
 class NoDevice(object):
-	__doc__ = 'Dummy Device with no parameters and custom class_name that is used when no device is selected, but parameter assignment is still necessary'	
+	__doc__ = 'Dummy Device with no parameters and custom class_name that is used when no device is selected, but parameter assignment is still necessary'
 
 
 	def __init__(self):
@@ -1252,35 +1255,35 @@ class NoDevice(object):
 		self.canonical_parent = None
 		self.can_have_chains = False
 		self.name = 'NoDevice'
-	
+
 
 	def add_name_listener(self, callback=None):
 		pass
-	
+
 
 	def remove_name_listener(self, callback=None):
 		pass
-	
+
 
 	def name_has_listener(self, callback=None):
 		return False
-	
+
 
 	def add_parameters_listener(self, callback=None):
 		pass
-	
+
 
 	def remove_parameters_listener(self, callback=None):
 		pass
-	
+
 
 	def parameters_has_listener(self, callback=None):
 		return False
-	
+
 
 	def store_chosen_bank(self, callback=None):
 		pass
-	
+
 
 
 class ModParameterProxy(ControlManager, EventObject):
@@ -1291,7 +1294,7 @@ class ModParameterProxy(ControlManager, EventObject):
 
 	def __init__(self, parameter = None, *a, **k):
 		super(ModParameterProxy, self).__init__(*a, **k)
-	
+
 
 
 
@@ -1309,14 +1312,14 @@ class ModDeviceProxy(ControlManager, EventObject):
 		self._bank_dict = {}
 		super(ModDeviceProxy, self).__init__(*a, **k)
 		self.fill_parameters_from_device(mod_device)
-	
+
 
 	def fill_parameters_from_device(self, device):
 		self._parameters = []
 		if device:
 			#self._parameters = [ModParameterProxy(parameter = parameter) for parameter in device.parameters]
 			self._parameters = [parameter for parameter in device.parameters]
-	
+
 
 	def set_bank_dict_entry(self, bank_type, bank_num, *a):
 		debug('set bank dict_entry for proxy:', self._name, 'type:', bank_type, 'num:', bank_num, 'contents:', *a)
@@ -1324,59 +1327,59 @@ class ModDeviceProxy(ControlManager, EventObject):
 			self._bank_dict[bank_type] = []
 		self._bank_dict[bank_type].insert(bank_num, [item for item in a])
 		#debug('new banks:', self._bank_dict)
-	
+
 
 	def update_parameters(self):
 		self.notify_parameters()
-	
+
 
 	@property
 	def bank_dict(self):
 		return self._bank_dict
-	
+
 
 	@listenable_property
 	def parameters(self):
 		debug('notifying parameters:', self._parameters if not self._alted else [self._parameters[0]] + self._parameters[8:])
 		return self._parameters if (not self._alted or len(self._parameters) < 9) else [self._parameters[0]] + self._parameters[9:]
-	
+
 
 	def current_parameters(self):
 		return self._parameters
-	
+
 
 	@parameters.setter
 	def parameters(self, parameters):
 		self._parameters = parameters
 		debug('parameters are now:', [parameter.name if hasattr(parameter, 'name') else None for parameter in self._parameters])
 		self.notify_parameters()
-	
+
 
 	@listenable_property
 	def name(self):
 		return self._name
-	
+
 
 	def store_chosen_bank(self, callback=None):
 		pass
-	
+
 
 	@property
 	def canonical_parent(self):
 		return self._mod_device.canonical_parent
-	
+
 
 	@property
 	def can_have_chains(self):
 		return self._mod_device.can_have_chains
-	
+
 
 	def test_dict(self):
 		for bank_type in self._bank_dict.keys():
 			debug('bank_type:', bank_type)
 			for bank_num in range(len(self._bank_dict[bank_type])):
 				debug('bank_num:', bank_num, self._bank_dict[bank_type][bank_num])
-	
+
 
 
 class LegacyModDeviceProxy(ModDeviceProxy):
@@ -1396,12 +1399,12 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
 	def __init__(self, *a, **k):
 		super(LegacyModDeviceProxy, self).__init__(*a, **k)
-		self._params = [ParamHolder(self, index, self._control_prefix) for index in range(16)] 
-	
+		self._params = [ParamHolder(self, index, self._control_prefix) for index in range(16)]
+
 
 	def fill_parameters_from_device(self, *a):
 		self.set_mod_device(self._mod_device)
-	
+
 
 	def _set_device_parent(self, mod_device_parent, single = None):
 		#debug('_set_device_parent', mod_device_parent, single)
@@ -1425,11 +1428,11 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 			self._device_parent = None
 			self._device_chain = 0
 			self._assign_parameters(None, True)
-	
 
-	def _select_parent_chain(self, chain, force = False): 
+
+	def _select_parent_chain(self, chain, force = False):
 		#debug('_select_parent_chain ', str(chain))
-		self._device_chain = chain 
+		self._device_chain = chain
 		if self._device_parent != None:
 			if isinstance(self._device_parent, Live.Device.Device):
 				if self._device_parent.can_have_chains:
@@ -1440,7 +1443,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 						self._assign_parameters(self._nodevice, True)
 					else:
 						self._assign_parameters(None)
-	
+
 
 	def _select_drum_pad(self, pad, force = False):
 		#debug('_select_drum_pad', pad, force, 'parent:', self._device_parent)
@@ -1457,21 +1460,21 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 						self._assign_parameters(self._nodevice, True)
 					else:
 						self._assign_parameters(None)
-	
+
 
 	@listens('devices')
 	def _parent_device_changed(self):
 		debug('parent_device_changed')
 		self._set_device_parent(None)
 		self._parent.send('lcd', 'parent', 'check')
-	
+
 
 	@listens('devices')
 	def _device_changed(self):
 		debug('device_changed')
 		self._assign_parameters(None)
 		self._parent.send('lcd', 'device', 'check')
-	
+
 
 	def _assign_parameters(self, device, force = False, *a):
 		debug('_assign_parameters:', device, device.class_name if device and hasattr(device, 'class_name') else 'no name')
@@ -1501,7 +1504,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 		self.parameters = new_parameters
 		self._parent.send('lcd', 'device_name', 'lcd_name', generate_strip_string(str(device.name)) if hasattr(device, 'name') else ' ')
 		debug('params are now:', [param.parameter.name if hasattr(param.parameter, 'name') else None for param in self._params])
-	
+
 
 	def get_parameter_by_name(self, device, name):
 		debug('get parameter: device-', device, 'name-', name)
@@ -1543,22 +1546,22 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 					if isinstance(self._custom_parameter[index], Live.DeviceParameter.DeviceParameter):
 						result = self._custom_parameter[index]
 		return result
-	
+
 
 	def rebuild_parameters(self):
 		self._assign_parameters(device = self._assigned_device, force = True)
-	
+
 
 	def set_params_report_change(self, value):
 		for param in self._params:
 			param._report = bool(value)
-	
+
 
 	def set_params_control_prefix(self, prefix):
 		self._control_prefix = prefix
 		for param in self._params:
 			param.set_control_prefix(prefix)
-	
+
 
 	def set_number_params(self, number, *a):
 		debug('set number params', number)
@@ -1566,42 +1569,42 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 			param.parameter = None
 		self._params = [ParamHolder(self, index) for index in range(number)]
 		#self._assign_parameters(self._assigned_device)
-	
+
 
 	def set_mod_device_type(self, mod_device_type, *a):
 		debug('set type ' + str(mod_device_type))
-	
+
 
 	def set_mod_device(self, mod_device, *a):
 		debug('set_mod_device:', mod_device)
 		self._assign_parameters(mod_device)
-	
+
 
 	def set_mod_device_parent(self, mod_device_parent, single=None, *a):
 		debug('set_mod_device_parent:', mod_device_parent, single)
 		self._set_device_parent(mod_device_parent, single)
-	
+
 
 	def set_mod_device_chain(self, chain, *a):
 		debug('set_mod_device_chain:', chain)
 		self._select_parent_chain(chain, True)
-	
+
 
 	def set_mod_drum_pad(self, pad, *a):
 		debug('set_mod_drum_pad:', pad)
 		self._select_drum_pad(pad, True)
-	
+
 
 	def set_mod_device_bank(self, bank_index, *a):
 		debug('set_mod_device_bank:', bank_index)
 		if bank_index != self._bank_index:
 			self._bank_index = bank_index
 			self.rebuild_parameters()
-	
+
 
 	def set_mod_parameter_value(self, num, val, *a):
 		num < len(self._params) and self._params[num]._change_value(val)
-	
+
 
 	def _params_value_change(self, sender, control_name, feedback = True):
 		#debug('params change', sender, control_name)
@@ -1611,7 +1614,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 		if(sender != None):
 			pn = str(generate_strip_string(str(sender.name)))
 			if sender.is_enabled:
-				try: 
+				try:
 					value = str(sender)
 				except:
 					value = ' '
@@ -1623,11 +1626,11 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 		self._parent.send('lcd', control_name, 'lcd_value', pv)
 		if feedback == True:
 			self._parent.send('lcd', control_name, 'encoder_value', val)
-	
+
 
 	def set_number_custom(self, number, *a):
 		self._custom_parameter = [None for index in range(number)]
-	
+
 
 	def set_custom_parameter(self, number, parameter, rebuild = True, *a):
 		if number < len(self._custom_parameter):
@@ -1636,7 +1639,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 				debug('custom is device:', parameter)
 				self._custom_parameter[number] = parameter
 				rebuild and self.rebuild_parameters()
-	
+
 
 	def set_custom_parameter_value(self, num, value, *a):
 		if num < len(self._custom_parameter):
@@ -1644,7 +1647,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 			if parameter != None:
 				newval = float(float(float(value)/127) * float(parameter.max - parameter.min)) + parameter.min
 				parameter.value = newval
-	
+
 
 
 class ModClient(NotifyingControlElement):
@@ -1671,40 +1674,40 @@ class ModClient(NotifyingControlElement):
 		if self._device_parent.devices_has_listener(self._device_listener):
 			self._device_parent.remove_devices_listener(self._device_listener)
 		self._device_parent.add_devices_listener(self._device_listener)
-	
+
 
 	@property
 	def proxied_devices(self):
 		return self._proxied_devices
-	
+
 
 	@property
 	def device(self):
 		return self._device
-	
+
 
 	def register_addresses(self):
 		for handler in self._parent._handlers:
 			handler._register_addresses(self)
 			self.send('register_handler', handler.name)
-	
+
 
 	def addresses(self):
 		return self._addresses
-	
+
 
 	def translations(self):
 		return self._translations
-	
+
 
 	def active_handlers(self):
 		return self._active_handlers
-	
+
 
 	def report_active_handlers(self):
 		args = ['active_handlers'] + [handler._name for handler in self.active_handlers()]
 		self.send(*args)
-	
+
 
 	def receive(self, address_name, method = 'value', values = 0, *a, **k):
 		if address_name in self._addresses.keys():
@@ -1715,7 +1718,7 @@ class ModClient(NotifyingControlElement):
 				getattr(address, method)(*value_list)
 			except:
 				debug('receive method exception', address_name, method, values)
-	
+
 
 	def Receive(self, address_name, method = 'value', *value_list):
 		if address_name in self._addresses.keys():
@@ -1725,7 +1728,7 @@ class ModClient(NotifyingControlElement):
 				getattr(address, method)(*value_list)
 			except:
 				debug('Receive method exception', address_name, method, value_list)
-	
+
 
 	def distribute(self, function_name, values = 0, *a, **k):
 		if hasattr(self, function_name):
@@ -1735,7 +1738,7 @@ class ModClient(NotifyingControlElement):
 				getattr(self, function_name)(*value_list)
 			except:
 				debug('distribute method exception', function_name, value_list)
-	
+
 
 	def Distribute(self, function_name, *value_list):
 		if hasattr(self, function_name):
@@ -1745,7 +1748,7 @@ class ModClient(NotifyingControlElement):
 				getattr(self, function_name)(*value_list)
 			except:
 				debug('Distribute method exception', function_name, value_list)
-	
+
 
 	def receive_translation(self, translation_name, method = 'value', *values):
 		#value_list = unpack_items(values)
@@ -1754,7 +1757,7 @@ class ModClient(NotifyingControlElement):
 			self._translations[translation_name].receive(method, *values)
 		except:
 			debug('receive_translation method exception', translation_name, method, values)
-	
+
 
 	def trans(self, translation_name, method = 'value', *values):
 		#value_list = unpack_items(values)
@@ -1763,36 +1766,36 @@ class ModClient(NotifyingControlElement):
 			self._translations[translation_name].receive(method, *values)
 		except:
 			debug('receive_translation method exception', translation_name, method, values)
-	
+
 
 	def send(self, control_name, *a):
 		#with self._parent._host.component_guard():
 		self.notify_value(control_name, *a)
-	
+
 
 	def is_active(self):
 		return (len(self._active_host) > 0)
-	
+
 
 	def set_enabled(self, val):
 		self._enabled = bool(val)
-	
+
 
 	def reset(self):
 		pass
-	
+
 
 	def restore(self):
 		for address_name, address in self._addresses.iteritems():
 			address.restore()
 		#self._param_component.update()
-	
+
 
 	#@listens('devices')
 	def _device_listener(self, *a, **k):
 		debug('devices listener....', liveobj_valid(self.device))
 		liveobj_valid(self.device) or self._disconnect_client()
-	
+
 
 	def _disconnect_client(self, reconnect = False):
 		#self._device_listener.subject = None
@@ -1802,7 +1805,7 @@ class ModClient(NotifyingControlElement):
 			handler.select_mod(None)
 		self._parent.remove_mod(self)
 		self.disconnect()
-	
+
 
 	def disconnect(self):
 		self._active_handlers = []
@@ -1810,16 +1813,16 @@ class ModClient(NotifyingControlElement):
 			self._device_parent.remove_devices_listener(self._device_listener)
 		#self._device_listener.subject = None
 		super(ModClient, self).disconnect()
-	
+
 
 	@property
 	def linked_device(self):
 		return self.device
-	
+
 
 	def script_wants_forwarding(self):
 		return True
-	
+
 
 	def add_translation(self, name, target, group=None, *args, **k):
 		#debug('name: ' + str(name) + ' target: ' + str(target) + ' args: ' + str(args))
@@ -1833,19 +1836,19 @@ class ModClient(NotifyingControlElement):
 					self._translation_groups[group] = []
 				self._translation_groups[group].append([name, target])
 				#debug('added to group ' + str(group) + ' : ' + str(self._translation_groups[group]))
-	
+
 
 	def enable_translation(self, name, target, enabled = True):
 		if name in self._translations.keys():
 			self._translations[name].set_enabled(target, enabled)
-	
+
 
 	def enable_translation_group(self, group, enabled = True):
 		if group in self._translation_groups.keys():
 			for pair in self._translation_groups[group]:
 				#debug('enabling for ' + str(pair))
 				self.enable_translation(pair[0], pair[1], enabled)
-	
+
 
 	def receive_device(self, command, *args):
 		#debug('receive_device_proxy', 'command:', command, 'args:', args)
@@ -1855,14 +1858,14 @@ class ModClient(NotifyingControlElement):
 			getattr(self._device_proxy, command)(*args)
 		except:
 			debug('receive_device_proxy exception: %(c)s %(a)s' % {'c':command, 'a':args})
-	
+
 
 	def receive_device_proxy(self, command, *args):
 		try:
 			getattr(self._device_proxy, command)(*args)
 		except:
 			debug('receive_device_proxy exception: %(c)s %(a)s' % {'c':command, 'a':args})
-	
+
 
 	def receive_alt_device_proxy(self, proxy_name, command, *args):
 		if hasattr(self, proxy_name):
@@ -1871,7 +1874,7 @@ class ModClient(NotifyingControlElement):
 				getattr(device_proxy, command)(*args)
 			except:
 				debug('receive_device_proxy exception: %(c)s %(a)s' % {'c':command, 'a':args})
-	
+
 
 	def create_alt_device_proxy(self, proxy_name):
 		if not hasattr(self, proxy_name):
@@ -1881,19 +1884,19 @@ class ModClient(NotifyingControlElement):
 			self._proxied_devices.append(getattr(self, proxy_name))
 		else:
 			debug('proxy already exists:', proxy_name)
-	
+
 
 	def update_device(self):
 		for handler in self.active_handlers():
 			handler.update_device()
-	
+
 
 	def set_legacy(self, value):
 		#debug('set_legacy: ' + str(value))
 		self.legacy = value > 0
 		for handler in self.active_handlers():
 			handler.update()
-	
+
 
 	def select_device_from_key(self, key):
 		key = str(key)
@@ -1914,7 +1917,7 @@ class ModClient(NotifyingControlElement):
 				break
 		if preset != None:
 			self._parent.song.view.select_device(preset)
-	
+
 
 	def fill_color_map(self, color_type = None, *color_map):
 		#debug('fill color map: ' + str(color_type) + ' ' + str(color_map))
@@ -1925,7 +1928,7 @@ class ModClient(NotifyingControlElement):
 				if handler._color_type is color_type:
 					handler._colors = self._color_maps[color_type]
 				handler.update()
-	
+
 
 	def set_color_map(self, color_type, *color_map):
 		#debug('set color map: ' + str(color_type) + ' ' + str(color_map))
@@ -1936,7 +1939,7 @@ class ModClient(NotifyingControlElement):
 				if handler._color_type is color_type:
 					handler._colors = self._color_maps[color_type]
 				handler.update()
-	
+
 
 	def get_handler_offsets(self):
 		debug('get handler offsets')
@@ -1946,12 +1949,12 @@ class ModClient(NotifyingControlElement):
 			handler = self.active_handlers()[0]
 			offsets = (handler.x_offset, handler.y_offset)
 		return offsets
-	
+
 
 	@property
 	def parameters(self):
 		return self._device_proxy.parameters
-	
+
 
 	def Forward(self, method = None, *value_list):
 		if not method is None:
@@ -1960,7 +1963,7 @@ class ModClient(NotifyingControlElement):
 					getattr(handler, method)(*value_list)
 				except:
 					debug('Forward method exception', method, value_list)
-	
+
 
 
 class ModRouter(CompoundComponent):
@@ -1974,7 +1977,7 @@ class ModRouter(CompoundComponent):
 		self._mods = []
 		self.log_message = self._log_message
 		return None
-	
+
 
 	def set_host(self, host):
 		assert isinstance(host, ControlSurface)
@@ -1982,15 +1985,15 @@ class ModRouter(CompoundComponent):
 		#self._task_group = host._task_group
 		self._host.log_message('host registered: ' + str(host))
 		self.log_message = host.log_message
-	
+
 
 	def has_host(self):
 		return not self._host is None
-	
+
 
 	def _log_message(self, *a, **k):
 		pass
-	
+
 
 	def register_handler(self, handler):
 		if handler not in self._handlers:
@@ -1998,7 +2001,7 @@ class ModRouter(CompoundComponent):
 		for mod in self._mods:
 			mod.register_addresses()
 			mod.send('disconnect')
-	
+
 
 	def unregister_handler(self, cs, handler):
 		debug('unregistering handler ' + str(cs) + ' ' + str(handler))
@@ -2019,29 +2022,29 @@ class ModRouter(CompoundComponent):
 				self._log_message = self._log_message
 				break
 
-	
+
 
 	@listenable_property
 	def mods(self):
 		return self._mods
-	
+
 
 	@mods.setter
 	def mods(self, mods):
 		self._mods = mods
 		self.notify_mods()
-	
+
 
 	def update_handlers(self, *a, **k):
 		self.notify_mods()
 		for handler in self._handlers:
 			handler._on_device_changed()
-	
+
 
 	@property
 	def devices(self):
 		return [mod.device for mod in self.mods]
-	
+
 
 	def get_mod(self, device):
 		debug('getting mod...')
@@ -2050,7 +2053,7 @@ class ModRouter(CompoundComponent):
 			if mod.device == device:
 				mod_client = mod
 		return mod_client
-	
+
 
 	def get_next_mod(self, active_mod):
 		if not active_mod is None:
@@ -2059,7 +2062,7 @@ class ModRouter(CompoundComponent):
 			return self._mods[0]
 		else:
 			return None
-	
+
 
 	def get_previous_mod(self, active_mod):
 		if not active_mod is None:
@@ -2068,7 +2071,7 @@ class ModRouter(CompoundComponent):
 			return self._mods[-1]
 		else:
 			return active_mod
-	
+
 
 	def add_mod(self, device):
 		mod_client = self.get_mod(device)
@@ -2077,26 +2080,26 @@ class ModRouter(CompoundComponent):
 		if mod_client is None:
 			#debug('device not in self.mods')
 			with self._host.component_guard():
-				mod_client = ModClient(parent = self, device = device, name = 'modClient'+str(len(self.mods))) 
+				mod_client = ModClient(parent = self, device = device, name = 'modClient'+str(len(self.mods)))
 				self._mods.append( mod_client )
 		debug('add mod device:', device.name, mod_client)
 		self._host.schedule_message(1, self.update_handlers)
 		return mod_client
-	
+
 
 	def remove_mod(self, mod):
 		if mod in self._mods:
 			debug('removing mod:', mod)
 			self._mods.remove(mod)
-	
+
 
 	def timer(self, *a, **k):
 		pass
-	
+
 
 	def update(self):
 		pass
-	
+
 
 	def disconnect(self):
 		for surface in get_control_surfaces():
@@ -2118,7 +2121,7 @@ class ModRouter(CompoundComponent):
 		self._mods = []
 		debug('monomodular is disconnecting....')
 		super(ModRouter, self).disconnect()
-	
+
 
 	def is_mod(self, device):
 		#debug('is mod(', device, ')')
@@ -2139,7 +2142,7 @@ class ModRouter(CompoundComponent):
 					break
 		#debug('modrouter is_mod() returned device: ' + str(mod_device))
 		return mod_device
-	
+
 
 	def is_mod(self, device):
 		debug('is mod(', device, ')')
@@ -2172,7 +2175,7 @@ class ModRouter(CompoundComponent):
 					break
 		#debug('modrouter is_mod() returned device: ' + str(mod_device))
 		return mod_device
-	
+
 
 
 def original_device_to_appoint(device):
@@ -2222,13 +2225,13 @@ class ModDeviceProvider(EventObject):
 		self.__on_selected_track_changed.subject = song.view
 		self.__on_selected_device_changed.subject = song.view.selected_track.view
 		#self.__on_mod_device_added.subject = get_modrouter()
-	
+
 
 	@listenable_property
 	def device(self):
 		#debug('delivering device:', self._device)
 		return self._device
-	
+
 
 	@device.setter
 	def device(self, device):
@@ -2238,61 +2241,61 @@ class ModDeviceProvider(EventObject):
 			self._device = device
 			#debug('setting device:', self._device)
 			self.notify_device()
-	
+
 
 	@listenable_property
 	def is_locked_to_device(self):
 		return self._locked_to_device
-	
+
 
 	def lock_to_device(self, device):
 		self.device = device
 		self._locked_to_device = True
 		self.notify_is_locked_to_device()
-	
+
 
 	def unlock_from_device(self):
 		self._locked_to_device = False
 		self.notify_is_locked_to_device()
 		self.update_device_selection()
-	
+
 
 	@listens('appointed_device')
 	def __on_appointed_device_changed(self):
 		self.device = device_to_appoint(self.song.appointed_device)
-	
+
 
 	@listens('has_macro_mappings')
 	def __on_has_macro_mappings_changed(self):
 		self.song.appointed_device = device_to_appoint(self.song.view.selected_track.view.selected_device)
-	
+
 
 	@listens('selected_track')
 	def __on_selected_track_changed(self):
 		self.__on_selected_device_changed.subject = self.song.view.selected_track.view
 		if self.device_selection_follows_track_selection:
 			self.update_device_selection()
-	
+
 
 	@listens('selected_device')
 	def __on_selected_device_changed(self):
 		self._update_appointed_device()
-	
+
 
 	@listens('chains')
 	def __on_chains_changed(self):
 		self._update_appointed_device()
-	
+
 
 	@listens('mods')
 	def __on_mod_device_added(self):
 		debug('__on_mod_device_added')
 		self.update_device_selection()
-	
+
 
 	def restart_mod(self):
 		self.__on_mod_device_added.subject = get_modrouter()
-	
+
 
 	def _update_appointed_device(self):
 		song = self.song
@@ -2302,7 +2305,7 @@ class ModDeviceProvider(EventObject):
 		rack_device = device if isinstance(device, Live.RackDevice.RackDevice) else None
 		self.__on_has_macro_mappings_changed.subject = rack_device
 		self.__on_chains_changed.subject = rack_device
-	
+
 
 	def mod_device_from_device(self, device):
 		modrouter = get_modrouter()
@@ -2311,7 +2314,7 @@ class ModDeviceProvider(EventObject):
 			if mod_device:
 				device = mod_device._device_proxy
 		return device
-	
+
 
 	def update_device_selection(self):
 		debug('--------------update_device_selection')
@@ -2331,7 +2334,7 @@ class ModDeviceProvider(EventObject):
 		else:
 			self.song.appointed_device = None
 			self.device = None
-	
+
 
 	def reevaluate_device(self):
 		debug('reevaluate_device')
@@ -2341,7 +2344,6 @@ class ModDeviceProvider(EventObject):
 			device = self.mod_device_from_device(self.device)
 			self._device = device
 			self.notify_device()
-	
+
 
 #a
-

@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 9.6 release on 021516
+# written against Live 10.0.3b8 RC on 083018
 
 
 from __future__ import absolute_import, print_function
@@ -10,7 +10,7 @@ from ableton.v2.base import inject, listens
 from ableton.v2.control_surface import ControlSurface, ControlElement, Layer, Skin, PrioritizedResource, Component, ClipCreator, DeviceBankRegistry
 from ableton.v2.control_surface.elements import ButtonMatrixElement
 from ableton.v2.control_surface.components import SessionRingComponent, SessionNavigationComponent, SessionComponent, TransportComponent, DeviceComponent, ViewControlComponent
-from ableton.v2.control_surface.components.mixer import simple_track_assigner
+from ableton.v2.control_surface.components.mixer import SimpleTrackAssigner
 
 from aumhaa.v2.base import initialize_debug
 from aumhaa.v2.control_surface import SendLividSysexMode
@@ -38,7 +38,7 @@ class GuitarWing(LividControlSurface):
 
 	_sysex_id = 20
 	_model_name = 'GuitarWing'
-	
+
 	def __init__(self, *a, **k):
 		super(GuitarWing, self).__init__(*a, **k)
 		self._skin = Skin(GuitarWingColors)
@@ -50,7 +50,7 @@ class GuitarWing(LividControlSurface):
 			self._setup_device_control()
 			self._setup_transport_control()
 			self._setup_view_control()
-	
+
 
 	def _setup_controls(self):
 		is_momentary = True
@@ -66,7 +66,7 @@ class GuitarWing(LividControlSurface):
 
 		self._parameter_control_matrix = ButtonMatrixElement(rows = [ [ self._fader[0], self._fader[1], self._fader[2], self._accel[2], self._ccs[0], self._ccs[1], self._ccs[2], self._ccs[3] ]])
 		self._scene_launch_matrix = ButtonMatrixElement(rows = [self._pad[:4]])
-	
+
 
 	def _setup_session_control(self):
 		self._session_ring = SessionRingComponent(num_tracks = 1, num_scenes = 4, tracks_to_use = lambda : self.song.visible_tracks + self.song.return_tracks)
@@ -83,12 +83,12 @@ class GuitarWing(LividControlSurface):
 
 		self._session_navigation.layer = Layer(left_button = self._button[1], right_button = self._button[0])
 		self._session_navigation.set_enabled(True)
-	
+
 
 	def _setup_mixer_control(self):
-		self._mixer = MonoMixerComponent(name = 'Mixer', tracks_provider = self._session_ring, track_assigner = simple_track_assigner, invert_mute_feedback = True, auto_name = True, enable_skinning = True)
-		self.song.view.selected_track = self._mixer.channel_strip(0)._track 
-	
+		self._mixer = MonoMixerComponent(name = 'Mixer', tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self.song.view.selected_track = self._mixer.channel_strip(0)._track
+
 
 	def _setup_transport_control(self):
 		self._transport = TransportComponent()
@@ -97,13 +97,13 @@ class GuitarWing(LividControlSurface):
 										seek_backward_button = self._button[8],
 										record_button = self._button[9])
 		self._transport.set_enabled(True)
-	
+
 
 	def _setup_device_control(self):
 		self._device = DeviceComponent(name = 'Device_Component', device_provider = self._device_provider, device_bank_registry = DeviceBankRegistry())
 		self._device.layer = Layer(parameter_controls = self._parameter_control_matrix)
 		self._device.set_enabled(True)
-	
+
 
 	def _setup_m4l_interface(self):
 		self._m4l_interface = M4LInterfaceComponent(controls=self.controls, component_guard=self.component_guard)
@@ -111,11 +111,11 @@ class GuitarWing(LividControlSurface):
 		self.get_control = self._m4l_interface.get_control
 		self.grab_control = self._m4l_interface.grab_control
 		self.release_control = self._m4l_interface.release_control
-	
+
 
 	def _setup_view_control(self):
 		self._view_control = ViewControlComponent()
 		self._view_control.layer = Layer(prev_track_button = self._button[1], next_track_button = self._button[0])
-	
+
 
 #	a

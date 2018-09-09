@@ -53,7 +53,7 @@ class MonoButtonElement(ButtonElement):
 			self._monobridge = script._monobridge
 		else:
 			self._monobridge = MonoBridgeProxy()
-	
+
 
 	def set_color_map(self, color_map):
 		assert isinstance(color_map, tuple)
@@ -61,40 +61,40 @@ class MonoButtonElement(ButtonElement):
 		self._num_colors = len(color_map)
 		self._num_flash_states = int(127/len(color_map))
 		self._color_map = color_map
-	
+
 
 	def set_on_off_values(self, on_value, off_value):
 		self._last_sent_message = None
 		self._on_value = on_value
 		self._off_value = off_value
-	
+
 
 	def set_on_value(self, value):
 		self._last_sent_message = None
 		self._on_value = value
-	
+
 
 	def set_off_value(self, value):
 		self._last_sent_message = None
 		self._off_value = value
-	
+
 
 	def set_darkened_value(self, value = 0):
 		#debug('setting darkened:', value)
 		if value:
 			value = self._color_map[value-1]
 		self._darkened = value
-	
+
 
 	def set_force_next_value(self):
 		self._last_sent_message = None
 		self._force_next_value = True
-	
+
 
 	def set_enabled(self, enabled):
 		self._is_enabled = enabled
 		self._request_rebuild()
-	
+
 
 	def turn_on(self, force = False):
 		self.force_next_send()
@@ -108,7 +108,7 @@ class MonoButtonElement(ButtonElement):
 				#super(MonoButtonElement, self).turn_on()
 				debug('skin color missing', self._on_value)
 				self.send_value(127)
-	
+
 
 	def turn_off(self, force = False):
 		self.force_next_send()
@@ -123,13 +123,13 @@ class MonoButtonElement(ButtonElement):
 				#super(MonoButtonElement, self).turn_off()
 				debug('skin color missing', self._off_value)
 				self.send_value(0)
-	
+
 
 	def reset(self, force = False):
 		self._darkened = 0;
 		self.force_next_send()
 		self.send_value(0)
-	
+
 
 	def set_light(self, value, *a, **k):
 		if value is None:
@@ -143,7 +143,7 @@ class MonoButtonElement(ButtonElement):
 			value = 'DefaultButton.On'
 		#debug(self.name, 'skin value:', value)
 		super(MonoButtonElement, self).set_light(value, *a, **k)
-	
+
 
 	def send_value(self, value, force = False):
 		#debug(self.name, 'send_value', value)
@@ -175,18 +175,18 @@ class MonoButtonElement(ButtonElement):
 				self._force_next_value = False
 		else:
 			debug('Button bad send value:', value)
-	
+
 
 	#def script_wants_forwarding(self):
 	#	if not self._is_enabled and not self._force_forwarding:
 	#		return False
 	#	else:
 	#		return super(MonoButtonElement, self).script_wants_forwarding()
-	
+
 
 	def set_enabled(self, enabled):
 		self.suppress_script_forwarding = not enabled
-	
+
 
 	def flash(self, timer):
 		if (self._is_being_forwarded and self._flash_state in range(1, self._num_flash_states) and (timer % self._flash_state) == 0):
@@ -202,13 +202,13 @@ class MonoButtonElement(ButtonElement):
 			self.send_midi((status_byte,
 			 data_byte1,
 			 data_byte2))
-			
-	
+
+
 
 	def release_parameter(self):
 		self._darkened = 0
 		super(MonoButtonElement, self).release_parameter()
-	
+
 
 
 
@@ -228,29 +228,29 @@ class DescriptiveMonoButtonElement(MonoButtonElement):
 			self._monobridge = self._script
 		else:
 			self._monobridge = MonoBridgeProxy()
-	
+
 
 	def set_descriptor(self, descriptor):
 		self._descriptor = '.' + str(descriptor) if descriptor else ''
-	
+
 
 	def _set_descriptor(self, descriptor):
 		#debug('_set_descriptor:', descriptor)
 		self.set_descriptor(descriptor)
-	
+
 
 	def _get_descriptor(self):
 		#debug('_get_descriptor:', '' if self._descriptor is None else str(self._descriptor))
 		return '' if self._descriptor is None else str(self._descriptor)
-	
-	
+
+
 	descriptor = property(_get_descriptor, _set_descriptor)
 
 	def report_descriptor(self, descriptor = None, force = False):
 		if force or (descriptor != self._last_reported_descriptor):
 			self._monobridge._send(self.name, 'button_function', str(descriptor) + self.descriptor)
 		self._last_reported_descriptor = descriptor
-	
+
 
 	def set_light(self, value, *a, **k):
 		try:
@@ -259,7 +259,7 @@ class DescriptiveMonoButtonElement(MonoButtonElement):
 			pass
 		super(MonoButtonElement, self).set_light(value, *a, **k)
 		self.report_descriptor(value)
-	
+
 
 	def turn_on(self, force = False):
 		self.force_next_send()
@@ -275,7 +275,7 @@ class DescriptiveMonoButtonElement(MonoButtonElement):
 				debug('skin color missing', self._on_value)
 				self.send_value(127)
 			self.report_descriptor(self._on_value)
-	
+
 
 	def turn_off(self, force = False):
 		self.force_next_send()
@@ -292,4 +292,3 @@ class DescriptiveMonoButtonElement(MonoButtonElement):
 				debug('skin color missing', self._off_value)
 				self.send_value(0)
 			self.report_descriptor(self._off_value)
-	

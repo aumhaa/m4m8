@@ -62,16 +62,16 @@ class DeviceSelectorComponent(Component):
 		self._device_listener.subject = self.song
 		self._device_listener()
 		self._off_value = 0
-	
+
 
 	def disconnect(self, *a, **k):
 		super(DeviceSelectorComponent, self).disconnect()
-	
+
 
 	def set_offset(self, offset):
 		self._offset = offset
 		self.update()
-	
+
 
 	def set_matrix(self, matrix):
 		buttons = []
@@ -80,10 +80,13 @@ class DeviceSelectorComponent(Component):
 				#self._script.log_message('button is: ' + str(button))
 				if not button is None:
 					button.use_default_message()
-					button.set_enabled(True)
+					if hasattr(button, 'set_enabled'):
+ 						button.set_enabled(True)
+					elif hasattr(button, 'suppress_script_forwarding'):
+						button.suppress_script_forwarding = False
 					buttons.append(button)
 		self.set_buttons(buttons)
-	
+
 
 	def set_buttons(self, buttons):
 		for button in self._buttons:
@@ -91,12 +94,12 @@ class DeviceSelectorComponent(Component):
 		self._buttons = buttons or []
 		self._on_button_value.replace_subjects(self._buttons)
 		self.update()
-	
+
 
 	def set_assign_button(self, button):
 		debug('set assign button:', button)
 		self.assign_button.set_control_element(button)
-	
+
 
 	@listens_group('value')
 	def _on_button_value(self, value, sender):
@@ -106,7 +109,7 @@ class DeviceSelectorComponent(Component):
 					self.assign_device(self._buttons.index(sender))
 				else:
 					self.select_device(self._buttons.index(sender))
-	
+
 
 	def assign_device(self, index):
 		device = self.song.appointed_device
@@ -130,13 +133,13 @@ class DeviceSelectorComponent(Component):
 			device.name = ' '.join(name)
 			self.scan_all()
 			self.update()
-	
+
 
 	def select_device(self, index):
 		if self.is_enabled():
 			preset = None
 			if index < len(self._device_registry):
-				preset = self._device_registry[index] 
+				preset = self._device_registry[index]
 			if not preset is None and isinstance(preset, Live.Device.Device):
 				self.song.view.select_device(preset)
 				self._script._device_provider.device = preset
@@ -146,7 +149,7 @@ class DeviceSelectorComponent(Component):
 				except:
 					pass
 			self.update()
-	
+
 
 	def scan_all(self):
 		#debug('scan all--------------------------------')
@@ -165,7 +168,7 @@ class DeviceSelectorComponent(Component):
 						self._device_registry[index] = device.chains[0].devices[0]
 		self.update()
 		#debug('device registry: ' + str(self._device_registry))
-	
+
 
 
 	@listens('appointed_device')
@@ -175,19 +178,19 @@ class DeviceSelectorComponent(Component):
 		self._watched_device = self.song.appointed_device
 		if self.is_enabled():
 			self.update()
-	
+
 
 	@listens('name')
 	def _on_name_changed(self):
 		#debug('on name changed')
 		if self._watched_device == self.song.appointed_device:
 			self.scan_all()
-	
+
 
 	def on_enabled_changed(self):
 		if self.is_enabled():
 			self.update()
-	
+
 
 	def update(self):
 		if self.is_enabled():
@@ -210,5 +213,3 @@ class DeviceSelectorComponent(Component):
 							button.send_value(val + selected_shift)
 						else:
 							button.send_value(self._off_value)
-	
-

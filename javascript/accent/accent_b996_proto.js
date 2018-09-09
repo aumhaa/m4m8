@@ -3,17 +3,17 @@
 //aumhaa@gmail.com --- http://www.aumhaa.com
 
 
-/*This script is the result of collaboration with Peter Nyboer @ Livid Instruments and 
+/*This script is the result of collaboration with Peter Nyboer @ Livid Instruments and
 represents a great deal of effort to gain some speed and stability from the original Steppr
-without sacrificing too much readability.  The majority of the functionality for the entire patch 
-can be modified in this js or the accompanying poly~ object, "steppr_wheel", without ever opening 
-the actual containing patch in the m4l editor (this is crucial for speeding up the development process).  
-Because of this, the functionality of the patch can be radically altered merely by modifying the 
-poly~ or adding some lines of code in to this js.  As an example, the poly~ used as the base for 
-this patch is only a slightly modified version of the "binary" mod (from Monomodular), and the 
+without sacrificing too much readability.  The majority of the functionality for the entire patch
+can be modified in this js or the accompanying poly~ object, "steppr_wheel", without ever opening
+the actual containing patch in the m4l editor (this is crucial for speeding up the development process).
+Because of this, the functionality of the patch can be radically altered merely by modifying the
+poly~ or adding some lines of code in to this js.  As an example, the poly~ used as the base for
+this patch is only a slightly modified version of the "binary" mod (from Monomodular), and the
 majority of processes in this script are maintained between both versions.*/
 
-/*It should be noted that many of the processes used in "binary" are still available and unused 
+/*It should be noted that many of the processes used in "binary" are still available and unused
 in this script, offering some excellent prospects for future development of this mod.*/
 
 autowatch = 1;
@@ -49,37 +49,37 @@ var unique = jsarguments[1];
 var WIKI = 'http://wiki.lividinstruments.com/wiki/Accent'
 
 
-//this array contains the scripting names of objects in the top level patcher.	To include an new object to be addressed 
+//this array contains the scripting names of objects in the top level patcher.	To include an new object to be addressed
 //in this script, it's only necessary to add its name to this array.  It can then be addressed as a direct variable
 var Vars = ['storage', 'poly', 'pipe', 'selected_filter', 'storepattr', 'preset_selector',
  			'padgui', 'padmodegui','keygui', 'keygui2', 'stepmodegui', 'padmodeadv',
-			'RepeatLen', 'Groove', 'Random', 'RotSize', 
-			'rotleftgui', 'rotrightgui', 'notevaluesgui', 'notetypegui', 
+			'RepeatLen', 'Groove', 'Random', 'RotSize',
+			'rotleftgui', 'rotrightgui', 'notevaluesgui', 'notetypegui',
 			'timeupgui', 'timedngui', 'pitchupgui', 'pitchdngui', 'repeatgui',
 			'transposegui', 'playgui', 'recgui', 'directiongui', 'lockgui',
-			'running_status', 'transport_change', 'presetdisplaygui', 'confirmgui']; 
+			'running_status', 'transport_change', 'presetdisplaygui', 'confirmgui'];
 
 //Vars trash: 'step'
 
-//this array contains the scripting names of objects in each of the polys.	To include an new object to be addressed 
+//this array contains the scripting names of objects in each of the polys.	To include an new object to be addressed
 //in the poly, it's only necessary to add its name to this array.  It can then be addressed as part[poly number].obj[its scripting name]
-var Objs = {'pattern':{'Name':'pattern', 'Type':'list', 'pattr':'pattern'}, 
+var Objs = {'pattern':{'Name':'pattern', 'Type':'list', 'pattr':'pattern'},
 			'duration':{'Name':'duration', 'Type':'list', 'pattr':'duration'},
 			'velocity':{'Name':'velocity', 'Type':'list', 'pattr':'velocity'},
 			'swing':{'Name':'swing', 'Type':'float', 'pattr':'swingpattr'},
 			'steps':{'Name':'steps', 'Type':'int', 'pattr':'stepspattr'},
 			'channel':{'Name':'channel', 'Type':'int', 'pattr':'hidden'},
 			'direction':{'Name':'direction', 'Type':'int', 'pattr':'directionpattr'},
-			'noteoffset':{'Name':'noteoffset', 'Type':'int', 'pattr':'hidden'}, 
+			'noteoffset':{'Name':'noteoffset', 'Type':'int', 'pattr':'hidden'},
 			'random':{'Name':'random', 'Type':'int', 'pattr':'randompattr'},
 			'repeatenable':{'Name':'repeatenable', 'Type':'int', 'pattr':'object'},
 			'ticks':{'Name':'ticks', 'Type':'int', 'pattr':'hidden'},
-			'notevalues':{'Name':'notevalues', 'Type':'int', 'pattr':'hidden'}, 
+			'notevalues':{'Name':'notevalues', 'Type':'int', 'pattr':'hidden'},
 			'notetype':{'Name':'notetype', 'Type':'int', 'pattr':'hidden'},
 			'quantize':{'Name':'quantize', 'Type':'int', 'pattr':'hidden'},
 			'active':{'Name':'active', 'Type':'int', 'pattr':'hidden'},
 			'offset':{'Name':'offset', 'Type':'int', 'pattr':'hidden'},
-			'addnote':{'Name':'addnote', 'Type':'int', 'pattr':'object'}, 
+			'addnote':{'Name':'addnote', 'Type':'int', 'pattr':'object'},
 			'patterncoll':{'Name':'patterncoll', 'Type':'list', 'pattr':'object'},
 			'clutch':{'Name':'clutch', 'Type':'int', 'pattr':'object'},
 			'restart':{'Name':'restart', 'Type':'bang', 'pattr':'object'},
@@ -105,25 +105,25 @@ var AddColors = [6, 1];
 var Blinks=[-1, 2];
 var partTRANS=[12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3];
 var TRANSLATE = [{'note':'128n', 'ticks':15, 'speed':1, 'notevalue': 0, 'notetype': 0},
-			 {'note':'64n','ticks':30, 'speed':2, 'notevalue':1, 'notetype':0}, 
-			{'note':'32nt','ticks':40, 'speed':3, 'notevalue':2, 'notetype':2}, 
-			{'note':'64nd','ticks':45, 'speed':4, 'notevalue':1, 'notetype':1}, 
+			 {'note':'64n','ticks':30, 'speed':2, 'notevalue':1, 'notetype':0},
+			{'note':'32nt','ticks':40, 'speed':3, 'notevalue':2, 'notetype':2},
+			{'note':'64nd','ticks':45, 'speed':4, 'notevalue':1, 'notetype':1},
 			{'note':'32n','ticks':60, 'speed':5, 'notevalue':2, 'notetype':0},
-			{'note':'16nt','ticks':80, 'speed':6, 'notevalue':3, 'notetype':2}, 
+			{'note':'16nt','ticks':80, 'speed':6, 'notevalue':3, 'notetype':2},
 			{'note':'32nd','ticks':90, 'speed':7, 'notevalue':2, 'notetype':1},
 			{'note':'16n', 'ticks':120, 'speed':8, 'notevalue':3, 'notetype':0},
 			{'note':'8nt', 'ticks':160, 'speed':9, 'notevalue':4, 'notetype':2},
-			{'note':'16nd', 'ticks':180, 'speed':10, 'notevalue':3, 'notetype':1}, 
+			{'note':'16nd', 'ticks':180, 'speed':10, 'notevalue':3, 'notetype':1},
 			{'note':'8n', 'ticks':240, 'speed':11, 'notevalue':4, 'notetype':0},
 			{'note':'4nt', 'ticks':320, 'speed':12, 'notevalue':5, 'notetype':2},
-			{'note':'8nd', 'ticks':360, 'speed':13, 'notevalue':4, 'notetype':1}, 
+			{'note':'8nd', 'ticks':360, 'speed':13, 'notevalue':4, 'notetype':1},
 			{'note':'4n', 'ticks':480, 'speed':14, 'notevalue':5, 'notetype':0},
 			{'note':'2nt', 'ticks':640, 'speed':15, 'notevalue':6, 'notetype':2},
-			{'note':'4nd', 'ticks':720, 'speed':16, 'notevalue':5, 'notetype':1}, 
+			{'note':'4nd', 'ticks':720, 'speed':16, 'notevalue':5, 'notetype':1},
 			{'note':'2n', 'ticks':960, 'speed':17, 'notevalue':6, 'notetype':0},
 			{'note':'1nt', 'ticks':1280, 'speed':18, 'notevalue':7, 'notetype':2},
 			{'note':'2nd', 'ticks':1440, 'speed':19, 'notevalue':6, 'notetype':1},
-			{'note':'1n', 'ticks':1920, 'speed':20, 'notevalue':7, 'notetype':0}, 
+			{'note':'1n', 'ticks':1920, 'speed':20, 'notevalue':7, 'notetype':0},
 			{'note':'1nd', 'ticks':2880, 'speed':21, 'notevalue':7, 'notetype':1}];
 
 var TRANS = [[15, 15, 15], [30, 30, 30], [60, 45, 80], [120, 180, 80], [240, 360, 160], [480, 720, 320], [960, 1440, 640], [1920, 2880, 1280]];
@@ -131,12 +131,12 @@ var TRANS = [[15, 15, 15], [30, 30, 30], [60, 45, 80], [120, 180, 80], [240, 360
 var ACCENTS = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2];
 var ACCENT_VALS = [87, 111, 127];
 
-/*Naming the js instance as script allows us to create scoped variables 
+/*Naming the js instance as script allows us to create scoped variables
 (properties of js.this) without specifically declaring them with var
-during the course of the session. This allows dynamic creation of 
+during the course of the session. This allows dynamic creation of
 objects without worrying about declaring them beforehand as globals
-presumably gc() should be able to do its job when the patch closes, or 
-if the variables are redclared.	 I'd love to know if this works the 
+presumably gc() should be able to do its job when the patch closes, or
+if the variables are redclared.	 I'd love to know if this works the
 way I think it does.*/
 var script = this;
 var autoclip;
@@ -190,22 +190,22 @@ var shifted = false;
 /////////////////////////////////////////*/
 
 
-/*	VERY IMPORTANT!! : This code utilizes a naming convention for private functions:  any function 
-preceeded by an underscore is considered private, but will have a public property reference	 
-assigned to it AFTER the script has received an initiallization call from mod.js.  That means that any 
-function that shouldn't be accessed before initialization can be created as a private function without 
-the need to use an internal test to find out whether the script has init()ed. 
+/*	VERY IMPORTANT!! : This code utilizes a naming convention for private functions:  any function
+preceeded by an underscore is considered private, but will have a public property reference
+assigned to it AFTER the script has received an initiallization call from mod.js.  That means that any
+function that shouldn't be accessed before initialization can be created as a private function without
+the need to use an internal test to find out whether the script has init()ed.
 
 Any calls to uninitiated private functions that require a response should be defined by the anything() parsing
 routine.
 
 Example:
 
-If we create _private_function(), and before init a call from max comes in to private_function(), that call 
-will be funneled to anything().	 After init(), however, all calls to private_function() will be forwarded to 
-_private_function().  
+If we create _private_function(), and before init a call from max comes in to private_function(), that call
+will be funneled to anything().	 After init(), however, all calls to private_function() will be forwarded to
+_private_function().
 
-Note:  It is best to only address these private functions by their actual names in the script, since calling aliased 
+Note:  It is best to only address these private functions by their actual names in the script, since calling aliased
 names will not be routed to anything()*/
 
 var GRIDMAP =[	[undefined, undefined, undefined, undefined, 'pads_0', 'pads_1', 'pads_2', 'pads_3'],
@@ -257,7 +257,7 @@ function setup_translations()
 	{
 		//mod.Send( 'add_translation', 'buttons_'+i, 'base_grid', 'base_buttons', (i%4), i/4);
 		mod.Send( 'add_translation', 'buttons_'+i, 'key', 'keys', i);
-		
+
 		//mod.Send( 'add_translation', 'extras_'+i, 'base_grid', 'base_extras', (i%4), (i/4)+2);
 
 		mod.Send( 'add_translation', 'buttons_'+i, 'cntrlr_encoder_button_grid', 'cntrlr_buttons', i%4, Math.floor(i/4));
@@ -331,9 +331,9 @@ function initialize(val)
 			//storage.message('priorty', 'poly.'+(poly_num+1), 'tickspattr', 10);
 			storage.message('priorty', 'poly.'+(poly_num+1),  'notetypepattr', 11);
 			storage.message('priorty', 'poly.'+(poly_num+1),  'notevaluepattr', 12);
-			part[i] = {'n': 'part', 'num':i, 'nudge':0, 'offset':0, 'channel':0, 'len':16, 'start':0, 
-						'jitter':0, 'active':1, 'swing':.5, 'lock':1, 'ticks':480, 'notevalues':5, 'notetype':0, 
-						'pushed':0, 'direction':0, 'root':i, 'octave':0, 'add':0, 'quantize':1, 'repeat':6, 
+			part[i] = {'n': 'part', 'num':i, 'nudge':0, 'offset':0, 'channel':0, 'len':16, 'start':0,
+						'jitter':0, 'active':1, 'swing':.5, 'lock':1, 'ticks':480, 'notevalues':5, 'notetype':0,
+						'pushed':0, 'direction':0, 'root':i, 'octave':0, 'add':0, 'quantize':1, 'repeat':6,
 						'random':0, 'note':i, 'steps':15};//'speed':480,'notevalue':'4n'
 			part[i].num = parseInt(i);
 			part[i].pattern = default_pattern.slice();
@@ -402,7 +402,7 @@ function make_obj_setter(part, obj)
 	if(obj.pattr == 'hidden')
 	{
 		var setter = function(val)
-		{	
+		{
 			if(val!=undefined)
 			{
 				//post('setter hidden\n');
@@ -428,7 +428,7 @@ function make_obj_setter(part, obj)
 		else
 		{
 			var setter = function(val)
-			{	
+			{
 				//post('setter object\n');
 				if(val!=undefined)
 				{
@@ -441,7 +441,7 @@ function make_obj_setter(part, obj)
 	else
 	{
 		var setter = function(val, pset)
-		{	
+		{
 			if(val!=undefined)
 			{
 				//post('setter pattr\n');
@@ -456,7 +456,7 @@ function make_obj_setter(part, obj)
 			}
 		}
 	}
-	return setter;	
+	return setter;
 }
 
 //make a closure to hold the getter function for any object in the poly patcher that is contained in the Objs dict
@@ -487,7 +487,7 @@ function callback()
 
 //called by init to initialize state of polys
 function init_poly()
-{	 
+{
 	//poly.message('target', 0);
 	mod.Send( 'batch', 'grid', 0);
 	for(var i=0;i<16;i++)
@@ -508,7 +508,7 @@ function init_poly()
 		part[i].obj.notevalues.message('int', part[i].notevalues);
 		part[i].obj.channel.message('int', part[i].channel);
 		//update_note_pattr(part[i]);
-		
+
 	}
 }
 
@@ -530,7 +530,7 @@ function _dissolve()
 		}
 	}
 	//alive=0;
-	post('Simple dissolved.\n');	   
+	post('Simple dissolved.\n');
 }
 
 
@@ -587,7 +587,7 @@ function anything()
 					locked = args[1];
 					break;
 			}
-			break;			
+			break;
 		default:
 			//if(DEBUG){post('anything', messagename, args, '\n');}
 			break;
@@ -745,7 +745,7 @@ function button_in(x, y, val)
 					break;
 			}
 			break;
-	}	 
+	}
 }
 
 //distribute presses received from mod.js
@@ -815,8 +815,8 @@ function key_in(num, val)
 		selected.pattern[num] = Math.abs(selected.pattern[num]-1);
 		//selected.obj.pattern.message('list', selected.pattern);
 		selected.obj.set.pattern(selected.pattern);
-		refresh_keys();	
-	}	 
+		refresh_keys();
+	}
 	else
 	{
 		switch(key_mode)
@@ -931,7 +931,7 @@ function _mode(val)
 	//step.message('mode', Modes[step_mode]);
 }
 
-//from live.step	
+//from live.step
 function _step_in()
 {
 	/*var args = arrayfromargs(arguments);
@@ -948,7 +948,7 @@ function _step_in()
 				case 'changed':
 					var new_value = step.getvalueof();
 					outlet(3, step_value);
-					//if(DEBUG_STEP){post('old', step_value);} 
+					//if(DEBUG_STEP){post('old', step_value);}
 					outlet(2, new_value);
 					break;
 			}
@@ -1106,7 +1106,7 @@ function _keygui_in(val)
 	//if(DEBUG){post('keyguiin', val, '\n');}
 	key_in(val, 1);
 	key_in(val, 0);
-	
+
 }
 
 //distributes input from top gui key element
@@ -1122,7 +1122,7 @@ function _blink(val)
 {
 	//if(DEBUG_BLINK){post('blink', val, '\n');}
 	mod.Send( 'receive_translation', 'keys2_'+last_mask, 'mask', -1);
-	mod.Send( 'receive_translation', 'keys2_'+val,  'mask', 5); 
+	mod.Send( 'receive_translation', 'keys2_'+val,  'mask', 5);
 	last_mask = val;
 }
 
@@ -1213,7 +1213,7 @@ function _remote(num, val)
 	}
 }
 
-//distribute 
+//distribute
 function _receive_automation(num, val)
 {
 	if((play_enabled>0)&&(num>110)&&(val!==0))
@@ -1314,7 +1314,7 @@ function _pset_dn()
 
 //called by pattr when it recalls a preset
 function _recall()
-{	 
+{
 	//if(DEBUG_PTR){post('recall\n');}
 	if(pad_invoked_key_mode == 3)
 	{
@@ -1333,7 +1333,7 @@ function _recall()
 				part[i].obj.get[Objs[item].Name]();
 			}
 		}while(i--);
-	}	
+	}
 	/*selected.nudge = Math.floor(selected.obj.nudge.getvalueof());
 	selected.steps = Math.floor(selected.obj.steps.getvalueof());
 	selected.root = Math.floor(selected.obj.noteoffset.getvalueof()%12);
@@ -1341,7 +1341,7 @@ function _recall()
 	//var i=15;do{
 		//part[i].active = part[i].obj.active.getvalueof();
 		//part[i].quantize = part[i].obj.active.getvalueof();
-		
+
 	//	update_speed(part[i]);
 	//}while(i--);
 	//update_step();
@@ -1407,7 +1407,7 @@ function make_funcs(part)
 		/*//if(DEBUG_STEP){post('step extra2', step, val, '\n');}
 		part.rulebends[step] = val;
 		part.obj.rulebends.message('list', part.rulebends);*/
-	}		 
+	}
 	return new_part
 }
 
@@ -1463,7 +1463,7 @@ function update_poly()
 					selected.funcs.stepLoop(step_value[args[i]-1], step_value[args[i]]-1);
 					break;
 			}
-		}		 
+		}
 	}while(i--);*/
 }
 
@@ -1488,7 +1488,7 @@ function select_pattern(num)
 	refresh_keys();
 	update_gui();
 	//presetdisplaygui.message('text', 'Preset', presets[selected.num]);
-}	 
+}
 
 //update the current global transposition to all polys
 function change_transpose(val)
@@ -1517,7 +1517,7 @@ function change_transpose(val)
 			part[i].obj.noteoffset.message('int', global_offset + i);
 		}
 		_select_chain(selected.num);
-	}	
+	}
 }
 
 //change the function of the keys
@@ -1549,7 +1549,7 @@ function change_pad_mode(val)
 	refresh_grid();
 	update_bank();
 }
-	
+
 //called from key_in, change the loopOut point and update it to live.step and poly
 function change_Out(val)
 {
@@ -1792,7 +1792,7 @@ function change_lock_status(part, dir)
 						}
 					}while(i--);
 					break;
-			}			
+			}
 			break;
 	}
 	//if(DEBUG_LOCK){post('new_speed', new_speed, '\n');}
@@ -1841,7 +1841,7 @@ function record(val)
 	else
 	{
 		record_enabled = 0;
-	}	 
+	}
 	//if(DEBUG_REC){post('record_enabled', record_enabled, '\n');}*/
 }
 
@@ -1878,14 +1878,14 @@ function add_automation(part, type, val)
 			case 'preset':
 				new_notes = notes.slice(2, -1).concat(['note', part.num+111, Math.round(autoclip.get('playing_position')*100)/100, .2, val+10, 0]);
 				break;
-		}				 
+		}
 		//if(DEBUG_REC){post('notes:', new_notes, '\n');}
-		finder.call('replace_selected_notes'); 
+		finder.call('replace_selected_notes');
 		finder.call('notes', num+1);
 		for(var i = 0;i<new_notes.length;i+=6)
 		{
 			finder.call('note', new_notes[i+1], new_notes[i+2]+.001, new_notes[i+3]+.001, new_notes[i+4], new_notes[i+5]);
-		} 
+		}
 		finder.call('done');
 		////if(DEBUG_REC){post('new_notes:', finder.call('get_selected_notes'), '\n');}
 	}*/
@@ -1906,7 +1906,7 @@ function randomize_pattern(global)
 				var j=15;do{
 					seq[j]=Math.round(Math.random());
 				}while(j--);
-				part[i].obj.set.pattern(seq, h+1); 
+				part[i].obj.set.pattern(seq, h+1);
 			}while(i--);
 		}while(h--);
 	}
@@ -2032,7 +2032,7 @@ function refresh_grid()
 
 //update the display on the CNTRLR/keygui to reflect current data
 function refresh_keys()
-{ 
+{
 	var i=15;do{
 		mod.Send( 'receive_translation', 'keys2_'+i, 'value', selected.pattern[i] * StepColors[i]);
 		keygui2.message(i, 0, (selected.pattern[i] * GUI_StepColors[i]));
@@ -2094,7 +2094,7 @@ function refresh_keys()
 			break;
 	}
 	presetdisplaygui.message('text', presets[selected.num]);
-	messnamed(unique+'confirm', 'Reset');	 
+	messnamed(unique+'confirm', 'Reset');
 }
 
 
@@ -2191,7 +2191,7 @@ function update_bank()
 			}while(i--);
 			break;
 	}
-	rotgate.message('int', ((pad_mode==5)||(key_mode==5))); 
+	rotgate.message('int', ((pad_mode==5)||(key_mode==5)));
 	*/
 }
 
@@ -2201,6 +2201,20 @@ function update_bank()
 //		  and LCD		   //
 ///////////////////////////*/
 
+
+
+var SIMPLE_BANKS = {'InstrumentGroupDevice':[['Macro 1', 'Macro 2', 'Macro 3', 'Macro 4', 'Macro 5', 'Macro 6', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'DrumGroupDevice':[['Macro 1', 'Macro 2', 'Macro 3', 'Macro 4', 'Macro 5', 'Macro 6', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'MidiEffectGroupDevice':[['Macro 1', 'Macro 2', 'Macro 3', 'Macro 4', 'Macro 5', 'Macro 6', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'Operator':[['Osc-A Level', 'Osc-B Level', 'Osc-C Level', 'Osc-D Level', 'Transpose', 'Filter Freq', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'UltraAnalog':[['AEG1 Attack', 'AEG1 Decay', 'AEG1 Sustain', 'AEG1 Rel', 'OSC1 Semi', 'F1 Freq', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'OriginalSimpler':[['Ve Attack', 'Ve Decay', 'Ve Sustain', 'Ve Release', 'Transpose', 'Filter Freq', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'MultiSampler':[['Ve Attack', 'Ve Decay', 'Ve Sustain', 'Ve Release', 'Transpose', 'Filter Freq', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'LoungeLizard':[['M Force', 'F Release', 'F Tone Decay', 'F Tone Vol', 'Semitone', 'P Distance', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'StringStudio':[['E Pos', 'Exc ForceMassProt', 'Exc FricStiff', 'Exc Velocity', 'Semitone', 'Filter Freq', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'Collision':[['Noise Attack', 'Noise Decay', 'Noise Sustain', 'Noise Release', 'Res 1 Tune', 'Res 1 Brightness', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'InstrumentImpulse':[['1 Start', '1 Envelope Decay', '1 Stretch Factor', 'Global Time', 'Global Transpose', '1 Filter Freq', 'Mod_Chain_Pan', 'Mod_Chain_Vol', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']],
+			'NoDevice':[['None', 'None', 'None', 'None', 'None', 'None', 'None', 'None', 'ModDevice_RepeatLen', 'ModDevice_Groove', 'ModDevice_Random', 'ModDevice_RotSize']]}
 
 var pns=[];
 var mps=[];
@@ -2217,6 +2231,16 @@ Warning = ['Missing', 'DrumRack.', 'Please', 'insert', 'and', 'press', 'Detect',
 // called from init
 function init_device()
 {
+  mod.Send('receive_device', 'set_mod_device_type', 'Hex');
+	mod.Send( 'receive_device', 'set_number_params', 16);
+	for(var dev_type in SIMPLE_BANKS)
+	{
+		for(var bank_num in SIMPLE_BANKS[dev_type])
+		{
+			mod.SendDirect('receive_device_proxy', 'set_bank_dict_entry', dev_type, bank_num, SIMPLE_BANKS[dev_type][bank_num]);
+		}
+		//mod.Send('receive_device_proxy', 'update_parameters');
+	}
 	finder = new LiveAPI(callback, 'this_device');
 	pns['device_name']=this.patcher.getnamed('device_name');
 	for(var i=0;i<8;i++)
@@ -2406,7 +2430,7 @@ function _encoder(num, val)
 {
 	//if(DEBUG){post('encoder in', num, val, '\n');}
 	if(num<8)
-	{				
+	{
 		mod.Send( 'receive_device', 'set_mod_parameter_value', num, val);
 	}
 	else
@@ -2432,7 +2456,7 @@ function _encoder(num, val)
 				mod.Send( 'receive_device', 'set_mod_parameter_value', num, val);
 				break;
 		}
-	}	 
+	}
 }
 
 //Used for UI warning. Uses the lcd objects to display an error message.
