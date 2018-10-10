@@ -1,5 +1,5 @@
 # by amounra 0618 : http://www.aumhaa.com
-# written against Live 10.0.3b1 on 061218
+# written against Live 10.0.4 100918
 
 from __future__ import with_statement
 import Live
@@ -27,6 +27,8 @@ from ableton.v2.control_surface.elements import adjust_string, ButtonElement, Bu
 from ableton.v2.control_surface.mode import CompoundMode, AddLayerMode, ModesComponent
 from ableton.v2.control_surface.input_control_element import ParameterSlot
 from ableton.v2.control_surface.elements import ButtonElement
+#from ableton.v2.control_surface.components import DeviceComponent as DeviceComponentBase
+
 
 from Push.push import Push
 from Push.device_navigation_component import DeviceNavigationComponent
@@ -43,7 +45,7 @@ from pushbase.instrument_component import InstrumentComponent
 from pushbase.step_seq_component import StepSeqComponent
 from pushbase.loop_selector_component import LoopSelectorComponent
 from pushbase.clip_control_component import ClipControlComponent
-from pushbase.device_component import DeviceComponent as ProviderDeviceComponent
+#from pushbase.device_component import DeviceComponent as ProviderDeviceComponent
 from pushbase.note_repeat_component import NoteRepeatComponent
 from pushbase.matrix_maps import PAD_TRANSLATIONS, FEEDBACK_CHANNELS
 from pushbase.control_element_factory import create_sysex_element
@@ -205,7 +207,7 @@ class AumpushDeviceParameterComponent(DeviceParameterComponent):
 
 
 
-class AumPushTrollComponent(CompoundComponent):
+class AumPushTrollComponent(Component):
 
 
 	def __init__(self, script, device_component, *a, **k):
@@ -230,11 +232,11 @@ class AumPushTrollComponent(CompoundComponent):
 
 		self._device1 = AumpushDeviceParameterComponent(parameter_provider=self._device_component)
 		self._device2 = AumpushDeviceParameterComponent(parameter_provider=self._device_component)
-		self.register_component(self._device1)
-		self.register_component(self._device2)
+		#self.register_component(self._device1)
+		#self.register_component(self._device2)
 
 		self._trollmodes = ModesComponent(name = 'TrollMode')  # is_enabled = False)
-		self.register_component(self._trollmodes)
+		#self.register_component(self._trollmodes)
 
 		#self._trollmodes.set_enabled(False)
 
@@ -294,10 +296,10 @@ class TrollMixerComponent(AumPushSpecialMixerComponent):
 		self._input_name_sources = [ DisplayDataSource('In1'),  DisplayDataSource('In2'), DisplayDataSource('In3'), DisplayDataSource('In4')]
 		for index in range(num_returns):
 			self._return_strips.append(self._create_strip())
-			self.register_components(self._return_strips[index])
+			#self.register_components(self._return_strips[index])
 		self._parameter_provider = device_component
 		self._input_device = DeviceParameterComponent(self._parameter_provider)
-		self.register_component(self._input_device)
+		#self.register_component(self._input_device)
 
 
 	def return_strip(self, index):
@@ -688,8 +690,9 @@ class AumPush(Push):
 
 		self.monomodular = get_monomodular(self)
 		self.monomodular.name = 'monomodular_switcher'
-		with inject(register_component = const(self._register_component), song = const(self.song)).everywhere():
-			self.modhandler = PushModHandler(self) ## song = self.song, register_component = self._register_component)
+		#with inject(register_component = const(self._register_component), song = const(self.song)).everywhere():
+        #with inject(song = const(self.song)).everywhere():
+		self.modhandler = PushModHandler(self) ## song = self.song, register_component = self._register_component)
 		self.modhandler.name = 'ModHandler'
 		self.modhandler.layer = Layer( priority = 6, lock_button = self.elements.note_mode_button,
 																			grid = self.elements.matrix,
@@ -780,9 +783,9 @@ class AumPush(Push):
 
 	def _create_main_modes_layer(self):
 		debug('create_main_modes_layer')
-		self._setup_troll()
-		self._main_modes.add_mode('troll', [self._troll], behaviour = CancellableBehaviourWithRelease())
-		return Layer(priority = 6, troll_button='master_select_button', volumes_button='vol_mix_mode_button', pan_sends_button='pan_send_mix_mode_button', track_button='single_track_mix_mode_button', clip_button='clip_mode_button', device_button='device_mode_button', browse_button='browse_mode_button', add_effect_right_button='create_device_button', add_effect_left_button=self._with_shift('create_device_button'), add_instrument_track_button='create_track_button')
+		#self._setup_troll()
+		#self._main_modes.add_mode('troll', [self._troll], behaviour = CancellableBehaviourWithRelease())
+		return Layer(priority = 6, volumes_button='vol_mix_mode_button', pan_sends_button='pan_send_mix_mode_button', track_button='single_track_mix_mode_button', clip_button='clip_mode_button', device_button='device_mode_button', browse_button='browse_mode_button', add_effect_right_button='create_device_button', add_effect_left_button=self._with_shift('create_device_button'), add_instrument_track_button='create_track_button')  #troll_button='master_select_button',
 
 
 	@listens('value')
@@ -953,7 +956,6 @@ class AumPush(Push):
 
 
 
-
 class ModDisplayComponent(ControlSurfaceComponent):
 
 
@@ -1027,7 +1029,7 @@ class PushModHandler(ModHandler):
 					'push_alt_name_display': {'obj': Array('push_alt_name_display', 8, _value = ' '), 'method': self._receive_push_alt_name_display},
 					'push_alt_value_display': {'obj': Array('push_alt_value_display', 8, _value = ' '), 'method': self._receive_push_alt_value_display}}
 		super(PushModHandler, self).__init__(addresses = addresses, *a, **k)
-		self.nav_box = self.register_component(NavigationBox(self, 16, 16, 8, 8, self.set_offset,)) # song = self.song, register_component = self.register_component, is_enabled = False))
+		self.nav_box = NavigationBox(self, 16, 16, 8, 8, self.set_offset,) # song = self.song, register_component = self.register_component, is_enabled = False))
 		self._push_colors = range(128)
 		self._push_colors[1:8] = [3, 85, 33, 95, 5, 21, 67]
 		self._push_colors[127] = 67

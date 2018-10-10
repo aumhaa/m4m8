@@ -1,5 +1,5 @@
 # by amounra 1016 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 from __future__ import absolute_import, print_function
 import Live
@@ -455,7 +455,7 @@ class AumPush2(Push2):
 		crossfader_strip = TouchStripControllerComponent()
 		crossfader_strip.layer = Layer(touch_strip = self.elements.touch_strip_control)
 		crossfader_strip.set_enabled(False)
-		self._crossfader_control = AumPushCrossfader(strip_controller = crossfader_strip, task_group = self._task_group, is_root = True)
+		self._crossfader_control = AumPushCrossfader(strip_controller = crossfader_strip, task_group = self._task_group)
 		self._crossfader_control.set_enabled(False)
 
 		self._device_selector = DeviceSelectorComponent(self)
@@ -723,7 +723,7 @@ class PushModHandler(ModHandler):
 		self._color_type = 'Push'
 		self._grid = None
 		super(PushModHandler, self).__init__(*a, **k)
-		self.nav_box = self.register_component(AumPushNavigationBox(self, 16, 16, 8, 8, self.set_offset,)) # song = self.song, register_component = self.register_component, is_enabled = False))
+		self.nav_box = AumPushNavigationBox(self, 16, 16, 8, 8, self.set_offset,) # song = self.song, register_component = self.register_component, is_enabled = False))
 		self._push_colors = range(128)
 		self._push_colors[1:8] = [120, 30, 12, 20, 65, 11, 125]
 		self._push_colors[127] = 125
@@ -822,7 +822,7 @@ class PushModHandler(ModHandler):
 		mod = self.active_mod()
 		if mod:
 			mod.send('shift', 1)
-		self.shift_layer and self.shift_layer.enter_mode()
+		#self.shift_layer and self.shift_layer.enter_mode()
 		if mod and mod.legacy:
 			self.legacy_shift_layer and self.legacy_shift_layer.enter_mode()
 		self.update()
@@ -835,7 +835,7 @@ class PushModHandler(ModHandler):
 		if mod:
 			mod.send('shift', 0)
 		self.legacy_shift_layer and self.legacy_shift_layer.leave_mode()
-		self.shift_layer and self.shift_layer.leave_mode()
+		#self.shift_layer and self.shift_layer.leave_mode()
 		self.update()
 
 

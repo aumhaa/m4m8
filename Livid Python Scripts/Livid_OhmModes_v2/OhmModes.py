@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 from __future__ import absolute_import, print_function
 import Live
@@ -634,7 +634,7 @@ class OhmModHandler(ModHandler):
 		self._shift_mode = ModesComponent()
 		self._color_type = 'RGB'
 		self._shift_mode.add_mode('shift', tuple([self._enable_shift, self._disable_shift]), behaviour = CancellableBehaviourWithRelease())
-		self.nav_box = self.register_component(NavigationBox(self, 16, 16, 8, 8, self.set_offset))
+		self.nav_box = NavigationBox(self, 16, 16, 8, 8, self.set_offset)
 		self._mod_button = None
 
 

@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 from __future__ import with_statement
 import sys
@@ -11,7 +11,7 @@ from re import *
 from itertools import chain, imap, izip_longest, izip
 
 from ableton.v2.base import clamp, flatten, depends, listenable_property, listens, listens_group, liveobj_changed, liveobj_valid, EventObject
-from ableton.v2.control_surface import ControlSurface, Component, CompoundComponent, ControlElement, NotifyingControlElement, InputSignal
+from ableton.v2.control_surface import ControlSurface, Component, ControlElement, NotifyingControlElement, InputSignal
 from ableton.v2.control_surface.device_provider import DeviceProvider
 from ableton.v2.control_surface.elements import ButtonMatrixElement
 from ableton.v2.control_surface.control import ControlManager
@@ -578,7 +578,7 @@ class RingedGrid(Grid):
 
 
 
-class ModHandler(CompoundComponent):
+class ModHandler(Component):
 
 
 	_name = 'DefaultModHandler'
@@ -1340,7 +1340,7 @@ class ModDeviceProxy(ControlManager, EventObject):
 
 	@listenable_property
 	def parameters(self):
-		debug('notifying parameters:', self._parameters if not self._alted else [self._parameters[0]] + self._parameters[8:])
+		#debug('notifying parameters:', self._parameters if not self._alted else [self._parameters[0]] + self._parameters[8:])
 		return self._parameters if (not self._alted or len(self._parameters) < 9) else [self._parameters[0]] + self._parameters[9:]
 
 
@@ -1351,7 +1351,7 @@ class ModDeviceProxy(ControlManager, EventObject):
 	@parameters.setter
 	def parameters(self, parameters):
 		self._parameters = parameters
-		debug('parameters are now:', [parameter.name if hasattr(parameter, 'name') else None for parameter in self._parameters])
+		#debug('parameters are now:', [parameter.name if hasattr(parameter, 'name') else None for parameter in self._parameters])
 		self.notify_parameters()
 
 
@@ -1446,7 +1446,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
 
 	def _select_drum_pad(self, pad, force = False):
-		#debug('_select_drum_pad', pad, force, 'parent:', self._device_parent)
+		debug('_select_drum_pad', pad, force, 'parent:', self._device_parent)
 		if self._device_parent != None:
 			if isinstance(self._device_parent, Live.Device.Device):
 				#debug('is device')
@@ -1965,8 +1965,7 @@ class ModClient(NotifyingControlElement):
 					debug('Forward method exception', method, value_list)
 
 
-
-class ModRouter(CompoundComponent):
+class ModRouter(Component):
 
 
 	def __init__(self, *a, **k):

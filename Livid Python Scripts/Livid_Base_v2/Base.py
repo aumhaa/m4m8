@@ -1,5 +1,6 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
+
 
 from __future__ import absolute_import, print_function
 import Live
@@ -441,7 +442,7 @@ class BaseModHandler(ModHandler):
 					'base_fader': {'obj': BaseFaderArray('base_fader', 8), 'method':self._receive_base_fader}}
 		super(BaseModHandler, self).__init__(addresses = addresses, *a, **k)
 		self._is_shifted = False
-		self.nav_box = self.register_component(NavigationBox(self, 16, 16, 8, 4, self.set_offset))
+		self.nav_box = NavigationBox(self, 16, 16, 8, 4, self.set_offset)
 
 
 	def _receive_base_grid(self, x, y, value = -1, identifier = -1, channel = -1, *a, **k):
@@ -974,7 +975,7 @@ class Base(LividControlSurface):
 		self._instrument._main_modes.add_mode('keypad_split_shifted', [self._instrument._keypad, self._instrument._keypad.split_select_layer, self._instrument.keypad_options_layer, self._instrument._keypad.octave_toggle_layer, self._instrument._selected_session, self._instrument._selected_session._keys_layer])
 		self._instrument._main_modes.add_mode('keypad_sequencer_shifted', [self._instrument._keypad, self._instrument._keypad.split_select_layer, self._instrument._keypad.sequencer_shift_layer, self._instrument.keypad_options_layer, self._instrument._keypad.octave_toggle_layer, self.splithorizontal_mode_sysex])
 		self._instrument._main_modes.add_mode('audioloop', [self._instrument.audioloop_layer, self.live_mode_sysex])
-		self._instrument.register_component(self._instrument._main_modes)
+		#self._instrument.register_component(self._instrument._main_modes)
 		self._instrument.set_enabled(False)
 
 

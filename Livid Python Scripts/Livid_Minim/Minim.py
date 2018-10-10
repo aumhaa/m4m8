@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 from __future__ import with_statement
 import Live
@@ -14,7 +14,7 @@ from ableton.v2.base import slicer, to_slice, liveobj_changed, group, flatten, l
 from ableton.v2.control_surface.elements.button import ButtonElement
 from ableton.v2.control_surface.elements.button_matrix import ButtonMatrixElement
 from ableton.v2.control_surface.components.channel_strip import ChannelStripComponent
-from ableton.v2.control_surface.compound_component import CompoundComponent
+from ableton.v2.control_surface.component import Component
 from ableton.v2.control_surface.control_element import ControlElement
 from ableton.v2.control_surface.control_surface import ControlSurface
 from ableton.v2.control_surface.component import Component as ControlSurfaceComponent
@@ -28,7 +28,7 @@ from ableton.v2.control_surface.mode import AddLayerMode, LayerMode, ModesCompon
 from ableton.v2.control_surface.resource import PrioritizedResource
 from ableton.v2.control_surface.skin import Skin
 from ableton.v2.control_surface import DeviceBankRegistry
-from ableton.v2.control_surface.components.device import DeviceComponent
+#from ableton.v2.control_surface.components.device import DeviceComponent
 from ableton.v2.control_surface.layer import Layer
 #from ableton.v2.control_surface.components.m4l_interface import M4LInterfaceComponent
 from ableton.v2.control_surface.elements.combo import ComboElement, DoublePressElement, MultiElement, DoublePressContext
@@ -250,7 +250,7 @@ class Minim(LividControlSurface):
 		self._instrument._main_modes.add_mode('drumpad_shifted', [self._instrument._drumpad, self._instrument._drumpad.select_layer, self._instrument.drumpad_options_layer])
 		self._instrument._main_modes.add_mode('keypad', [self._instrument._keypad, self._instrument._keypad.main_layer, self._instrument.keypad_options_layer])
 		self._instrument._main_modes.add_mode('keypad_shifted', [self._instrument._keypad, self._instrument._keypad.select_layer, self._instrument.keypad_options_layer])
-		self._instrument.register_component(self._instrument._main_modes)
+		#self._instrument.register_component(self._instrument._main_modes)
 
 		self._instrument.set_enabled(False)
 		#self._instrument.audioloop_layer = LayerMode(self._instrument, Layer(priority = 6, loop_selector_matrix = self._base_grid))

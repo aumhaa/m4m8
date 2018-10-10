@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 
 from __future__ import absolute_import, print_function
@@ -9,7 +9,7 @@ import math
 from ableton.v2.base import inject, listens
 from ableton.v2.control_surface import ControlSurface, ControlElement, Layer, Skin, PrioritizedResource, Component, ClipCreator, DeviceBankRegistry
 from ableton.v2.control_surface.elements import ButtonMatrixElement
-from ableton.v2.control_surface.components import SessionRingComponent, SessionNavigationComponent, SessionComponent, TransportComponent, DeviceComponent, ViewControlComponent
+from ableton.v2.control_surface.components import SessionRingComponent, SessionNavigationComponent, SessionComponent, TransportComponent, ViewControlComponent
 from ableton.v2.control_surface.components.mixer import SimpleTrackAssigner
 
 from aumhaa.v2.base import initialize_debug
@@ -17,6 +17,7 @@ from aumhaa.v2.control_surface import SendLividSysexMode
 from aumhaa.v2.control_surface.elements import MonoEncoderElement, MonoBridgeElement
 from aumhaa.v2.control_surface.elements.mono_button import *
 from aumhaa.v2.control_surface.components import DeviceNavigator, MonoMixerComponent
+from aumhaa.v2.control_surface.components.device import DeviceComponent
 from aumhaa.v2.livid import LividControlSurface, LividRGB
 from aumhaa.v2.control_surface.components.m4l_interface import M4LInterfaceComponent
 from .Map import *

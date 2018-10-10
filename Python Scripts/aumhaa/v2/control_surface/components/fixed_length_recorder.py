@@ -1,3 +1,5 @@
+# written against Live 10.0.4 100918
+
 import Live
 
 from functools import partial
@@ -49,7 +51,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 		self._clip_creator = clip_creator
 		self._length_value = 1
 		self._length_values = length_values
-		self._fixed_length = self.register_component(ToggleWithOptionsComponent())
+		self._fixed_length = ToggleWithOptionsComponent()
 		self._length_selector = self._fixed_length.options
 		self._length_selector.option_names = LENGTH_OPTION_NAMES
 		self._length_selector.selected_option = 3
@@ -62,7 +64,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 
 	def _length_should_be_fixed(self):
 		return self._fixed_length.is_active
-	
+
 
 	def _original_get_selected_length(self):
 		song = self.song
@@ -71,7 +73,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 		if self._length_selector.selected_option > 1:
 			length = length * song.signature_numerator / song.signature_denominator
 		return (length, quant)
-	
+
 
 	def _get_selected_length(self):
 		song = self.song
@@ -79,25 +81,25 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 		quant = LAUNCH_QUANTIZATION[(self._length_values[self._length_value])]
 		length = length * song.signature_numerator / song.signature_denominator
 		return (length, quant)
-	
+
 
 	def set_length_button(self, button):
 		self._fixed_length.action_button.set_control_element(button)
 		self._on_length_value.subject = button
 		self._length_press_state = None
-	
+
 
 	def set_length_buttons(self, buttons):
 		self._on_length_buttons_value.subject = buttons
 		self.update_length_buttons()
-	
+
 
 	@listens('value')
 	def _on_length_buttons_value(self, value, x, y, *a, **k):
 		if value > 0:
 			self._length_value = x
 			self.update_length_buttons()
-	
+
 
 	def _start_recording(self):
 		song = self.song
@@ -110,7 +112,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 			self._ensure_slot_is_visible(track, scene_index)
 		if not song.is_playing:
 			song.is_playing = True
-	
+
 
 	def _record_in_slot(self, track, clip_slot):
 		if self._length_should_be_fixed() and not clip_slot.has_clip:
@@ -124,20 +126,20 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 				clip_slot.fire(force_legato=True, launch_quantization=_Q.q_no_q)
 			else:
 				clip_slot.fire()
-	
+
 
 	def _ensure_slot_is_visible(self, track, scene_index):
 		song = self.song
 		if song.view.selected_track == track:
 			song.view.selected_scene = song.scenes[scene_index]
 		self._view_selected_clip_detail()
-	
+
 
 	@listens('selected_option')
 	def _on_selected_fixed_length_option_changed(self, _):
 		length, _ = self._get_selected_length()
 		self._clip_creator.fixed_length = length
-	
+
 
 	@listens('value')
 	def _on_length_value(self, value):
@@ -145,7 +147,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 			self._on_length_press()
 		else:
 			self._on_length_release()
-	
+
 
 	def _on_length_press(self):
 		song = self.song
@@ -155,7 +157,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 		clip = slot.clip
 		if slot.is_recording and not clip.is_overdubbing:
 			self._length_press_state = (slot, clip.playing_position)
-	
+
 
 	def _on_length_release(self):
 		song = self.song
@@ -179,18 +181,18 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 					self.song.overdub = False
 				self._fixed_length.is_active = False
 		self._length_press_state = None
-	
+
 
 	def _handle_limitation_error_on_scene_creation(self):
 		pass
-	
+
 
 
 	def update(self, *a, **k):
 		super(FixedLengthSessionRecordingComponent, self).update(*a, **k)
 		if self.is_enabled():
 			self.update_length_buttons()
-	
+
 
 	def update_length_buttons(self):
 		buttons = self._on_length_buttons_value.subject
@@ -201,7 +203,7 @@ class FixedLengthSessionRecordingComponent(SessionRecordingComponent):
 						button.set_light('Recorder.FixedAssigned')
 					else:
 						button.set_light('Recorder.FixedNotAssigned')
-	
+
 
 	def _update_new_button(self):
 		self._update_generic_new_button(self._new_button)

@@ -4,7 +4,7 @@ monomodular b999
 
 How to make this work:
 
-1) You MUST be using the most current version of Live! (as of this writing, version 10.03).
+1) You MUST be using the most current version of Live! (as of this writing, version 10.0.4).
 
 2) Download this repository.  Put the “m4m8” or “m4m8-master” folder
 inside Max’s packages folder:  ~/Documents/Max 8/packages

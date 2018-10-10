@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 from __future__ import absolute_import, print_function
 import Live
@@ -8,7 +8,7 @@ from ableton.v2.base import listens, listens_group, EventObject, liveobj_valid, 
 import ableton.v2.base.task as Task
 from ableton.v2.control_surface import DeviceBankRegistry
 from ableton.v2.control_surface.components import ChannelStripComponent as ChannelStripComponentBase, MixerComponent as MixerComponentBase
-from ableton.v2.control_surface import ParameterSlot, CompoundComponent
+from ableton.v2.control_surface import ParameterSlot
 
 from _Generic.Devices import *
 
@@ -36,7 +36,7 @@ class TrackArmState(EventObject):
 	def __init__(self, track = None, *a, **k):
 		super(TrackArmState, self).__init__(*a, **k)
 		self.set_track(track)
-	
+
 
 	def set_track(self, track):
 		self._track = track
@@ -44,28 +44,28 @@ class TrackArmState(EventObject):
 		subject = track if track and track.can_be_armed else None
 		self._on_explicit_arm_changed.subject = subject
 		self._on_implicit_arm_changed.subject = subject
-	
+
 
 	@listens('arm')
 	def _on_explicit_arm_changed(self):
 		self._on_arm_changed()
-	
+
 
 	@listens('implicit_arm')
 	def _on_implicit_arm_changed(self):
 		self._on_arm_changed()
-	
+
 
 	def _on_arm_changed(self):
 		if not self._track.arm:
 			new_state = self._track.implicit_arm
 			self._arm = self._arm != new_state and new_state
 			self.notify_arm()
-	
+
 
 	def _get_arm(self):
 		return self._arm if self._track.can_be_armed else False
-	
+
 
 	def _set_arm(self, new_state):
 		if self._track.can_be_armed:
@@ -73,7 +73,7 @@ class TrackArmState(EventObject):
 			if not new_state:
 				self._track.implicit_arm = False
 		self._arm = new_state
-	
+
 
 	arm = property(_get_arm, _set_arm)
 
@@ -96,13 +96,13 @@ class ChannelStripStaticDeviceProvider(EventObject):
 
 	def __init__(self, *a, **k):
 		super(ChannelStripStaticDeviceProvider, self).__init__(*a, **k)
-	
+
 
 	@listenable_property
 	def device(self):
 		#debug('returning:', self._device)
 		return self._device
-	
+
 
 	@device.setter
 	def device(self, device):
@@ -110,7 +110,7 @@ class ChannelStripStaticDeviceProvider(EventObject):
 		if liveobj_changed(self._device, device):
 			self._device = device
 			self.notify_device()
-	
+
 
 
 class ChannelStripDeviceComponent(DeviceComponent):
@@ -118,7 +118,7 @@ class ChannelStripDeviceComponent(DeviceComponent):
 
 	def show_message(self, *a, **k):
 		pass
-	
+
 
 class MonoChannelStripComponent(ChannelStripComponentBase):
 
@@ -155,7 +155,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self._ChannelStripComponent__on_selected_track_changed = self.__on_selected_track_changed
 		self.__on_selected_track_changed.subject = self.song.view
 		self.__on_selected_track_changed()
-	
+
 
 	@listens('selected_track')
 	def __on_selected_track_changed(self):
@@ -168,7 +168,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 			self.select_button.color = self.empty_color
 		self._update_track_button()
 		self._update_device_selection()
-	
+
 
 	def set_track(self, track):
 		assert(isinstance(track, (type(None), Live.Track.Track)))
@@ -176,7 +176,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self._update_device_selection()
 		self._detect_eq(track)
 		super(MonoChannelStripComponent,self).set_track(track)
-	
+
 
 	def _on_mute_changed(self):
 		if self.is_enabled() and self._mute_button != None:
@@ -187,7 +187,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 					self._mute_button.set_light(self._mute_off_color)
 			else:
 				self._mute_button.set_light(self.empty_color)
-	
+
 
 	def _on_solo_changed(self):
 		if self.is_enabled() and self._solo_button != None:
@@ -198,7 +198,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 					self._solo_button.set_light(self._solo_off_color)
 			else:
 				self._solo_button.set_light(self.empty_color)
-	
+
 
 	def _on_arm_changed(self):
 		if self.is_enabled() and self._arm_button != None:
@@ -210,7 +210,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 			else:
 				self._arm_button.set_light(self.empty_color)
 		self._update_track_button()
-	
+
 
 	def _on_cf_assign_changed(self):
 		if self.is_enabled() and self._crossfade_toggle != None:
@@ -225,42 +225,42 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 			else:
 				self._crossfade_toggle.turn_off()
 			#debug('xfade toggle is:', self._track.mixer_device.crossfade_assign)
-	
+
 
 	def set_stop_button(self, button):
 		#debug('setting stop button:', button)
 		button and button.reset()
 		self._on_stop_value.subject = button
 		button and button.set_light(self._clip_stop_color)
-	
+
 
 	@listens('value')
 	def _on_stop_value(self, value):
 		if self._track:
 			self._track.stop_all_clips()
-	
+
 
 	def update(self, *a, **k):
 		super(MonoChannelStripComponent, self).update()
 		self._update_device_selection()
-	
+
 
 	def set_invert_mute_feedback(self, invert_feedback):
 		assert(isinstance(invert_feedback, type(False)))
 		self._invert_mute_feedback = invert_feedback
 		self.update()
-	
+
 
 	def set_eq_gain_controls(self, controls):
 		for control in list(self._eq_gain_controls or []):
 			release_control(control)
 		self._eq_gain_controls = controls
 		self.update()
-	
+
 
 	def set_parameter_controls(self, controls):
 		self._device_component.set_parameter_controls(controls)
-	
+
 
 	@listens('devices')
 	def _on_devices_changed(self):
@@ -268,7 +268,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self._update_device_selection()
 		self._detect_eq(self._track)
 		self.update()
-	
+
 
 	def _detect_eq(self, track = None):
 		self._eq_device = None
@@ -278,7 +278,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 				if device.class_name in EQ_DEVICES.keys():
 					self._eq_device = device
 					break
-	
+
 
 	def _connect_parameters(self):
 		super(MonoChannelStripComponent, self)._connect_parameters()
@@ -300,11 +300,11 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 							eq_gain_control.release_parameter()
 							self._empty_control_slots.register_slot(eq_gain_control, nop, 'value')
 					index += 1
-	
+
 
 	def _all_controls(self):
 		return [self._pan_control, self._volume_control] + list(self._send_controls or []) + list(self._eq_gain_controls or [])
-	
+
 
 	def _update_device_selection(self):
 		track = self._track
@@ -312,20 +312,20 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		if track and device_to_select == None and len(track.devices) > 0:
 			device_to_select = track.devices[0]
 		self._device_provider.device = device_to_select
-	
+
 
 	@listens('arm')
 	def _on_arm_state_changed(self):
 		if self.is_enabled() and self._track:
 			self._update_track_button()
-	
+
 
 	def set_arming_select_button(self, button):
 		button and button.reset()
 		self._arming_select_button = button
 		self._arming_select_value.subject = button
 		self._update_track_button()
-	
+
 
 	@listens('value')
 	def _arming_select_value(self, value):
@@ -338,7 +338,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 			self._fold_task.restart()
 		else:
 			self._fold_task.kill()
-	
+
 
 	def _do_toggle_arm(self, exclusive = False):
 		if self._track.can_be_armed:
@@ -347,16 +347,16 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 				for track in self.song.tracks:
 					if track.can_be_armed and track != self._track:
 						track.arm = False
-	
+
 
 	def _do_fold_track(self):
 		if self.is_enabled() and self._track != None and self._track.is_foldable:
 			self._track.fold_state = not self._track.fold_state
-	
+
 
 	def _do_select_track(self, track):
 		pass
-	
+
 
 	def _update_track_button(self):
 		if self.is_enabled():
@@ -375,12 +375,12 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 					self._arming_select_button.set_light(self._selected_on_color)
 				else:
 					self._arming_select_button.set_light(self._selected_off_color)
-	
+
 
 	def disconnect(self):
 		self._device_component._get_device = lambda: None
 		super(MonoChannelStripComponent, self).disconnect()
-	
+
 
 
 
@@ -395,14 +395,14 @@ class MonoMixerComponent(MixerComponentBase):
 		super(MonoMixerComponent, self).__init__(*a, **k)
 		for index in range(num_returns):
 			self._return_strips.append(self._create_strip())
-			self.register_components(self._return_strips[index])
+			#self.register_components(self._return_strips[index])
 		enable_skinning and self._assign_skin_colors()
 		self._reassign_tracks()
-	
+
 
 	def _create_strip(self):
 		return self._channel_strip_class()
-	
+
 
 	def _assign_skin_colors(self):
 		for strip in self._channel_strips + self._return_strips + [self._master_strip, self._selected_strip]:
@@ -420,18 +420,18 @@ class MonoMixerComponent(MixerComponentBase):
 			strip._xfade_off_color = 'Mixer.XFadeOff'
 			strip._xfade_a_color = 'Mixer.XFadeAOn'
 			strip._xfade_b_color = 'Mixer.XFadeBOn'
-	
+
 
 	def return_strip(self, index):
 		assert(index in range(len(self._return_strips)))
 		return self._return_strips[index]
-	
+
 
 	def _reassign_tracks(self):
 		super(MonoMixerComponent, self)._reassign_tracks()
 		for track, channel_strip in izip(self.song.return_tracks, self._return_strips):
 			channel_strip.set_track(track)
-	
+
 
 	def set_send_controls(self, controls):
 		self._send_controls and self._send_controls.reset()
@@ -448,7 +448,7 @@ class MonoMixerComponent(MixerComponentBase):
 					strip.set_send_controls([None])
 				else:
 					strip.set_send_controls([None for _ in range(self.send_index)])
-	
+
 
 	def set_return_controls(self, controls):
 		self._return_controls = controls
@@ -456,22 +456,22 @@ class MonoMixerComponent(MixerComponentBase):
 			if channel_strip:
 				channel_strip.set_volume_control(control)
 				channel_strip.update()
-	
+
 
 	def set_crossfade_toggles(self, buttons):
 		for strip, button in izip_longest(self._channel_strips, buttons or []):
 			strip.set_crossfade_toggle(button)
-	
+
 
 	def set_stop_clip_buttons(self, buttons):
 		for strip, button in map(None, self._channel_strips, buttons or []):
 			strip.set_stop_button(button)
-	
+
 
 	def set_arming_track_select_buttons(self, buttons):
 		for strip, button in map(None, self._channel_strips, buttons or []):
 			strip.set_arming_select_button(button)
-	
+
 
 	def set_eq_gain_controls(self, controls):
 		self._eq_controls = controls
@@ -482,7 +482,7 @@ class MonoMixerComponent(MixerComponentBase):
 		else:
 			for strip in self._channel_strips:
 				strip.set_eq_gain_controls(None)
-	
+
 
 	def set_parameter_controls(self, controls):
 		self._parameter_controls = controls
@@ -493,15 +493,15 @@ class MonoMixerComponent(MixerComponentBase):
 		else:
 			for strip in self._channel_strips:
 				strip.set_parameter_controls(None)
-	
+
 
 	def tracks_to_use(self):
 		return tuple(self.song.visible_tracks) + tuple(self.song.return_tracks)
-	
+
 
 	def set_track_select_dial(self, dial):
 		self._on_track_select_dial_value.subject = dial
-	
+
 
 	@listens('value')
 	def _on_track_select_dial_value(self, value):
@@ -510,7 +510,7 @@ class MonoMixerComponent(MixerComponentBase):
 			self.select_prev_track()
 		else:
 			self.select_next_track()
-	
+
 
 	def select_next_track(self):
 		if self.is_enabled():
@@ -520,7 +520,7 @@ class MonoMixerComponent(MixerComponentBase):
 			if selected_track != all_tracks[-1]:
 				index = list(all_tracks).index(selected_track)
 				self.song.view.selected_track = all_tracks[index + 1]
-	
+
 
 	def select_prev_track(self):
 		if self.is_enabled():
@@ -531,5 +531,3 @@ class MonoMixerComponent(MixerComponentBase):
 				index = list(all_tracks).index(selected_track)
 				self.song.view.selected_track = all_tracks[index - 1]
 #a
-
-

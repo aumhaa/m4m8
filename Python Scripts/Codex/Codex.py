@@ -1,4 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
+# written against Live 10.0.4 100918
 
 from __future__ import with_statement
 import Live
@@ -8,13 +9,15 @@ from re import *
 
 from _Generic.Devices import *
 
-from ableton.v2.control_surface.components.device import DeviceComponent
+#from ableton.v2.control_surface.components.device import DeviceComponent
 
 from ableton.v2.control_surface.mode import DelayMode
 
 from ableton.v2.control_surface.components.session_ring import SessionRingComponent
 
 """Imports from aumhaa"""
+from aumhaa.v2.control_surface.components.device import DeviceComponent
+
 from aumhaa.v2.control_surface.elements.mono_button import MonoButtonElement
 
 from aumhaa.v2.control_surface.elements.mono_encoder import MonoEncoderElement
@@ -57,14 +60,14 @@ class CodexDeviceProvider(EventObject):
 		super(CodexDeviceProvider, self).__init__(*a, **k)
 		returns = song.return_tracks
 		self._device = returns[self._return_index].devices[0] if (len(returns)>self._return_index and len(returns[self._return_index].devices)>0) else None
-	
+
 
 	@listenable_property
 	def device(self):
 		return self._device
-	
 
-		
+
+
 class Codex(Codec):
 
 
@@ -72,7 +75,7 @@ class Codex(Codec):
 		self._shifted = False
 		super(Codex, self).__init__(*a, **k)
 		self.log_message('<<<<<<<<<<<<<<<<<<<<<<<<< Codex subclass log opened >>>>>>>>>>>>>>>>>>>>>>>>>')
-	
+
 
 	def _setup_send_reset(self):
 		super(Codex, self)._setup_send_reset()
@@ -81,7 +84,7 @@ class Codex(Codec):
 		self._alt_send_reset.name = 'Alt_Reset_Sends'
 		self._alt_send_reset.layer = Layer(priority = 4, buttons = self._button_matrix.submatrix[4:, 2])
 		self._alt_send_reset.set_enabled(False)
-	
+
 
 	def _setup_device_controls(self):
 		super(Codex, self)._setup_device_controls()
@@ -95,7 +98,7 @@ class Codex(Codec):
 		self._device2.name = 'Device_Component2'
 		self._device2.layer = Layer(priority = 4, parameter_controls = self._encoder_matrix.submatrix[4:,:2])
 		self._device2.set_enabled(False)
-	
+
 
 	def _setup_mixer_controls(self):
 		super(Codex, self)._setup_mixer_controls()
@@ -105,7 +108,7 @@ class Codex(Codec):
 		self._mixer._troll_layer = AddLayerMode(self._mixer, Layer(priority = 4, volume_controls = self._encoder_matrix.submatrix[:8,3],
 									mute_buttons = self._button_matrix.submatrix[:8,3],
 									))
-	
+
 
 	def _setup_modes(self):
 
@@ -131,7 +134,7 @@ class Codex(Codec):
 										)
 		self._main_modes.selected_mode = 'disabled'
 		self._main_modes.set_enabled(False)
-	
+
 
 	def _troll_shifted_enabled(self):
 		debug('_troll_shifted_enabled')
@@ -149,13 +152,13 @@ class Codex(Codec):
 			self._dial[4][2].connect_to(returns[0].mixer_device.sends[1])
 			self._dial[5][2].connect_to(returns[1].mixer_device.sends[0])
 		self.request_rebuild_midi_map()
-	
+
 
 	def _troll_shifted_disabled(self):
 		for control in self._dial[:][2]:
 			release_control(control)
 		self.request_rebuild_midi_map()
-	
+
 
 	def find_inputs(self):
 		found_device = None
@@ -166,7 +169,7 @@ class Codex(Codec):
 					if bool(device.can_have_chains) and device.name.endswith('Inputs'):
 						found_device = device
 		return found_device
-	
+
 
 	def find_perc_crossfader(self):
 		found_parameter = None
@@ -179,7 +182,7 @@ class Codex(Codec):
 							if parameter.name == 'XFade':
 								found_parameter = parameter
 		return found_parameter
-	
+
 
 
 #

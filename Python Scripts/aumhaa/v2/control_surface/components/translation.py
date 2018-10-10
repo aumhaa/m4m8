@@ -1,13 +1,15 @@
 # by amounra 0216 : http://www.aumhaa.com
+# written against Live 10.0.4 100918
+
 from ableton.v2.control_surface.elements.button_matrix import ButtonMatrixElement
-from ableton.v2.control_surface.compound_component import CompoundComponent
+from ableton.v2.control_surface.component import Component
 from ableton.v2.base.event import Event, listens, listens_group
 
 from aumhaa.v2.base.debug import initialize_debug
 
 debug = initialize_debug()
 
-class TranslationComponent(CompoundComponent):
+class TranslationComponent(Component):
 
 
 	def __init__(self, controls = [], user_channel_offset = 1, channel = 0, *a, **k):
@@ -16,28 +18,28 @@ class TranslationComponent(CompoundComponent):
 		self._user_channel_offset = user_channel_offset
 		self._channel = channel or 0
 		self._color = 0
-	
+
 
 	def set_controls(self, controls):
 		self._controls = controls
-	
+
 
 	def add_control(self, control):
 		if control:
 			self._controls.append(control)
-	
+
 
 	def set_channel_selector_buttons(self, buttons):
 		self._on_channel_selector_button_value.subject = buttons
 		self.update_channel_selector_buttons()
-	
+
 
 	def set_channel_selector_control(self, control):
 		if self._on_channel_selector_control_value.subject:
 			self._on_channel_selector_control_value.subject.send_value(0)
 		self._on_channel_selector_control_value.subject = control
 		self.update_channel_selector_control()
-	
+
 
 	def update_channel_selector_control(self):
 		control = self._on_channel_selector_control_value.subject
@@ -45,7 +47,7 @@ class TranslationComponent(CompoundComponent):
 			chan_range = 14 - self._user_channel_offset
 			value =  ((self._channel-self._user_channel_offset)*127)/chan_range
 			control.send_value(  int(value)  )
-	
+
 
 	def update_channel_selector_buttons(self):
 		buttons = self._on_channel_selector_button_value.subject
@@ -62,7 +64,7 @@ class TranslationComponent(CompoundComponent):
 						#debug('turning on:', channel, button)
 					else:
 						button.set_light('Translation.SelectorOff')
-	
+
 
 	@listens('value')
 	def _on_channel_selector_control_value(self, value, *a, **k):
@@ -72,7 +74,7 @@ class TranslationComponent(CompoundComponent):
 			if channel != self._channel:
 				self._channel = channel
 				self.update()
-	
+
 
 	@listens('value')
 	def _on_channel_selector_button_value(self, value, x, y, *a, **k):
@@ -81,7 +83,7 @@ class TranslationComponent(CompoundComponent):
 				x = x + (y*self._on_channel_selector_button_value.subject.width())
 				self._channel = min(x+self._user_channel_offset, 14)
 			self.update()
-	
+
 
 	def update(self):
 		if self.is_enabled():
@@ -102,4 +104,3 @@ class TranslationComponent(CompoundComponent):
 					control.set_enabled(True)
 		self.update_channel_selector_buttons()
 		self.update_channel_selector_control()
-	

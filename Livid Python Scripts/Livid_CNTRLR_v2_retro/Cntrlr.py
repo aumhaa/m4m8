@@ -1,5 +1,5 @@
 # by amounra 0218 : http://www.aumhaa.com
-# written against Live 10.0.3b8 RC on 083018
+# written against Live 10.0.4 100918
 
 from __future__ import absolute_import, print_function
 import Live
@@ -364,7 +364,8 @@ class CntrlrViewControlComponent(ViewControlComponent):
 
 	def __init__(self, *a, **k):
 		super(CntrlrViewControlComponent, self).__init__(*a, **k)
-		self._basic_scroll_scenes = self.register_component(ScrollComponent(BasicSceneScroller()))
+		#self._basic_scroll_scenes = self.register_component(ScrollComponent(BasicSceneScroller()))
+		self._basic_scroll_scenes = ScrollComponent(BasicSceneScroller())
 		self.register_slot(self.song, self._basic_scroll_scenes.update, 'scenes')
 		self.register_slot(self.song.view, self._basic_scroll_scenes.update, 'selected_scene')
 
@@ -879,7 +880,7 @@ class CntrlrModHandler(ModHandler):
 					'cntrlr_key': {'obj':  Grid('cntrlr_key', 16, 2), 'method': self._receive_cntrlr_key}}
 		super(CntrlrModHandler, self).__init__(addresses = addresses, *a, **k)
 		self._color_type = 'RGB'
-		self.nav_box = self.register_component(NavigationBox(self, 16, 16, 4, 4, self.set_offset))
+		self.nav_box = NavigationBox(self, 16, 16, 4, 4, self.set_offset)
 
 
 	def _receive_cntrlr_grid(self, x, y, value = -1, *a, **k):
