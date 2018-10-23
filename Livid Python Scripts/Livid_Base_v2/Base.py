@@ -1,6 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.4 100918
-
+# written against Live 10.0.5 on 102318
 
 from __future__ import absolute_import, print_function
 import Live
@@ -291,6 +290,8 @@ class BaseDeviceComponent(DeviceComponent):
 			return DeviceComponent._current_bank_details(self)
 
 	"""
+
+
 
 class BlockingMonoButtonElement(MonoButtonElement):
 
@@ -780,19 +781,19 @@ class Base(LividControlSurface):
 
 	def _setup_mixer_control(self):
 		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 4,tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
-		self._mixer.master_strip().layer = Layer(priority = 4, volume_control = self._fader[8])
-		self._mixer.volume_layer = AddLayerMode(self._mixer, Layer(priority = 4, volume_controls = self._fader_matrix))
-		self._mixer.select_layer = AddLayerMode(self._mixer, Layer(priority = 4, track_select_buttons = self._touchpad_matrix))
+		self._mixer.master_strip().layer = Layer(priority = 6, volume_control = self._fader[8])
+		self._mixer.volume_layer = AddLayerMode(self._mixer, Layer(priority = 6, volume_controls = self._fader_matrix))
+		self._mixer.select_layer = AddLayerMode(self._mixer, Layer(priority = 6, track_select_buttons = self._touchpad_matrix))
 		selected_strip = self._mixer.selected_strip()
 		selected_strip.set_invert_mute_feedback(True)
-		self._mixer.selected_channel_controls_layer = AddLayerMode(selected_strip, Layer(priority = 4, arm_button = self._button[6], solo_button = self._button[5], mute_button = self._button[4], stop_button = self._button[7]))
-		self._mixer.selected_sends_layer = AddLayerMode(selected_strip, Layer(priority = 4, send_controls = self._fader_matrix.submatrix[:4, :]))
-		self._mixer.returns_layer = AddLayerMode(self._mixer, Layer(priority = 4, return_controls = self._fader_matrix.submatrix[4:, :]))
-		self._mixer.channel_controls_layer = AddLayerMode(self._mixer, Layer(priority = 4, mute_buttons = self._base_grid.submatrix[:, :1],
+		self._mixer.selected_channel_controls_layer = AddLayerMode(selected_strip, Layer(priority = 6, arm_button = self._button[6], solo_button = self._button[5], mute_button = self._button[4], stop_button = self._button[7]))
+		self._mixer.selected_sends_layer = AddLayerMode(selected_strip, Layer(priority = 6, send_controls = self._fader_matrix.submatrix[:4, :]))
+		self._mixer.returns_layer = AddLayerMode(self._mixer, Layer(priority = 6, return_controls = self._fader_matrix.submatrix[4:, :]))
+		self._mixer.channel_controls_layer = AddLayerMode(self._mixer, Layer(priority = 6, mute_buttons = self._base_grid.submatrix[:, :1],
 																		solo_buttons = self._base_grid.submatrix[:, 1:2],
 																		arm_buttons = self._base_grid.submatrix[:, 2:3],
 																		stop_clip_buttons = self._base_grid.submatrix[:, 3:4]))
-		self._mixer.navigation_layer = AddLayerMode(self._mixer, Layer(priority = 4, previous_track_button = self._button[6], next_track_button = self._button[7]))
+		self._mixer.navigation_layer = AddLayerMode(self._mixer, Layer(priority = 6, previous_track_button = self._button[6], next_track_button = self._button[7]))
 		self._mixer.set_enabled(False)
 
 
@@ -801,8 +802,8 @@ class Base(LividControlSurface):
 		self._session_ring.set_enabled(False)
 
 		self._session_navigation = SessionNavigationComponent(session_ring = self._session_ring)
-		self._session_navigation.navigation_layer = AddLayerMode(self._session_navigation, Layer(priority = 4, up_button = self._button[4], down_button = self._button[5], left_button = self._button[6], right_button = self._button[7]))
-		self._session_navigation.page_navigation_layer = AddLayerMode(self._session_navigation, Layer(priority = 4, page_up_button = self._button[4], page_down_button = self._button[5], page_left_button = self._button[6], page_right_button = self._button[7]))
+		self._session_navigation.navigation_layer = AddLayerMode(self._session_navigation, Layer(priority = 6, up_button = self._button[4], down_button = self._button[5], left_button = self._button[6], right_button = self._button[7]))
+		self._session_navigation.page_navigation_layer = AddLayerMode(self._session_navigation, Layer(priority = 6, page_up_button = self._button[4], page_down_button = self._button[5], page_left_button = self._button[6], page_right_button = self._button[7]))
 		self._session_navigation._vertical_banking.scroll_up_button.color = 'Session.NavigationButtonOn'
 		self._session_navigation._vertical_banking.scroll_down_button.color = 'Session.NavigationButtonOn'
 		self._session_navigation._horizontal_banking.scroll_up_button.color = 'Session.NavigationButtonOn'
@@ -815,9 +816,9 @@ class Base(LividControlSurface):
 
 		self._session = BaseSessionComponent(name = 'Session', parent_task_group = self._task_group, session_ring = self._session_ring, auto_name = True)
 		hasattr(self._session, '_enable_skinning') and self._session._enable_skinning()
-		self._session.cliplaunch_layer = AddLayerMode(self._session, Layer(priority = 4, clip_launch_buttons = self._base_grid))
-		self._session.overlay_cliplaunch_layer = AddLayerMode(self._session, Layer(priority = 4, clip_launch_buttons = self._base_grid.submatrix[:7, :], scene_launch_buttons = self._base_grid.submatrix[7:, :]))
-		#self._session.clipstop_layer = AddLayerMode(self._session, Layer(priority = 4, stop_track_clip_buttons = self._base_grid.submatrix[:, 3:4]))
+		self._session.cliplaunch_layer = AddLayerMode(self._session, Layer(priority = 6, clip_launch_buttons = self._base_grid))
+		self._session.overlay_cliplaunch_layer = AddLayerMode(self._session, Layer(priority = 6, clip_launch_buttons = self._base_grid.submatrix[:7, :], scene_launch_buttons = self._base_grid.submatrix[7:, :]))
+		#self._session.clipstop_layer = AddLayerMode(self._session, Layer(priority = 6, stop_track_clip_buttons = self._base_grid.submatrix[:, 3:4]))
 		self._session.set_enabled(False)
 
 
@@ -832,8 +833,8 @@ class Base(LividControlSurface):
 	def _setup_device_control(self):
 		self._device_selection_follows_track_selection = True
 		self._device = DeviceComponent(name = 'Device_Component', device_bank_registry = DeviceBankRegistry(), device_provider = self._device_provider)
-		self._device.parameters_layer = AddLayerMode(self._device, Layer(priority = 4, parameter_controls = self._fader_matrix.submatrix[:8][:]))
-		self._device.nav_layer = AddLayerMode(self._device, Layer(priority = 4, bank_prev_button = self._button[6], bank_next_button = self._button[7]))
+		self._device.parameters_layer = AddLayerMode(self._device, Layer(priority = 6, parameter_controls = self._fader_matrix.submatrix[:8][:]))
+		self._device.nav_layer = AddLayerMode(self._device, Layer(priority = 6, bank_prev_button = self._button[6], bank_next_button = self._button[7]))
 		self._device.device_name_data_source().set_update_callback(self._on_device_name_changed)
 		self._device.set_enabled(False)
 
@@ -844,8 +845,8 @@ class Base(LividControlSurface):
 		self._device_navigator._chain_color_off = 'DeviceNavigator.ChainNavOff'
 		self._device_navigator._level_color_on = 'DeviceNavigator.LevelNavOn'
 		self._device_navigator._level_color_off = 'DeviceNavigator.LevelNavOff'
-		self._device_navigator.main_layer = AddLayerMode(self._device_navigator, Layer(priority = 4, prev_button = self._button[4], next_button = self._button[5]))
-		self._device_navigator.alt_layer = AddLayerMode(self._device_navigator, Layer(priority = 4, prev_chain_button = self._button[4], next_chain_button = self._button[5], enter_button = self._button[7], exit_button = self._button[6]))
+		self._device_navigator.main_layer = AddLayerMode(self._device_navigator, Layer(priority = 6, prev_button = self._button[4], next_button = self._button[5]))
+		self._device_navigator.alt_layer = AddLayerMode(self._device_navigator, Layer(priority = 6, prev_chain_button = self._button[4], next_chain_button = self._button[5], enter_button = self._button[7], exit_button = self._button[6]))
 		self._device_navigator.set_enabled(False)
 
 
@@ -854,7 +855,7 @@ class Base(LividControlSurface):
 		self._clip_creator.name = 'ClipCreator'
 		self._recorder = FixedLengthSessionRecordingComponent(length_values = LENGTH_VALUES, clip_creator = self._clip_creator, view_controller = ViewControlComponent())
 		self._recorder.main_layer = LayerMode(self._recorder, Layer(priority = 6, new_button = self._button[5], record_button = self._button[6], length_button = self._button[7]))
-		#self._recorder.alt_layer = LayerMode(self._recorder, Layer(priority = 4, new_button = self._button[5], record_button = self._button[6]))
+		#self._recorder.alt_layer = LayerMode(self._recorder, Layer(priority = 6, new_button = self._button[5], record_button = self._button[6]))
 		self._recorder.alt_layer = LayerMode(self._recorder, Layer(priority = 6, length_buttons = self._nav_buttons.submatrix[1:4,:]))
 		self._recorder.set_enabled(False)
 
@@ -875,7 +876,7 @@ class Base(LividControlSurface):
 		self._translations = BaseDisplayingTranslationComponent(controls, USER_OFFSET)
 		self._translations.name = 'TranslationComponent'
 		self._translations._channel = USER_OFFSET
-		self._translations.layer = Layer(priority = 10, channel_selector_buttons = self._nav_buttons, display = self._display)
+		self._translations.layer = Layer(priority = 7, channel_selector_buttons = self._nav_buttons, display = self._display)
 		self._translations.set_enabled(False)
 
 
@@ -938,29 +939,29 @@ class Base(LividControlSurface):
 									split_button = self._touchpad[0],
 									sequencer_button = self._touchpad[1]))
 
-		self._instrument._keypad.octave_toggle_layer = AddLayerMode(self._instrument._keypad, Layer(priority = 7, offset_shift_toggle = self._button[4]))
-		self._instrument._drumpad.octave_toggle_layer = AddLayerMode(self._instrument._drumpad, Layer(priority = 7, offset_shift_toggle = self._button[4]))
+		self._instrument._keypad.octave_toggle_layer = AddLayerMode(self._instrument._keypad, Layer(priority = 5, offset_shift_toggle = self._button[4]))
+		self._instrument._drumpad.octave_toggle_layer = AddLayerMode(self._instrument._drumpad, Layer(priority = 5, offset_shift_toggle = self._button[4]))
 
-		self._instrument._keypad.main_layer = LayerMode(self._instrument._keypad, Layer(priority = 6, keypad_matrix = self._base_grid.submatrix[:,:]))
-		self._instrument._keypad.select_layer = LayerMode(self._instrument._keypad, Layer(priority = 6, keypad_select_matrix = self._base_grid.submatrix[:, :]))
-		self._instrument._keypad.split_layer = LayerMode(self._instrument._keypad, Layer(priority = 6, keypad_matrix = self._base_grid.submatrix[:, 2:4]))
-		self._instrument._keypad.split_select_layer = LayerMode(self._instrument._keypad, Layer(priority = 6, keypad_select_matrix = self._base_grid.submatrix[:, 2:4]))
+		self._instrument._keypad.main_layer = LayerMode(self._instrument._keypad, Layer(priority = 5, keypad_matrix = self._base_grid.submatrix[:,:]))
+		self._instrument._keypad.select_layer = LayerMode(self._instrument._keypad, Layer(priority = 5, keypad_select_matrix = self._base_grid.submatrix[:, :]))
+		self._instrument._keypad.split_layer = LayerMode(self._instrument._keypad, Layer(priority = 5, keypad_matrix = self._base_grid.submatrix[:, 2:4]))
+		self._instrument._keypad.split_select_layer = LayerMode(self._instrument._keypad, Layer(priority = 5, keypad_select_matrix = self._base_grid.submatrix[:, 2:4]))
 
-		self._instrument._keypad.sequencer_layer = AddLayerMode(self._instrument._keypad, Layer(priority = 6, playhead = self._playhead_element, sequencer_matrix = self._base_grid.submatrix[:, :2]))
-		self._instrument._keypad.sequencer_shift_layer = AddLayerMode(self._instrument._keypad, Layer(priority = 6, loop_selector_matrix = self._base_grid.submatrix[:, :1], quantization_buttons = self._base_grid.submatrix[:8, 1:2],)) #follow_button = self._pad[15]))
+		self._instrument._keypad.sequencer_layer = AddLayerMode(self._instrument._keypad, Layer(priority = 5, playhead = self._playhead_element, sequencer_matrix = self._base_grid.submatrix[:, :2]))
+		self._instrument._keypad.sequencer_shift_layer = AddLayerMode(self._instrument._keypad, Layer(priority = 5, loop_selector_matrix = self._base_grid.submatrix[:, :1], quantization_buttons = self._base_grid.submatrix[:8, 1:2],)) #follow_button = self._pad[15]))
 
-		self._instrument._drumpad.main_layer = LayerMode(self._instrument._drumpad, Layer(priority = 6, drumpad_matrix = self._base_grid.submatrix[:,:]))
-		self._instrument._drumpad.select_layer = LayerMode(self._instrument._drumpad, Layer(priority = 6, drumpad_select_matrix = self._base_grid.submatrix[:,:]))
-		self._instrument._drumpad.split_layer = LayerMode(self._instrument._drumpad, Layer(priority = 6, drumpad_matrix = self._base_grid.submatrix[:4, :],))
-		self._instrument._drumpad.split_select_layer = LayerMode(self._instrument._drumpad, Layer(priority = 6, drumpad_select_matrix = self._base_grid.submatrix[:4,:]))
+		self._instrument._drumpad.main_layer = LayerMode(self._instrument._drumpad, Layer(priority = 5, drumpad_matrix = self._base_grid.submatrix[:,:]))
+		self._instrument._drumpad.select_layer = LayerMode(self._instrument._drumpad, Layer(priority = 5, drumpad_select_matrix = self._base_grid.submatrix[:,:]))
+		self._instrument._drumpad.split_layer = LayerMode(self._instrument._drumpad, Layer(priority = 5, drumpad_matrix = self._base_grid.submatrix[:4, :],))
+		self._instrument._drumpad.split_select_layer = LayerMode(self._instrument._drumpad, Layer(priority = 5, drumpad_select_matrix = self._base_grid.submatrix[:4,:]))
 
-		self._instrument._drumpad.sequencer_layer = AddLayerMode(self._instrument._drumpad, Layer(priority = 6, playhead = self._playhead_element, sequencer_matrix = self._base_grid.submatrix[4:8, :]))
-		self._instrument._drumpad.sequencer_shift_layer = AddLayerMode(self._instrument._drumpad, Layer(priority = 6, loop_selector_matrix = self._base_grid.submatrix[4:8, :2], quantization_buttons = self._base_grid.submatrix[4:8, 2:],)) #follow_button = self._pad[31]))
+		self._instrument._drumpad.sequencer_layer = AddLayerMode(self._instrument._drumpad, Layer(priority = 5, playhead = self._playhead_element, sequencer_matrix = self._base_grid.submatrix[4:8, :]))
+		self._instrument._drumpad.sequencer_shift_layer = AddLayerMode(self._instrument._drumpad, Layer(priority = 5, loop_selector_matrix = self._base_grid.submatrix[4:8, :2], quantization_buttons = self._base_grid.submatrix[4:8, 2:],)) #follow_button = self._pad[31]))
 
-		self._instrument._selected_session._keys_layer = LayerMode(self._instrument._selected_session, Layer(priority = 6, clip_launch_buttons = self._base_grid.submatrix[:, :2]))
-		self._instrument._selected_session._drum_layer = LayerMode(self._instrument._selected_session, Layer(priority = 6, clip_launch_buttons = self._base_grid.submatrix[4:8, :]))
+		self._instrument._selected_session._keys_layer = LayerMode(self._instrument._selected_session, Layer(priority = 5, clip_launch_buttons = self._base_grid.submatrix[:, :2]))
+		self._instrument._selected_session._drum_layer = LayerMode(self._instrument._selected_session, Layer(priority = 5, clip_launch_buttons = self._base_grid.submatrix[4:8, :]))
 
-		self._instrument._main_modes = ModesComponent(name = 'InstrumentModes')
+		self._instrument._main_modes = ModesComponent(parent = self._instrument, name = 'InstrumentModes')
 		self._instrument._main_modes.add_mode('disabled', [])
 		self._instrument._main_modes.add_mode('drumpad', [self._instrument._drumpad, self._instrument._drumpad.main_layer, self.midi_mode_sysex])
 		self._instrument._main_modes.add_mode('drumpad_split', [self._instrument._drumpad, self._instrument._drumpad.split_layer, self._instrument._selected_session, self._instrument._selected_session._drum_layer, self.splitvertical_mode_sysex])
@@ -996,11 +997,11 @@ class Base(LividControlSurface):
 		self._main_modes.add_mode('Sends', [self._mixer, self._mixer.returns_layer, self._mixer.selected_sends_layer, self.sends_layer_sysex, self._mixer.select_layer,  self._session_ring, self._transport, self._recorder, self._recorder.main_layer, self._instrument], behaviour = self._shift_latching(color = 'MainModes.Sends'), display_string = MODE_DATA['Sends'])
 		self._main_modes.add_mode('Device_shifted', [self.device_layer_sysex, self._modswitcher, self._mixer, self._session_ring, tuple([self._send_instrument_shifted, self._send_instrument_unshifted]), self._device, self._device.parameters_layer, self._device_navigator.alt_layer,  ], groups = ['shifted'], behaviour = self._shift_latching(color = 'MainModes.Device'), display_string = MODE_DATA['Device_shifted'])
 		self._main_modes.add_mode('Device', [self.device_layer_sysex, self._modswitcher, self._mixer, self._mixer.select_layer, self._session_ring, self._device, self._device.parameters_layer, self._device.nav_layer, self._device_navigator.main_layer,], behaviour = self._shift_latching(color = 'MainModes.Device'), display_string = MODE_DATA['Device'])
-		self._main_modes.add_mode('User_shifted', [self._translations, self._mixer, self._mixer.select_layer, self.user_layer_sysex, self.user_mode_sysex ], groups = ['shifted'], behaviour = self._shift_latching(color = 'MainModes.User'), display_string = MODE_DATA['User'])
-		self._main_modes.add_mode('User', [self._translations, self._mixer, self._mixer.select_layer, self.user_layer_sysex, self.user_mode_sysex], behaviour = self._shift_latching(color = 'MainModes.User'), display_string = MODE_DATA['User'])
+		self._main_modes.add_mode('User_shifted', [DelayMode(self._translations), self._mixer, self._mixer.select_layer, self.user_layer_sysex, self.user_mode_sysex ], groups = ['shifted'], behaviour = self._shift_latching(color = 'MainModes.User'), display_string = MODE_DATA['User'])
+		self._main_modes.add_mode('User', [DelayMode(self._translations), self._mixer, self._mixer.select_layer, self.user_layer_sysex, self.user_mode_sysex], behaviour = self._shift_latching(color = 'MainModes.User'), display_string = MODE_DATA['User'])
 		self._main_modes.add_mode('Select', [self._mixer, self._mixer.volume_layer, self._mixer.selected_channel_controls_layer, self._session_ring, self._session, self._session.overlay_cliplaunch_layer, self.clips_layer_sysex], behaviour = DelayedExcludingMomentaryBehaviour(excluded_groups = ['shifted']), display_string = MODE_DATA['Select'])  #excluded_groups = ['shifted']
 		self._main_modes.Select_button._send_current_color = lambda: None  #cant have the multielement updating its button color since it belongs to select buttons, this is the easiest way to deal with it....should probably override in a separate behaviour class
-		self._main_modes.layer = Layer(priority = 4, Clips_button=self._button[0], Sends_button=self._button[1], Device_button=self._button[2], User_button=self._button[3], Select_button=self._touchpad_multi, display = self._display)
+		self._main_modes.layer = Layer(priority = 6, Clips_button=self._button[0], Sends_button=self._button[1], Device_button=self._button[2], User_button=self._button[3], Select_button=self._touchpad_multi, display = self._display)
 		self._main_modes.selected_mode = 'disabled'
 		self._main_modes.set_enabled(True)
 
@@ -1041,6 +1042,11 @@ class Base(LividControlSurface):
 				else:
 					button.set_light(button.scale_color)
 				button._last_flash = value
+
+
+	def _reset_pressed_pads(self):
+		for button in self._stream_pads:
+			button.display_press = False
 
 
 	@listens('value')

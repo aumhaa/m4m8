@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.4 100918
+# written against Live 10.0.5 on 102318
 
 from __future__ import absolute_import, print_function
 import Live

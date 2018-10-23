@@ -1,5 +1,5 @@
 # by amounra 0217 : http://www.aumhaa.com
-# written against Live 10.0.4 100918
+# written against Live 10.0.5 on 102318
 
 import Live
 from itertools import imap, chain, starmap, ifilter
@@ -252,11 +252,11 @@ class MonoScaleComponent(Component):
 		self._grid_resolution = grid_resolution
 
 		#self._vertical_offset_component = self.register_component(self._offset_settings_component_class(name = 'VerticalOffset', attribute_tag = 'vert_offset', parent_task_group = parent_task_group, value_dict = range(24), default_value_index = self._settings['DefaultVertOffset'], default_channel = 0, on_color = 'MonoInstrument.VerticalOffsetOnValue', off_color = 'MonoInstrument.VerticalOffsetOffValue'))
-		self._vertical_offset_component = self._offset_settings_component_class(name = 'VerticalOffset', attribute_tag = 'vert_offset', parent_task_group = parent_task_group, value_dict = range(24), default_value_index = self._settings['DefaultVertOffset'], default_channel = 0, on_color = 'MonoInstrument.VerticalOffsetOnValue', off_color = 'MonoInstrument.VerticalOffsetOffValue')
+		self._vertical_offset_component = self._offset_settings_component_class(parent = self, name = 'VerticalOffset', attribute_tag = 'vert_offset', parent_task_group = parent_task_group, value_dict = range(24), default_value_index = self._settings['DefaultVertOffset'], default_channel = 0, on_color = 'MonoInstrument.VerticalOffsetOnValue', off_color = 'MonoInstrument.VerticalOffsetOffValue')
 		self._vertical_offset_value.subject = self._vertical_offset_component
 
 		#self._offset_component = self.register_component(self._offset_settings_component_class(name = 'NoteOffset', attribute_tag = 'drum_offset', parent_task_group = parent_task_group, value_dict = range(112), default_value_index = self._settings['DefaultOffset'], default_channel = 0, bank_increment = 12, on_color = 'MonoInstrument.OffsetOnValue', off_color = 'MonoInstrument.OffsetOffValue'))
-		self._offset_component = self._offset_settings_component_class(name = 'NoteOffset', attribute_tag = 'drum_offset', parent_task_group = parent_task_group, value_dict = range(112), default_value_index = self._settings['DefaultOffset'], default_channel = 0, bank_increment = 12, on_color = 'MonoInstrument.OffsetOnValue', off_color = 'MonoInstrument.OffsetOffValue')
+		self._offset_component = self._offset_settings_component_class(parent = self, name = 'NoteOffset', attribute_tag = 'drum_offset', parent_task_group = parent_task_group, value_dict = range(112), default_value_index = self._settings['DefaultOffset'], default_channel = 0, bank_increment = 12, on_color = 'MonoInstrument.OffsetOnValue', off_color = 'MonoInstrument.OffsetOffValue')
 		self._offset_value.subject = self._offset_component
 		self.set_offset_shift_toggle = self._offset_component.shift_toggle.set_control_element
 
@@ -266,7 +266,7 @@ class MonoScaleComponent(Component):
 
 		scale_clip_creator = ClipCreator()
 		scale_note_editor = MonoNoteEditorComponent(clip_creator=scale_clip_creator, grid_resolution=grid_resolution)
-		self._note_sequencer = MonoStepSeqComponent(clip_creator=scale_clip_creator, skin=skin, grid_resolution=self._grid_resolution, name='Note_Sequencer', note_editor_component=scale_note_editor, instrument_component=self._keygroup )
+		self._note_sequencer = MonoStepSeqComponent(parent = self, clip_creator=scale_clip_creator, skin=skin, grid_resolution=self._grid_resolution, name='Note_Sequencer', note_editor_component=scale_note_editor, instrument_component=self._keygroup )
 		#self._note_sequencer._playhead_component._follower = self._note_sequencer._loop_selector  ##########pull this if everything works, it was a test
 		self._note_sequencer._playhead_component._notes=tuple(chain(*starmap(range, ((60, 68), (52, 60)))))
 		self._note_sequencer._playhead_component._triplet_notes=tuple(chain(*starmap(range, ((60, 66), (52, 58)))))
@@ -317,7 +317,7 @@ class MonoDrumpadComponent(Component):
 		self._grid_resolution = grid_resolution
 
 		#self._drum_offset_component = self.register_component(self._offset_settings_component_class(attribute_tag = 'drum_offset', name = 'DrumPadOffset', parent_task_group = parent_task_group, value_dict = range(28), default_value_index = self._settings['DefaultDrumOffset'], default_channel = 0, bank_increment = 4, on_color = 'MonoInstrument.OffsetOnValue', off_color = 'MonoInstrument.OffsetOffValue'))
-		self._drum_offset_component = self._offset_settings_component_class(attribute_tag = 'drum_offset', name = 'DrumPadOffset', parent_task_group = parent_task_group, value_dict = range(28), default_value_index = self._settings['DefaultDrumOffset'], default_channel = 0, bank_increment = 4, on_color = 'MonoInstrument.OffsetOnValue', off_color = 'MonoInstrument.OffsetOffValue')
+		self._drum_offset_component = self._offset_settings_component_class(parent = self, attribute_tag = 'drum_offset', name = 'DrumPadOffset', parent_task_group = parent_task_group, value_dict = range(28), default_value_index = self._settings['DefaultDrumOffset'], default_channel = 0, bank_increment = 4, on_color = 'MonoInstrument.OffsetOnValue', off_color = 'MonoInstrument.OffsetOffValue')
 		self._drum_offset_value.subject = self._drum_offset_component
 		self.set_offset_shift_toggle = self._drum_offset_component.shift_toggle.set_control_element
 
@@ -328,7 +328,7 @@ class MonoDrumpadComponent(Component):
 
 		drum_clip_creator = ClipCreator()
 		drum_note_editor = MonoNoteEditorComponent(clip_creator=drum_clip_creator, grid_resolution=grid_resolution)
-		self._step_sequencer = MonoStepSeqComponent(clip_creator=drum_clip_creator, skin=skin, grid_resolution=grid_resolution, name='Drum_Sequencer', note_editor_component=drum_note_editor, instrument_component=self._drumgroup)
+		self._step_sequencer = MonoStepSeqComponent(parent = self, clip_creator=drum_clip_creator, skin=skin, grid_resolution=grid_resolution, name='Drum_Sequencer', note_editor_component=drum_note_editor, instrument_component=self._drumgroup)
 		self._step_sequencer._playhead_component._notes=tuple(chain(*starmap(range, ((64, 68), (56, 60), (48, 52), (40, 44)))))
 		self._step_sequencer._playhead_component._triplet_notes=tuple(chain(*starmap(range, ((64, 67), (56, 59), (48, 51), (40, 43)))))
 		self._step_sequencer._playhead_component._feedback_channels = [15]
@@ -393,13 +393,13 @@ class MonoInstrumentComponent(Component):
 		self._setup_shift_mode()
 
 		#self._scale_offset_component = self.register_component(self._scale_settings_component_class(name = 'VerticalOffset', attribute_tag = 'scale', parent_task_group = parent_task_group, value_dict = self._scalenames, default_value_index = self._scalenames.index(DEFAULT_SCALE), default_channel = 0, on_color = 'MonoInstrument.ScaleOffsetOnValue', off_color = 'MonoInstrument.ScaleOffsetOffValue'))
-		self._scale_offset_component = self._scale_settings_component_class(name = 'VerticalOffset', attribute_tag = 'scale', parent_task_group = parent_task_group, value_dict = self._scalenames, default_value_index = self._scalenames.index(DEFAULT_SCALE), default_channel = 0, on_color = 'MonoInstrument.ScaleOffsetOnValue', off_color = 'MonoInstrument.ScaleOffsetOffValue')
+		self._scale_offset_component = self._scale_settings_component_class(parent = self, name = 'VerticalOffset', attribute_tag = 'scale', parent_task_group = parent_task_group, value_dict = self._scalenames, default_value_index = self._scalenames.index(DEFAULT_SCALE), default_channel = 0, on_color = 'MonoInstrument.ScaleOffsetOnValue', off_color = 'MonoInstrument.ScaleOffsetOffValue')
 		self._scale_offset_value.subject = self._scale_offset_component
 		self.set_scale_up_button = self._scale_offset_component.up_button.set_control_element
 		self.set_scale_down_button = self._scale_offset_component.down_button.set_control_element
 
 		#self._mode_component = self.register_component(self._toggle_settings_component_class(name = 'SplitModeOffset', attribute_tag = 'mode', parent_task_group = parent_task_group,))
-		self._mode_component = self._toggle_settings_component_class(name = 'SplitModeOffset', attribute_tag = 'mode', parent_task_group = parent_task_group,)
+		self._mode_component = self._toggle_settings_component_class(parent = self, name = 'SplitModeOffset', attribute_tag = 'mode', parent_task_group = parent_task_group,)
 		self._mode_value.subject = self._mode_component
 		self.set_split_button = self._mode_component.split_toggle.set_control_element
 		self.set_sequencer_button = self._mode_component.seq_toggle.set_control_element
@@ -426,7 +426,7 @@ class MonoInstrumentComponent(Component):
 		self.set_loop_selector_matrix = self._audio_loop.set_loop_selector_matrix
 
 		#self._main_modes = self.register_component(ModesComponent())
-		self._main_modes = ModesComponent()
+		self._main_modes = ModesComponent()  #parent = self)
 		self._main_modes.add_mode('disabled', [])
 		self._main_modes.add_mode('audioloop', [self._audio_loop])
 		self._main_modes.set_enabled(True)
@@ -446,7 +446,7 @@ class MonoInstrumentComponent(Component):
 	def _setup_shift_mode(self):
 		self._shifted = False
 		#self._shift_mode = self.register_component(ModesComponent())
-		self._shift_mode = ModesComponent()
+		self._shift_mode = ModesComponent()  #parent = self)
 		self._shift_mode.add_mode('disabled', [])
 		self._shift_mode.add_mode('shift', tuple([lambda a: self._on_shift_value(True), lambda a: self._on_shift_value(False)]), behaviour = ShiftCancellableBehaviourWithRelease())
 
@@ -522,7 +522,7 @@ class MonoInstrumentComponent(Component):
 		#if self.is_enabled():
 		new_mode = 'disabled'
 		drum_device = find_drum_group_device(self.song.view.selected_track)
-		debug('instrument update, drum device:', drum_device.name if drum_device else None)
+		#debug('instrument update, drum device:', drum_device.name if drum_device else None)
 		self._drumpad._drumgroup.set_drum_group_device(drum_device)
 		cur_track = self.song.view.selected_track
 		if cur_track.has_audio_input and cur_track in self.song.visible_tracks:
@@ -538,14 +538,14 @@ class MonoInstrumentComponent(Component):
 				new_mode += '_shifted'
 			self._script.set_feedback_channels([self._scale_offset_component.channel])
 			self._script.set_controlled_track(self.song.view.selected_track)
-		debug('trying to set mode:', new_mode)
+		#debug('trying to set mode:', new_mode)
 		if new_mode in self._main_modes._mode_map or new_mode is None:
 			self._main_modes.selected_mode = new_mode
 			self._script.set_controlled_track(self.song.view.selected_track)
 		else:
 			self._main_modes.selected_mode = 'disabled'
 			self._script.set_controlled_track(self.song.view.selected_track)
-		debug('monoInstrument mode is:', self._main_modes.selected_mode, '  inst:', self.is_enabled(), '  modes:', self._main_modes.is_enabled(), '   key:', self._keypad.is_enabled(), '   drum:', self._drumpad.is_enabled())
+		#debug('monoInstrument mode is:', self._main_modes.selected_mode, '  inst:', self.is_enabled(), '  modes:', self._main_modes.is_enabled(), '   key:', self._keypad.is_enabled(), '   drum:', self._drumpad.is_enabled())
 
 
 
