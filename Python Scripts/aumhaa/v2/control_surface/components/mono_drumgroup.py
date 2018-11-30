@@ -31,7 +31,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		super(MonoDrumGroupComponent, self).__init__(*a, **k)
 		self.selected_notes_provider = self
 		self._on_selected_track_changed.subject = self.song.view
-	
+
 
 	def _get_current_channel(self):
 		cur_track = self.song.view.selected_track
@@ -45,33 +45,33 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		else:
 			cur_chan = 14
 		return cur_chan
-	
+
 
 	@listens('selected_track')
 	def _on_selected_track_changed(self):
 		#debug('keys settings track changed')
 		self.translation_channel = self._get_current_channel()
 		self.update_matrix()
-	
+
 
 	@property
 	def translation_channel(self, translation_channel):
 		return self._translation_channel
-	
+
 
 	@translation_channel.setter
 	def translation_channel(self, channel):
 		debug('drumpad set_translation_channel', channel)
 		self._translation_channel = channel
 		self.update_matrix()
-	
+
 
 	@property
 	def position(self):
 		if liveobj_valid(self._drum_group_device):
 			return self._drum_group_device.view.drum_pads_scroll_position
 		return 0
-	
+
 
 	@position.setter
 	def position(self, index):
@@ -83,19 +83,19 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			self.update_matrix()
 		else:
 			self.update_matrix()
-	
+
 
 	def update_matrix(self):
 		self._reset_selected_pads()
 		self._update_led_feedback()
 		self._update_note_translations()
-	
+
 
 	def set_translation_channel(self, translation_channel):
 		self._translation_channel = translation_channel
 		self._update_assigned_drum_pads()
 		self._create_and_set_pad_translations()
-	
+
 
 	def _create_and_set_pad_translations(self):
 		if self._can_set_pad_translations():
@@ -110,7 +110,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		else:
 			self._update_note_translations()
 			self._set_pad_translations(None)
-	
+
 
 	def _button_coordinates_to_pad_index(self, first_note, coordinates):
 		y, x = coordinates
@@ -123,7 +123,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			first_note += 4 * self.width + 16
 		index = x % 4 + y % 4 * 4 + first_note
 		return index
-	
+
 
 	def _note_translation_for_button(self, button):
 		if liveobj_valid(self._drum_group_device):
@@ -137,7 +137,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			identifier = self._button_coordinates_to_pad_index(self._raw_position*4, button.coordinate)
 			channel = self._translation_channel
 			return (identifier, channel)
-	
+
 
 	def _update_led_feedback(self):
 		if liveobj_valid(self._drum_group_device):
@@ -146,7 +146,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			super(DrumGroupComponent, self)._update_led_feedback()
 		for button in self.select_matrix:
 			self._update_button_color(button)
-	
+
 
 	def _update_button_color(self, button):
 		if liveobj_valid(self._drum_group_device):
@@ -161,7 +161,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			#debug('button color:', button.color)
 		if button._control_element:
 			button._control_element.scale_color = button.color
-	
+
 
 	def _color_for_pad(self, pad):
 		has_soloed_pads = bool(find_if(lambda pad: pad.solo, self._all_drum_pads))
@@ -175,7 +175,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			elif has_soloed_pads and pad.solo:
 				button_color = 'DrumGroup.PadSoloedSelected'
 		elif pad.chains:
-			register = (pad.note-4)%32 
+			register = (pad.note-4)%32
 			button_color = 'DrumGroup.PadFilled' if (0 <= register <16) else 'DrumGroup.PadFilledAlt'
 			if has_soloed_pads and not pad.solo:
 				button_color = 'DrumGroup.PadFilled' if not pad.mute else 'DrumGroup.PadMuted'
@@ -184,12 +184,12 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			elif has_soloed_pads and pad.solo:
 				button_color = 'DrumGroup.PadSoloed'
 		return button_color
-	
+
 
 	def set_drum_group_device(self, *a, **k):
 		super(MonoDrumGroupComponent,self).set_drum_group_device(*a, **k)
 		self.update_matrix()
-	
+
 
 	def _update_selected_drum_pad(self):
 		super(MonoDrumGroupComponent, self)._update_selected_drum_pad()
@@ -199,7 +199,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			self.notify_selected_notes(tuple([selected_drum_pad.note]))
 		else:
 			self.notify_selected_notes(tuple([int(self._selected_note)]))
-	
+
 
 	@listenable_property
 	def selected_note(self):
@@ -210,8 +210,8 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		else:
 			#debug('selected note:', self._selected_note)
 			return int(self._selected_note)
-		
-	
+
+
 
 	@listenable_property
 	def selected_notes(self):
@@ -221,19 +221,19 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		else:
 			return tuple([int(self._selected_note)])
 		return self._selected_notes
-	
+
 
 	@selected_notes.setter
 	def selected_notes(self, note):
 		self._selected_notes = tuple(note)
 		self.notify_selected_notes(self._selected_notes)
-	
+
 
 	def set_matrix(self, matrix):
 		self._set_matrix_special_attributes(False)
 		super(MonoDrumGroupComponent, self).set_matrix(matrix)
 		self._set_matrix_special_attributes(True)
-	
+
 
 	def _set_matrix_special_attributes(self, enabled):
 		for button in self.matrix:
@@ -241,11 +241,12 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 				button._control_element.display_press = enabled
 				button._control_element._last_flash = 0
 				not enabled and button._control_element.reset_state()
-	
+
 
 	def _on_matrix_pressed(self, button):
+		debug('DrumGroup._on_matrix_pressed: mute:', self.mute_button.is_pressed, 'solo:', self.solo_button.is_pressed)
 		super(MonoDrumGroupComponent, self)._on_matrix_pressed(button)
-	
+
 
 	@select_matrix.pressed
 	def select_matrix(self, button):
@@ -264,11 +265,11 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		else:
 			self.notify_selected_notes(tuple([int(self._selected_note)]))
 		self._update_led_feedback()
-	
+
 
 	def select_drum_pad(self, drum_pad):
 		pass
-	
+
 
 	def set_select_matrix(self, matrix):
 		debug('set select matrix:', matrix)
@@ -277,14 +278,14 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			#not button is None and hasattr(button, 'set_playable') and button.set_playable(False)
 			button.set_mode(PlayableControl.Mode.listenable)
 		self._update_led_feedback()
-	
+
 
 	def _update_note_translations(self):
 		if liveobj_valid(self._drum_group_device):
 			super(MonoDrumGroupComponent, self)._update_note_translations()
 		else:
 			super(DrumGroupComponent, self)._update_note_translations()
-	
+
 
 	def _button_should_be_enabled(self, button):
 		#this was throwing an error so I overrode, sometimes drumcomponent sends a non-iterable
@@ -292,7 +293,7 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 		if button:
 			identifier, _ = self._note_translation_for_button(button)
 		return identifier < 128
-	
+
 
 	def _on_selected_drum_pad_changed(self):
 		#debug('on selected drumpad changed')
@@ -302,8 +303,16 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 			self.notify_selected_notes(tuple([selected_drum_pad.note]))
 		else:
 			self.notify_selected_notes(tuple([int(self._selected_note)]))
-	
+
+	@mute_button.value
+	def mute_button(self, value, button):
+		debug('mute_button.value:', value)
+		self._set_control_pads_from_script(bool(value))
+
+	@solo_button.value
+	def solo_button(self, value, button):
+		debug('solo_button.value:', value)
+		self._set_control_pads_from_script(bool(value))
 
 
 #a
-
