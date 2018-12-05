@@ -1,5 +1,5 @@
 # by amounra 0216 : http://www.aumhaa.com
-# written against Live 10.0.4 100918
+# written against Live 10.0.5 on 120418
 
 from __future__ import with_statement
 import sys
@@ -1965,6 +1965,21 @@ class ModClient(NotifyingControlElement):
 					debug('Forward method exception', method, value_list)
 
 
+
+
+def drumrack_devices(song):
+	found_drumrack_devices = []
+	for track in song.tracks:
+		if liveobj_valid(track) and track.has_midi_input:
+			for device in track.devices:
+				#if liveobj_valid(device):
+					#debug(device.type, device)
+				if liveobj_valid(device) and isinstance(device, Live.RackDevice.RackDevice):  # and device.has_drum_pads:
+					found_drumrack_devices.append(device)
+	#debug('found_drumrack_devices:', found_drumrack_devices)
+	return found_drumrack_devices
+
+
 class ModRouter(Component):
 
 
@@ -2153,18 +2168,26 @@ class ModRouter(Component):
 			except:
 				pass
 			debug('---------------device name is:', device.name)
-			debug('---------------device startswith @modAlias:', device.name.startswith('@modAlias'))
+			#debug('---------------device startswith @modAlias:', device.name.startswith('@modAlias'))
 			if device.name.startswith('@modAlias:'):
 				alias_name = device.name.split('@modAlias:')[1]
-				debug('---------------alias name is:', alias_name)
+				#debug('---------------modAlias name is:', alias_name)
 				for mod in self._mods:
 					name = mod.device.name if mod.device else None
-					debug('mod device name is:', name)
-					debug('name == alias_name:', str(name) == str(alias_name))
+					#debug('mod device name is:', name)
+					#debug('name == alias_name:', str(name) == str(alias_name))
 					if str(name) == str(alias_name):
 						device = mod.device
 						break
-		#debug('pass device: ' + str(device))
+			#if device.name.startswith('@drumAlias:'):
+			#	alias_name = device.name.split('@drumAlias:')[1]
+				#debug('---------------drumAlias name is:', alias_name)
+			#	for drumrack_device in drumrack_devices(self.song):
+			#		name = drumrack_device.name
+			#		if str(name) == str(alias_name):
+			#			device = drumrack_device
+			#			break;
+		debug('pass device: ' + str(device.name) if liveobj_valid(device) else str(device))
 		if not device is None:
 			for mod in self._mods:
 				#debug('mod in mods: ' + str(mod.device))
@@ -2204,6 +2227,9 @@ def get_modrouter():
 	if hasattr(__builtins__, 'monomodular') or 'monomodular' in __builtins__.keys():
 		modrouter = __builtins__['monomodular']
 	return modrouter
+
+
+
 
 
 def livedevice(device):
@@ -2310,7 +2336,7 @@ class ModDeviceProvider(EventObject):
 		modrouter = get_modrouter()
 		if modrouter:
 			mod_device = modrouter.is_mod(device)
-			if mod_device:
+			if mod_device and isinstance(mod_device, ModClient):
 				device = mod_device._device_proxy
 		return device
 
