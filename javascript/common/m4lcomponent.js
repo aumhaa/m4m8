@@ -16,7 +16,7 @@ var script = this;
 
 aumhaa = require('_base');
 var FORCELOAD = false;
-var DEBUG = true;
+var DEBUG = false;
 aumhaa.init(this);
 
 
