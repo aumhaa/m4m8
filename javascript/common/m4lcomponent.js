@@ -5,11 +5,10 @@ outlets = 1;
 
 var finder;
 var control_surface;
-var m4lcomp = 0;
-var M4LCOMPONENT=new RegExp(/(M4LInterface)/);
+var return_value;
 var control_names = [];
 var controls = {};
-var excluded = ['control', 'control_names', 'done'];
+var EXCLUDED = ['control', 'control_names', 'done'];
 var control_surface_type = jsarguments[1]||'None';
 
 var script = this;
@@ -33,7 +32,7 @@ function init()
 {
 	debug('m4lcomponent init');
 	finder = new LiveAPI(callback, 'control_surfaces');
-	control_surface = new LiveAPI(callback, 'control_surfaces');
+	control_surface = new LiveAPI(function(args){debug('control_surface callback:', args);}, 'control_surfaces');
 	var number_children = parseInt(finder.children[0]);
 	debug('control_surfaces length:', number_children);
 	for(var i=0;i<number_children;i++)
@@ -41,46 +40,33 @@ function init()
 		debug('Checking control surface #:', i);
 		finder.goto('control_surfaces', i);
 		control_surface.goto('control_surfaces', i);
-		debug('type is:', finder.type);
+		debug('looking for:', control_surface_type, 'type is:', finder.type);
 		if(finder.type == control_surface_type)
 		{
-			var components = finder.get('components');
-			for (var i in components)
+			debug('found corresponding control surface:', finder.type)
+			var names = finder.call('get_control_names').filter(function(element){return EXCLUDED.indexOf(element)<0;}).slice(1);
+			//debug('names:', names);
+			for (var i in names)
 			{
-				debug('component is:', finder.type);
-				finder.id = components[i];
-				if(M4LCOMPONENT.test(finder.type)>0)
+				debug(i, 'name:', names[i]);
+				var name = names[i];
+				try
 				{
-					m4lcomp = finder.id;
-					break;
+					controls[names[i]] = 0;
+				}
+				catch(err)
+				{
 				}
 			}
-			if (m4lcomp)
-			{
-				debug('found m4linterface');
-				var names = finder.call('get_control_names');
-				for (var i in names)
-				{
-					var name = names[i];
-					if((name!='control_names')&&(name!='control')&&(name!='done'))
-					{
-						try
-						{
-							controls[names[i]] = 0;
-						}
-						catch(err)
-						{
-						}
-					}
-				}
-				//control_surface.id = finder.id;
-				debug('control_surface is:', control_surface.path);
-				deprivatize_script_functions(script);
-			}
+			control_surface.id = finder.id;
+			control_surface.property = 'received_midi';
+			debug('control_surface is:', control_surface.path);
+			deprivatize_script_functions(script);
 			outlet(0, 'path', finder.path);
 			return;
 		}
 	}
+
 }
 
 function get_control_names()
@@ -95,7 +81,7 @@ function make_callback(name)
 {
 	var callback = function(args)
 	{
-		//debug('callback closure:', args);
+		debug('callback closure:', name, args);
 		outlet(0, name, args);
 	}
 	return callback;
@@ -103,17 +89,25 @@ function make_callback(name)
 
 function _grab(name)
 {
+
+	debug('_grab:', name);
 	if(controls[name]!=undefined)
 	{
 		if(controls[name]==0)
 		{
 			var control = finder.call('get_control', name);
 			debug('control is:', control);
-			controls[name] = new LiveAPI(make_callback(name), control);
-			debug('control:', control, controls[name].id);
+			var obj = new LiveAPI(make_callback(name), control);
+			obj.property = 'value';
+			controls[name] = obj;
+			//debug('control:', obj.get('name'), obj.get('value'), obj.id);
+			//debug('checking:', controls[name].get('name'), controls[name].get('value'));
+			//controls[name].property = 'value';
 		}
-		finder.call('grab_control', 'id', controls[name].id);
-		controls[name].property = 'value';
+		//finder.call('grab_control', 'id', controls[name].id);
+		finder.call('grab_control', name);
+		//controls[name].property = 'value';
+
 	}
 	else
 	{
