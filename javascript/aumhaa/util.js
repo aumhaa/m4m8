@@ -1,5 +1,21 @@
 autowatch = 1;
 
+function mixin(dest)
+{
+	Array.prototype.slice.call(arguments, 1).forEach(function (src)
+	{
+		Object.keys(src).forEach(function (prop)
+		{
+			var descriptor = Object.getOwnPropertyDescriptor(src, prop);
+			Object.defineProperty(dest, prop, descriptor);
+		});
+	});
+	return dest;
+}
+
+exports.mixin = mixin;
+
+
 function inherits(ctor, superCtor)
 {
 	ctor.super_ = superCtor;
@@ -8,6 +24,30 @@ function inherits(ctor, superCtor)
 }
 
 exports.inherits = inherits;
+
+function class_inherits(ctor, superCtor)
+{
+	// Custom proxy constructor
+	function Clazz()
+	{
+		superCtor.apply(this, arguments);
+		ctor.apply(this, arguments);
+	}
+	// Hang on to the original subclass prototype so it doesn't get lost
+	var proto = ctor.prototype;
+	// Inherit as usual (overwrites the subclass prototype and adds super_)
+	util.inherits(ctor, superCtor);
+	// Ensure the proxy constructor is a good likeness
+	Clazz.super_ = ctor.super_;
+	// Fake out the prototype chain
+	Clazz.prototype.constructor.prototype = ctor.prototype;
+	// Merge the prototype definition from the subclass
+	mixin(Clazz.prototype, proto);
+	// Return the proxy constructor
+	return Clazz;
+}
+
+exports.class_inherits = class_inherits;
 
 function extend(destination, source)
 {
@@ -367,6 +407,7 @@ function find_patcher_objects(container, patcher, names)
 	{
 		container[names[i]] = patcher.getnamed(names[i]);
 	}
+	return container;
 }
 
 exports.find_patcher_objects = find_patcher_objects;
