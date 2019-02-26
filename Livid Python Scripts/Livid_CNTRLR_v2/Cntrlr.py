@@ -143,7 +143,7 @@ class CntrlrSessionNavigationComponent(SessionNavigationComponent):
 	@listens('value')
 	def _on_track_nav_dial_value(self, value):
 	#	debug('_on_track_nav_dial_value', value)
-		self._horizontal_banking.can_scroll_up() and self._horizontal_banking.scroll_up() if value == 127 else self._horizontal_banking.can_scroll_down() and self._horizontal_banking.scroll
+		self._horizontal_banking.can_scroll_up() and self._horizontal_banking.scroll_up() if value == 127 else self._horizontal_banking.can_scroll_down() and self._horizontal_banking.scroll_down()
 
 
 
