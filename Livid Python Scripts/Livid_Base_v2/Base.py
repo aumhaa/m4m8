@@ -81,7 +81,7 @@ SENDS_FADER_COLORS = [5, 5, 5, 5, 4, 4, 4, 4, 2]
 DEVICE_FADER_COLORS = [6, 6, 6, 6, 6, 6, 6, 6, 2]
 USER_FADER_COLORS = [1, 1, 1, 1, 1, 1, 1, 1, 2]
 MOD_FADER_COLORS = [7, 7, 7, 7, 7, 7, 7, 7, 2]
-
+PAD_SENSITIVITY = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,]
 
 MIDI_NOTE_TYPE = 0
 MIDI_CC_TYPE = 1
@@ -702,6 +702,7 @@ class Base(LividControlSurface):
 		self._livid_settings.send('set_function_button_leds_linked', [1])
 		self._livid_settings.send('set_capacitive_fader_note_output_enabled', [1])
 		self._livid_settings.send('set_pad_pressure_output_type', ATON if AFTERTOUCH is True else ATOFF)
+		self._livid_settings.send('set_analog_filter_mode', PAD_SENSITIVITY)
 		self._send_midi((191, 122, 64))
 
 

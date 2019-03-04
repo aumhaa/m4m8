@@ -36,6 +36,7 @@ CALLS = {'set_local_control':8,
 		'reverse_crossfader':15,
 		'set_encoder_encosion_mode':17,
 		'set_encoder_speed':30,
+		'set_analog_filter_mode':41,
 		'set_fader_led_colors':61,
 		'set_streaming_enabled':62,
 		'set_pad_output_type':66,
@@ -87,7 +88,7 @@ class LividSettings(object):
 			self._send_midi(tuple(message))
 		else:
 			debug(call, 'is not a valid lividsettings call')
-	
+
 
 
 class DescriptorBank(object):
