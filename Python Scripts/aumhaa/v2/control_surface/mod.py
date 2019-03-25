@@ -1649,6 +1649,34 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 				parameter.value = newval
 
 
+	def set_all_params_to_defaults(self):
+		debug('set all params to default')
+		for param in self._parameters:
+			if param:
+				name = param.name
+				#debug('param name:', name)
+				if name:
+					for item in name.split(' '):
+						if len(str(item)) and str(item)[0]=='@':
+							vals = item[1:].split(':')
+							if vals[0] in ['rst', 'def', 'defaults']:
+								self.set_param_to_default(param, vals[1])
+							else:
+								debug('no def value...')
+
+
+	def set_param_to_default(self, param, val):
+		rst_val = float(val)/100
+		newval = float(rst_val * (param.max - param.min)) + param.min
+		param.value = newval
+
+
+	def toggle_param(self, param):
+		if param.value == param.min:
+			param.value = param.max
+		else:
+			param.value = param.min
+
 
 class ModClient(NotifyingControlElement):
 

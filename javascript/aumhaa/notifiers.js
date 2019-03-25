@@ -324,7 +324,11 @@ NotifierClass.prototype.notify = function(obj)
 			//{
 			//	lcl_debug('err:', i);
 			//}
-			lcl_debug('-> for', this._name,' : callback->', cb.toString());
+			var error = new Error();
+			var entire = cb.toString();
+			var body = entire.slice(entire.indexOf("{") + 1, entire.lastIndexOf("}"));
+			lcl_debug('-> for', this._name,' : error->', cb.toString(), ': error_stack->', error.stack);
+			lcl_debug('-> for', this._name,' : callback->', cb.name, body);
 		}
 	}
 	for (var i in this._listeners)
@@ -357,7 +361,7 @@ NotifierClass.prototype.set_enabled = function(val)
 exports.NotifierClass = NotifierClass;
 
 
-GUI_Element = function(name)
+GUI_Element = function(name, args)
 {
 	this._grid = {};
 	this.add_bound_properties(this, ['receive', 'receive_notifier', '_x', '_y']);
@@ -910,7 +914,7 @@ exports.CyclePageStackBehaviour = CyclePageStackBehaviour;
 ModeClass = function(number_of_modes, name, args)
 {
 	var self = this;
-	this.add_bound_properties(this, ['mode_cycle_value', 'mode_value', 'toggle_value', 'change_mode', 'update', 'add_mode', 'set_mode_buttons', 'set_mode_cycle_button', 'current_mode']);
+	this.add_bound_properties(this, ['mode_cycle_value', 'mode_value', 'toggle_value', 'change_mode', 'update', 'add_mode', 'set_mode_buttons', 'set_mode_cycle_button', 'current_mode', 'recalculate_mode', 'push_mode', 'splice_mode']);
 	this._value = 0;
 	this._mode_callbacks = new Array(number_of_modes);
 	this._mode_stack = [];
@@ -919,16 +923,17 @@ ModeClass = function(number_of_modes, name, args)
 	this._mode_colors = [0, 1];
 	this._timered = function()
 	{
-		//debug('timered...', arguments[0]._name);
+		//debug('timered...', arguments[0]._name, self._name);
 		button = arguments[0];
 		if(button&&button.pressed())
 		{
-			this._behaviour.press_delayed(button);
+			self._behaviour.press_delayed(button);
 		}
 	}
-	this._behaviour_timer = new Task(this._timered, this); //, self);
-	this.add_bound_properties(this, ['_behaviour_timer', '_timered', '_mode_stack', 'mode_value', 'mode_toggle']);
+	this.add_bound_properties(this, ['_task_server', '_behaviour', '_behaviour_timer', '_timered', '_mode_stack', 'mode_value', 'mode_toggle']);
 	ModeClass.super_.call(this, name, args);
+	lcl_debug('making timer for:', this._name, this._main_script);
+	//this._behaviour_timer = new Task(this._timered, this._main_script ? this._main_script : this, undefined); //, self);
 	this._behaviour = this._behaviour!= undefined ? new this._behaviour(this) : new DefaultPageStackBehaviour(this);
 	this._press_delay = this._press_delay ? this._press_delay : PRS_DLY;
 	this.mode_toggle = new ToggledParameter(this._name + '_Mode_Toggle', {'onValue':colors.BLUE, 'offValue':colors.CYAN, 'value':0});
@@ -960,6 +965,7 @@ ModeClass.prototype.mode_cycle_value = function(button)
 		//this._behaviour_timer = new Task(this._timered, this);
 		this._behaviour_timer.arguments = [button];
 		//this._behaviour_timer.object = this;
+		//this._behaviour_timer = new Task(this._timered, this);
 		this._behaviour_timer.schedule(this._press_delay);
 	}
 	else
@@ -972,6 +978,40 @@ ModeClass.prototype.mode_cycle_value = function(button)
 		else
 		{
 			this._behaviour.release_delayed(button);
+		}
+	}
+	this.notify();
+}
+
+ModeClass.prototype.mode_cycle_value = function(button)
+{
+	debug('mode_cycle_value:', button);
+	if(this._task_server)
+	{
+		if(button.pressed())
+		{
+			this._task_server.removeTask(this._timered)
+			this._behaviour.press_immediate(button);
+			this._task_server.addTask(this._timered, [button], 1, false);
+		}
+		else
+		{
+			if(this._task_server.taskIsRunning(this._timered))
+			{
+				this._task_server.removeTask(this._timered);
+				this._behaviour.release_immediate(button);
+			}
+			else
+			{
+				this._behaviour.release_delayed(button);
+			}
+		}
+	}
+	else
+	{
+		if(button.pressed())
+		{
+			this.change_mode((this._value + 1) % this._mode_callbacks.length)
 		}
 	}
 	this.notify();
@@ -1009,6 +1049,42 @@ ModeClass.prototype.mode_value = function(button)
 		else
 		{
 			this._behaviour.release_delayed(button);
+		}
+	}
+	this.notify();
+}
+
+ModeClass.prototype.mode_value = function(button)
+{
+	if(this._task_server)
+	{
+		if(button.pressed())
+		{
+			if(this._task_server.taskIsRunning(this._timered))
+			{
+				this._task_server.removeTask(this._timered);
+			}
+			this._behaviour.press_immediate(button);
+			this._task_server.addTask(this._timered, [button], 1, false);
+		}
+		else
+		{
+			if(this._task_server.taskIsRunning(this._timered))
+			{
+				this._task_server.removeTask(this._timered);
+				this._behaviour.release_immediate(button);
+			}
+			else
+			{
+				this._behaviour.release_delayed(button);
+			}
+		}
+	}
+	else
+	{
+		if(button.pressed())
+		{
+			this.change_mode(this.mode_buttons.indexOf(button));
 		}
 	}
 	this.notify();
@@ -1149,7 +1225,7 @@ ModeClass.prototype.recalculate_mode = function()
 {
 	//debug('recalculate_mode');
 	var mode = this._mode_stack.length ? this._mode_stack[0] : 0;
-	this.change_mode(this._mode_stack[0]);
+	this.change_mode(mode);
 }
 
 exports.ModeClass = ModeClass;
@@ -1630,7 +1706,7 @@ exports.OffsetComponent = OffsetComponent;
 
 RadioComponent = function(name, minimum, maximum, initial, callback, onValue, offValue, args)
 {
-	this.add_bound_properties(this, ['_min', '_max', 'receive', 'set_value', 'update_controls', '_apiCallback', '_Callback', 'set_controls', 'set_enabled']);
+	this.add_bound_properties(this, ['_callback', '_min', '_max', 'receive', 'set_value', 'update_controls', '_apiCallback', '_Callback', 'set_controls', 'set_enabled']);
 	this._min = minimum!=undefined?minimum:0;
 	this._max = maximum!=undefined?maximum:1;
 	this._buttons = [];
@@ -1667,10 +1743,10 @@ RadioComponent.prototype._Callback = function(obj)
 	}
 }
 
-RadioComponent.prototype.receive = function(value)
+/*RadioComponent.prototype.receive = function(value)
 {
 	this.set_value(value);
-}
+}*/
 
 RadioComponent.prototype.set_controls = function(control)
 {
@@ -1988,6 +2064,7 @@ exports.Page = Page;
 TaskServer = function(script, interval)
 {
 	var self = this;
+	this.add_bound_properties(this, ['_script', '_queue', '_interval', '_run', '_tsk']);
 	this._queue = {};
 	this._interval = interval || 100;
  	this._run = function()
@@ -2016,7 +2093,10 @@ TaskServer = function(script, interval)
 	this._tsk.interval = interval;
 	this._tsk.initialdelay = 10000;
 	this._tsk.repeat();
+	TaskServer.super_.call(this, 'TaskSever', {'_script':script});
 }
+
+inherits(TaskServer, Bindable);
 
 TaskServer.prototype.addTask = function(callback, arguments, interval, repeat, name)
 {
@@ -2043,6 +2123,31 @@ TaskServer.prototype.resetTask = function(name)
 	}
 }
 
+TaskServer.prototype.taskIsRunning = function(callback, name)
+{
+	if(name)
+	{
+		if(this._queue[name])
+		{
+			return true;
+		}
+	}
+	else if(callback)
+	{
+		for(var i in this._queue)
+		{
+			if(this._queue[i].callback == callback)
+			{
+				return true;
+			}
+		}
+	}
+	else
+	{
+		return false;
+	}
+}
+
 TaskServer.prototype.removeTask = function(callback, arguments, name)
 {
 	lcl_debug('removing task:', name);
@@ -2057,7 +2162,7 @@ TaskServer.prototype.removeTask = function(callback, arguments, name)
 	{
 		for(var i in this._queue)
 		{
-			if((this._queue[i].callback == callback)&&(this.qeue[i].arguments = arguments))
+			if((this._queue[i].callback == callback)&&(this._queue[i].arguments = arguments))
 			{
 				delete this._queue[i];
 			}
