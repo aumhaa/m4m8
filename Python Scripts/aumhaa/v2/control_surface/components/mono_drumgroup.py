@@ -98,13 +98,21 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 
 
 	def _create_and_set_pad_translations(self):
+		debug('_create_and_set_pad_translations')
+		def create_translation_entry(button):
+			row, col = button.coordinate
+			return (col,
+			 row,
+			 button.identifier,
+			 button.channel)
+
 		if self._can_set_pad_translations():
 			translations = []
 			for button in self.matrix:
 				button.channel = self._translation_channel
 				button.identifier = self._button_coordinates_to_pad_index(self._raw_position*4, button.coordinate)
 				button.enabled = True
-				translations.append(self.create_translation_entry(button))
+				translations.append(create_translation_entry(button))
 
 			self._set_pad_translations(tuple(translations))
 		else:
@@ -281,10 +289,13 @@ class MonoDrumGroupComponent(DrumGroupComponent):
 
 
 	def _update_note_translations(self):
-		if liveobj_valid(self._drum_group_device):
+		debug('_update_note_translations')
+		"""if liveobj_valid(self._drum_group_device):
+			debug('MONO')
 			super(MonoDrumGroupComponent, self)._update_note_translations()
 		else:
-			super(DrumGroupComponent, self)._update_note_translations()
+			debug('VANILLA')"""
+		super(DrumGroupComponent, self)._update_note_translations()
 
 
 	def _button_should_be_enabled(self, button):

@@ -207,7 +207,7 @@ class CntrlrMonoInstrumentComponent(MonoInstrumentComponent):
 				self._script.set_controlled_track(self.song.view.selected_track)
 			if new_mode in self._main_modes._mode_map or new_mode is None:
 				self._main_modes.selected_mode = new_mode
-				self._script.set_controlled_track(None)
+				self._script.set_controlled_track(self.song.view.selected_track)
 			else:
 				self._main_modes.selected_mode = 'disabled'
 				self._script.set_controlled_track(None)
@@ -581,7 +581,7 @@ class Cntrlr(LividControlSurface):
 		self._instrument._drumpad.sequencer_layer = LayerMode(self._instrument._drumpad, Layer(priority = 5,
 																										playhead = self._playhead_element,
 																										drumpad_matrix = self._matrix.submatrix[:,:],
-																										sequencer_matrix = self._key_matrix.submatrix[:,:1]))
+																										sequencer_matrix = self._key_matrix.submatrix[:,0]))
 		self._instrument._drumpad.split_layer = LayerMode(self._instrument._drumpad, Layer(priority = 5,
 																										drumpad_matrix = self._matrix.submatrix[:,:],
 																										split_matrix = self._key_matrix.submatrix[:16,:1]))

@@ -20,6 +20,8 @@ from pushbase.note_editor_component import NoteEditorComponent
 from pushbase.loop_selector_component import LoopSelectorComponent
 from pushbase.playhead_component import PlayheadComponent
 from pushbase.grid_resolution import GridResolution
+from pushbase.pad_control import PadControl
+
 
 from aumhaa.v2.control_surface.mono_modes import CancellableBehaviour, CancellableBehaviourWithRelease
 from aumhaa.v2.control_surface.components.channelized_settings import ChannelizedSettingsBase, ScrollingChannelizedSettingsComponent, ToggledChannelizedSettingsComponent, TaggedSettingsComponent
@@ -115,12 +117,68 @@ Feedback channels for playhead are locked to Ch.15, we overloaded NoteEditor to 
 Feedback channels for track notes are set via control_surface.set_feedback channels and control_surface.set_controlled_track
 """
 
+class SpecialPlayheadComponent(PlayheadComponent):
+
+	def update(self):
+		super(SpecialPlayheadComponent, self).update()
+		debug('SpecialPlayheadComponent.update()')
+		debug('self._playhead:', self._playhead)
+		debug('enabled:', self.is_enabled())
+		#debug('liveobj_valid:', liveobj_valid(self._clip))
+		if self.is_enabled() and self.song.is_playing and liveobj_valid(self._clip):
+			if self._clip.is_arrangement_clip or self._clip.is_playing:
+				clip = self._clip
+				is_triplet = self._grid_resolution.clip_grid[1]
+				notes = self._triplet_notes if is_triplet else self._notes
+				debug('clip:', clip.name if hasattr(clip, 'name') else None)
+				debug('notes:', notes)
+				debug('wrap_around:', self._follower.is_following and self._paginator.can_change_page)
+				debug('start_time:', self._paginator.page_length * self._paginator.page_index)
+				debug('step_length:', self._paginator.page_length / len(notes))
+				debug('feedback_channels:', self._feedback_channels)
+
+
+
+	def set_clip(self, clip):
+		debug('*******************Playhead.set_clip:', clip.name if clip and hasattr(clip, 'name') else None)
+		super(SpecialPlayheadComponent, self).set_clip(clip)
+
+	@listens(u'page')
+	def _on_page_changed(self):
+		debug('*******************Playhead._on_page_changed()')
+		self.update()
+
+	@listens(u'playing_status')
+	def _on_playing_status_changed(self):
+		debug('*******************Playhead._on_page_changed()')
+		self.update()
+
+	@listens(u'is_playing')
+	def _on_song_is_playing_changed(self):
+		debug('*******************Playhead._on_playing_status_changed()')
+		self.update()
+
+	@listens(u'is_following')
+	def _on_follower_is_following_changed(self, value):
+		debug('*******************Playhead._on_follower_is_following_changed()')
+		self.update()
+
+
+
 class MonoStepSeqComponent(StepSeqComponent):
 
 
 	def __init__(self, *a, **k):
 		super(MonoStepSeqComponent, self).__init__(*a, **k)
+		self._playhead_component = PlayheadComponent(parent=self, grid_resolution=self._grid_resolution, paginator=self.paginator, follower=self._loop_selector, notes=chain(*starmap(range, ((92, 100),
+		 (84, 92),
+		 (76, 84),
+		 (68, 76)))), triplet_notes=chain(*starmap(range, ((92, 98),
+		 (84, 90),
+		 (76, 82),
+		 (68, 74)))), feedback_channels=[15])
 		self._loop_selector.follow_detail_clip = True
+		self._loop_selector._on_detail_clip_changed.subject = self.song.view
 		self._update_delay_task = self._tasks.add(task.sequence(task.wait(.1), task.run(self._update_delayed)))
 		self._update_delay_task.kill()
 
@@ -134,6 +192,7 @@ class MonoStepSeqComponent(StepSeqComponent):
 	def _update_delayed(self):
 		self._on_detail_clip_changed()
 		self._update_playhead_color()
+		self._update_delay_task.kill()
 
 
 	def set_follow_button(self, button):
@@ -152,20 +211,21 @@ class MonoNoteEditorComponent(NoteEditorComponent):
 
 	"""Custom function for displaying triplets for different grid sizes, called by _visible steps"""
 	_visible_steps_model = lambda self, indices: filter(lambda k: k % 4 != 3, indices)
-	_matrix = None
+	#_matrix = None
+	matrix = control_matrix(PadControl, channel=15, sensitivity_profile=u'loop', mode=PlayableControl.Mode.listenable)
 
 	"""First we need to reset the state (chan, id) of each button of the matrix that was previously grabbed so that it doesn't display the playhead when it's given to something else"""
 	"""Next we need to override the channel that each control is set to in this function, as it is hardcoded from a header definition in the module"""
-	def set_button_matrix(self, matrix):
+	"""def set_button_matrix(self, matrix):
 		if self._matrix:
 			for button, _ in ifilter(first, self._matrix.iterbuttons()):
 				button.reset_state()
 		super(MonoNoteEditorComponent, self).set_button_matrix(matrix)
 		if matrix:
 			for button, _ in ifilter(first, matrix.iterbuttons()):
-				button.set_channel(15)
+				button.set_channel(15)"""
 
-
+	"""
 	def set_matrix(self, matrix):
 		if self._matrix:
 			for button, _ in ifilter(first, self._matrix.iterbuttons()):
@@ -175,6 +235,20 @@ class MonoNoteEditorComponent(NoteEditorComponent):
 		if matrix:
 			for button, _ in ifilter(first, matrix.iterbuttons()):
 				button.set_channel(15)
+	"""
+
+	@matrix.pressed
+	def matrix(self, button):
+		super(MonoNoteEditorComponent, self)._on_pad_pressed(button.coordinate)
+
+	@matrix.released
+	def matrix(self, button):
+		super(MonoNoteEditorComponent, self)._on_pad_released(button.coordinate)
+
+	def _on_pad_pressed(self, coordinate):
+		y, x = coordinate
+		debug('MonoNoteEditorComponent._on_pad_pressed:', y, x)
+		super(MonoNoteEditorComponent, self)._on_pad_pressed(coordinate)
 
 
 	def _visible_steps(self):
