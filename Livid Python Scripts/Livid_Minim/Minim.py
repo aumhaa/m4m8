@@ -52,7 +52,7 @@ from _Generic.Devices import *
 from aumhaa.v2.control_surface import SendLividSysexMode, ShiftedBehaviour, LatchingShiftedBehaviour, DelayedExcludingMomentaryBehaviour
 from aumhaa.v2.control_surface.mod import *
 from aumhaa.v2.control_surface.instrument_consts import *
-from aumhaa.v2.control_surface.components import DeviceNavigator, DeviceSelectorComponent, MonoMixerComponent
+from aumhaa.v2.control_surface.components import DeviceNavigator, DeviceSelectorComponent, MonoMixerComponent, MonoChannelStripComponent
 from aumhaa.v2.control_surface.components.mono_instrument import *
 from aumhaa.v2.control_surface.elements import MonoBridgeElement, MonoButtonElement, MonoEncoderElement
 from aumhaa.v2.livid import LividControlSurface
@@ -181,7 +181,7 @@ class Minim(LividControlSurface):
 
 
 	def _setup_mixer(self):
-		self._mixer = MonoMixerComponent(name = 'Mixer',tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer',tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True, channel_strip_component_type = MonoChannelStripComponent)
 		self._mixer._selected_strip.layer = Layer(priority = 4, volume_control = self._fader)
 		self._mixer.solo_mute_record_stop_layer = AddLayerMode(self._mixer, Layer(priority = 4,
 																					mute_buttons = self._matrix.submatrix[:, 0],

@@ -10,7 +10,7 @@ Minim_Map.py
 
 Created by amounra on 2012-12-30.
 
-This file allows the reassignment of the controls from their default arrangement.  The order is from left to right; 
+This file allows the reassignment of the controls from their default arrangement.  The order is from left to right;
 Buttons are Note #'s and Faders/Rotaries are Controller #'s
 """
 
@@ -119,8 +119,8 @@ SCALENAMES = [scale for scale in sorted(SCALES.iterkeys())]
 """It is possible to create a custom list of scales to be used by the script.  For instance, the list below would include major, minor, auto, drumpad, and chromatic scales, in that order."""
 #SCALENAMES = ['Major', 'Minor', 'Auto', 'DrumPad', 'Chromatic']
 
-DEFAULT_INSTRUMENT_SETTINGS = {'Scales':SCALES, 
-								'ScaleAbbrevs':SCALEABBREVS, 
+DEFAULT_INSTRUMENT_SETTINGS = {'Scales':SCALES,
+								'ScaleAbbrevs':SCALEABBREVS,
 								'ScaleNames':SCALENAMES,
 								'DefaultAutoScale':DEFAULT_AUTO_SCALE,
 								'DefaultVertOffset':DEFAULT_VERTOFFSET,
@@ -140,7 +140,7 @@ class MinimColors:
 		Off = LividRGB.OFF
 		Disabled = LividRGB.OFF
 		Alert = LividRGB.BlinkFast.WHITE
-	
+
 
 	class Transport:
 		OverdubOn = LividRGB.BlinkFast.RED
@@ -149,28 +149,29 @@ class MinimColors:
 		PlayOn = LividRGB.BlinkSlow.GREEN
 		StopOn = LividRGB.BLUE
 		StopOff = LividRGB.OFF
-	
+
 
 	ResetSendsColor = LividRGB.WHITE
 
 	class Mod:
 		ShiftOff = LividRGB.OFF
 		ShiftOn = LividRGB.WHITE
-	
+
 
 	class Mode:
 		Session = LividRGB.BLUE
 		Session_shifted = LividRGB.BlinkFast.BLUE
 		Instrument = LividRGB.CYAN
 		Instrument_shifted = LividRGB.BlinkFast.CYAN
-	
+
 
 	class ShiftMode:
 		Enabled = LividRGB.BlinkFast.WHITE
 		Disabled = LividRGB.OFF
-	
+
 
 	class Session:
+		StopClipDisabled = LividRGB.OFF
 		StopClipTriggered = LividRGB.BlinkFast.BLUE
 		StopClip = LividRGB.BLUE
 		Scene = LividRGB.CYAN
@@ -186,24 +187,24 @@ class MinimColors:
 		NavigationButtonOn = LividRGB.BLUE
 		PageNavigationButtonOn = LividRGB.CYAN
 		Empty = LividRGB.OFF
-	
+
 
 	class NoteEditor:
 
 		class Step:
 			Low = LividRGB.CYAN
-			High = LividRGB.WHITE 
+			High = LividRGB.WHITE
 			Full = LividRGB.YELLOW
 			Muted = LividRGB.YELLOW
 			StepEmpty = LividRGB.OFF
-		
+
 
 		class StepEditing:
 			High = LividRGB.GREEN
 			Low = LividRGB.CYAN
 			Full = LividRGB.YELLOW
 			Muted = LividRGB.WHITE
-		
+
 
 		StepEmpty = LividRGB.OFF
 		StepEmptyBase = LividRGB.OFF
@@ -214,7 +215,7 @@ class MinimColors:
 		StepSelected = LividRGB.GREEN
 		QuantizationSelected = LividRGB.RED
 		QuantizationUnselected = LividRGB.MAGENTA
-	
+
 
 	class LoopSelector:
 		Playhead = LividRGB.YELLOW
@@ -223,7 +224,7 @@ class MinimColors:
 		SelectedPage = LividRGB.WHITE
 		InsideLoop = LividRGB.CYAN
 		PlayheadRecord = LividRGB.RED
-	
+
 
 	class DrumGroup:
 		PadAction = LividRGB.WHITE
@@ -238,7 +239,7 @@ class MinimColors:
 		PadSoloedSelected = LividRGB.BLUE
 		PadInvisible = LividRGB.OFF
 		PadAction = LividRGB.RED
-	
+
 
 	class Mixer:
 		SoloOn = LividRGB.CYAN
@@ -252,13 +253,13 @@ class MinimColors:
 		StopClip = LividRGB.BLUE
 		SelectedOn = LividRGB.BLUE
 		SelectedOff = LividRGB.OFF
-	
+
 
 	class Recording:
 		On = LividRGB.BlinkFast.RED
 		Off = LividRGB.RED
 		Transition = LividRGB.BlinkSlow.RED
-	
+
 
 	class Recorder:
 		On = LividRGB.WHITE
@@ -273,14 +274,14 @@ class MinimColors:
 		FixedNotAssigned = LividRGB.OFF
 		OverdubOn = LividRGB.BlinkFast.RED
 		OverdubOff = LividRGB.RED
-	
+
 
 	class Sequencer:
 		OctaveOn = LividRGB.BlinkFast.CYAN
 		OctaveOff = LividRGB.OFF
 		On = LividRGB.WHITE
 		Off = LividRGB.OFF
-	
+
 
 	class Device:
 		NavOn = LividRGB.MAGENTA
@@ -291,7 +292,7 @@ class MinimColors:
 		ChainNavOff = LividRGB.OFF
 		ContainNavOn = LividRGB.CYAN
 		ContainNavOff = LividRGB.OFF
-	
+
 
 	class DeviceNavigator:
 		DevNavOff = LividRGB.OFF
@@ -300,7 +301,7 @@ class MinimColors:
 		ChainNavOff = LividRGB.OFF
 		LevelNavOn = LividRGB.CYAN
 		LevelNavOff = LividRGB.OFF
-	
+
 
 	class MonoInstrument:
 
@@ -324,16 +325,13 @@ class MinimColors:
 			RootBlackValue = LividRGB.MAGENTA
 			WhiteValue = LividRGB.CYAN
 			BlackValue = LividRGB.BLUE
-		
+
 
 		class Drums:
 			SelectedNote = LividRGB.BLUE
 			EvenValue = LividRGB.GREEN
 			OddValue = LividRGB.MAGENTA
-		
 
-	
+
+
 ## a
-
-
-

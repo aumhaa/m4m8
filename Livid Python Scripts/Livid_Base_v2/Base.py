@@ -26,7 +26,7 @@ from aumhaa.v2.control_surface.mod_devices import *
 from aumhaa.v2.control_surface.mod import *
 from aumhaa.v2.control_surface.elements import MonoEncoderElement, MonoBridgeElement, generate_strip_string
 from aumhaa.v2.control_surface.elements.mono_button import *
-from aumhaa.v2.control_surface.components import MonoDeviceComponent, DeviceNavigator, TranslationComponent, MonoMixerComponent
+from aumhaa.v2.control_surface.components import MonoDeviceComponent, DeviceNavigator, TranslationComponent, MonoMixerComponent, MonoChannelStripComponent
 from aumhaa.v2.control_surface.components.device import DeviceComponent
 from aumhaa.v2.control_surface.components.mono_instrument import *
 from aumhaa.v2.livid import LividControlSurface, LividSettings, LividRGB
@@ -781,7 +781,7 @@ class Base(LividControlSurface):
 
 
 	def _setup_mixer_control(self):
-		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 4,tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 4,tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True, channel_strip_component_type = MonoChannelStripComponent)
 		self._mixer.master_strip().layer = Layer(priority = 6, volume_control = self._fader[8])
 		self._mixer.volume_layer = AddLayerMode(self._mixer, Layer(priority = 6, volume_controls = self._fader_matrix))
 		self._mixer.select_layer = AddLayerMode(self._mixer, Layer(priority = 6, track_select_buttons = self._touchpad_matrix))

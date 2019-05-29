@@ -16,7 +16,7 @@ from aumhaa.v2.base import initialize_debug
 from aumhaa.v2.control_surface import SendLividSysexMode
 from aumhaa.v2.control_surface.elements import MonoEncoderElement, MonoBridgeElement
 from aumhaa.v2.control_surface.elements.mono_button import *
-from aumhaa.v2.control_surface.components import DeviceNavigator, MonoMixerComponent
+from aumhaa.v2.control_surface.components import DeviceNavigator, MonoMixerComponent, MonoChannelStripComponent
 from aumhaa.v2.control_surface.components.device import DeviceComponent
 from aumhaa.v2.livid import LividControlSurface, LividRGB
 from aumhaa.v2.control_surface.components.m4l_interface import M4LInterfaceComponent
@@ -87,7 +87,7 @@ class GuitarWing(LividControlSurface):
 
 
 	def _setup_mixer_control(self):
-		self._mixer = MonoMixerComponent(name = 'Mixer', tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer', tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True, channel_strip_component_type = MonoChannelStripComponent)
 		self.song.view.selected_track = self._mixer.channel_strip(0)._track
 
 

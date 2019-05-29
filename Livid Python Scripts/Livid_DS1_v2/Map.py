@@ -44,16 +44,17 @@ class DS1Colors:
 		Main = LividRGB.WHITE
 		Select = LividRGB.RED
 		Clips = LividRGB.GREEN
-	
+
 
 	class DefaultButton:
 		On = LividRGB.WHITE
 		Off = LividRGB.OFF
 		Disabled = LividRGB.OFF
 		Alert = LividRGB.BlinkFast.WHITE
-	
+
 
 	class Session:
+		StopClipDisabled = LividRGB.OFF
 		StopClipTriggered = LividRGB.BiColor.BLUE.WHITE
 		StopClip = LividRGB.BLUE
 		Scene = LividRGB.CYAN
@@ -70,14 +71,14 @@ class DS1Colors:
 		NavigationButtonOff = LividRGB.YELLOW
 		ZoomOn = LividRGB.BlinkFast.WHITE
 		ZoomOff = LividRGB.WHITE
-	
+
 
 	class Zooming:
 		Selected = LividRGB.BlinkFast.YELLOW
 		Stopped = LividRGB.WHITE
 		Playing = LividRGB.GREEN
 		Empty = LividRGB.OFF
-	
+
 
 	class LoopSelector:
 		Playhead = LividRGB.YELLOW
@@ -86,7 +87,7 @@ class DS1Colors:
 		SelectedPage = LividRGB.WHITE
 		InsideLoop = LividRGB.CYAN
 		PlayheadRecord = LividRGB.RED
-	
+
 
 	class Transport:
 		PlayOn = LividRGB.BiColor.WHITE.GREEN
@@ -101,7 +102,7 @@ class DS1Colors:
 		SeekBackwardOff = LividRGB.CYAN
 		LoopOn = LividRGB.BlinkMedium.YELLOW
 		LoopOff = LividRGB.YELLOW
-	
+
 
 	class Mixer:
 		SoloOn = LividRGB.BLUE
@@ -114,18 +115,18 @@ class DS1Colors:
 		StopClip = LividRGB.BLUE
 		SelectedOn = LividRGB.BLUE
 		SelectedOff = LividRGB.MAGENTA
-	
+
 
 	class Recording:
 		On = LividRGB.BiColor.WHITE.MAGENTA
 		Transition = LividRGB.BlinkFast.MAGENTA
 		Off = LividRGB.MAGENTA
-	
+
 
 	class Automation:
 		On = LividRGB.BiColor.WHITE.YELLOW
 		Off = LividRGB.YELLOW
-	
+
 
 	class Recorder:
 		On = LividRGB.WHITE
@@ -140,7 +141,7 @@ class DS1Colors:
 		AutomationOff = LividRGB.YELLOW
 		FixedAssigned = LividRGB.MAGENTA
 		FixedNotAssigned = LividRGB.OFF
-	
+
 
 	class Device:
 		NavOn = LividRGB.MAGENTA
@@ -151,5 +152,3 @@ class DS1Colors:
 		ChainNavOff = LividRGB.OFF
 		ContainNavOn = LividRGB.CYAN
 		ContainNavOff = LividRGB.OFF
-	
-

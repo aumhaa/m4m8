@@ -27,7 +27,7 @@ from aumhaa.v2.control_surface.mod_devices import *
 from aumhaa.v2.control_surface.mod import *
 from aumhaa.v2.control_surface.elements import MonoEncoderElement, MonoBridgeElement, generate_strip_string, CodecEncoderElement
 from aumhaa.v2.control_surface.elements.mono_button import *
-from aumhaa.v2.control_surface.components import DeviceNavigator, TranslationComponent, MonoMixerComponent, ResetSendsComponent, DeviceSelectorComponent, MonoMixerComponent
+from aumhaa.v2.control_surface.components import DeviceNavigator, TranslationComponent, MonoMixerComponent, ResetSendsComponent, DeviceSelectorComponent, MonoChannelStripComponent
 from aumhaa.v2.control_surface.components.device import DeviceComponent
 from aumhaa.v2.control_surface.components.mono_instrument import *
 from aumhaa.v2.control_surface.mono_modes import CancellableBehaviour, SendLividSysexMode, SendSysexMode, CancellableBehaviourWithRelease, ColoredCancellableBehaviourWithRelease, MomentaryBehaviour, BicoloredMomentaryBehaviour, DefaultedBehaviour
@@ -649,7 +649,7 @@ class Cntrlr(LividControlSurface):
 
 
 	def _setup_mixer_control(self):
-		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2,tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2,tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True, channel_strip_component_type = MonoChannelStripComponent)
 		self._mixer.fader_layer = AddLayerMode(self._mixer, Layer(priority = 4, volume_controls = self._fader_matrix.submatrix[:4, :],
 											return_controls = self._fader_matrix.submatrix[4:6, :],
 											prehear_volume_control = self._fader[6],

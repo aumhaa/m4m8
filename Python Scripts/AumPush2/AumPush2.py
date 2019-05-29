@@ -653,12 +653,12 @@ class AumPush2(Push2):
 
 
 
-class ModDispayComponent(Component):
+class ModDisplayComponent(Component):
 
 
 	def __init__(self, parent, display_strings, value_strings, *a, **k):
 		assert len(display_strings) == len(value_strings)
-		super(ModDispayComponent, self).__init__(*a, **k)
+		super(ModDisplayComponent, self).__init__(*a, **k)
 		self.num_segments = len(display_strings)
 		self._parent = parent
 		self._name_display_line = None

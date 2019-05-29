@@ -476,6 +476,9 @@ class CodecMixerComponent(MixerComponent):
 		self._reassign_tracks()
 
 
+	def _create_strip(self):
+		return ChannelStripComponent(parent=self)
+
 	def return_strip(self, index):
 		assert(index in range(len(self._return_strips)))
 		return self._return_strips[index]
@@ -616,7 +619,7 @@ class Codec(LividControlSurface):
 		self._session_navigation.layer = Layer(priority = 4, left_button = self._button[6][0], right_button = self._button[7][0])
 		self._session_navigation.set_enabled(False)
 		#self._session = SessionComponent(name = 'Session', session_ring = self._session_ring)
-		self._mixer = CodecMixerComponent(num_returns = 4, name = 'Mixer', tracks_provider = self._session_ring, invert_mute_feedback = True, auto_name = True)
+		self._mixer = CodecMixerComponent(num_returns = 4, name = 'Mixer', tracks_provider = self._session_ring, invert_mute_feedback = False, auto_name = True)
 		self._mixer._mix_layer = AddLayerMode(self._mixer, Layer(priority = 4, volume_controls = self._encoder_matrix.submatrix[:8,3],
 									pan_controls = self._encoder_matrix.submatrix[:8,2],
 									send_controls = self._encoder_matrix.submatrix[:8, :2],

@@ -26,7 +26,7 @@ from aumhaa.v2.control_surface.mod_devices import *
 from aumhaa.v2.control_surface.mod import *
 from aumhaa.v2.control_surface.elements import MonoEncoderElement, MonoBridgeElement, generate_strip_string
 from aumhaa.v2.control_surface.elements.mono_button import *
-from aumhaa.v2.control_surface.components import MonoDeviceComponent, DeviceNavigator, TranslationComponent, MonoMixerComponent
+from aumhaa.v2.control_surface.components import MonoDeviceComponent, DeviceNavigator, TranslationComponent, MonoMixerComponent, MonoChannelStripComponent
 from aumhaa.v2.control_surface.components.device import DeviceComponent
 from aumhaa.v2.control_surface.components.mono_instrument import *
 from aumhaa.v2.livid import LividControlSurface, LividSettings, LividRGB
@@ -217,7 +217,7 @@ class DS1(LividControlSurface):
 
 	def _setup_mixer_control(self):
 
-		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2, tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = MonoMixerComponent(name = 'Mixer', num_returns = 2, tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True, channel_strip_component_type=MonoChannelStripComponent)
 		self._mixer.master_strip().set_volume_control(self._master_fader)
 		self._mixer.set_prehear_volume_control(self._side_dial[3])
 		self._mixer.layer = Layer(volume_controls = self._fader_matrix, track_select_dial = self._encoder[1])

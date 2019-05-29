@@ -25,7 +25,7 @@ from aumhaa.v2.control_surface.mod_devices import *
 from aumhaa.v2.control_surface.mod import *
 from aumhaa.v2.control_surface.elements import MonoEncoderElement, MonoBridgeElement, generate_strip_string
 from aumhaa.v2.control_surface.elements.mono_button import *
-from aumhaa.v2.control_surface.components import MonoKeyGroupComponent, MonoDrumGroupComponent, MonoDeviceComponent, DeviceNavigator, TranslationComponent, MonoMixerComponent
+from aumhaa.v2.control_surface.components import MonoKeyGroupComponent, MonoDrumGroupComponent, MonoDeviceComponent, DeviceNavigator, TranslationComponent, MonoMixerComponent, MonoChannelStripComponent
 from aumhaa.v2.control_surface.components.device import DeviceComponent
 from aumhaa.v2.control_surface.components.mono_instrument import *
 from aumhaa.v2.livid import LividControlSurface, LividSettings, LividRGB
@@ -52,6 +52,7 @@ SCALES = ['ionian', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'aeolian', 'lo
 
 class OhmMixerComponent(MonoMixerComponent):
 
+	_channel_strip_class = MonoChannelStripComponent
 
 	#overriding to accomodate only having 4 of our 7 channelstrips assigned send controls
 	def set_send_controls(self, controls):
@@ -89,6 +90,7 @@ class OhmMixerComponent(MonoMixerComponent):
 			for index in range(min(len(self._channel_strips), controls.width())):
 				eq_controls = [controls.get_button(row, index) for row in range(controls.height())]
 				self._channel_strips[index].set_eq_gain_controls(eq_controls)
+				debug('strip:', self._channel_strips[index])
 		else:
 			for strip in self._channel_strips:
 				strip.set_eq_gain_controls(None)
@@ -366,7 +368,7 @@ class OhmModes(LividControlSurface):
 
 
 	def _setup_mixer_control(self):
-		self._mixer = OhmMixerComponent(name = 'Mixer', tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True)
+		self._mixer = OhmMixerComponent(name = 'Mixer', tracks_provider = self._session_ring, track_assigner = SimpleTrackAssigner(), invert_mute_feedback = True, auto_name = True, enable_skinning = True, channel_strip_component_type = MonoChannelStripComponent)
 		self._mixer.layer = Layer(priority = 5, volume_controls = self._fader_matrix.submatrix[:7, :], prehear_volume_control = self._dial[15], crossfader_control = self._crossfader)
 		self._mixer.master_strip().layer = Layer(priority = 5, volume_control = self._fader[7], select_button = self._button[7])
 		self._mixer.mix_layer = AddLayerMode(self._mixer, Layer(priority = 5, mute_buttons = self._matrix.submatrix[:7,5],
