@@ -31,7 +31,7 @@ VALUES = [[1, 1, 1], [1, 1, 0], [0, 1, 1], [1, 0, 1], [1, 0, 0], [0, 1, 0], [0, 
 
 STATE_COLORS = [5, 1, 6, 3, 4, 7]
 LIVE_STATE_COLORS = [7, 5, 6, 3]
-
+FLASH_DELAY = 4
 
 class LoopPedalButtonElement(MonoButtonElement):
 
@@ -423,7 +423,7 @@ class Monoloop(ControlSurfaceComponent):
 			if not self.on_state_change.subject == None:
 				val = int(self.on_state_change.subject.value)
 				if val < len(STATE_COLORS):
-					self._led.send_value(STATE_COLORS[val] + (self.is_selected()*7), True)
+					self._led.send_value(STATE_COLORS[val] + (self.is_selected()*(FLASH_DELAY*7)), True)
 			#state = self._record.value or  self._mute.value * 2 or self._overdub.value * 3 or self._clear.value * 4 or self._speed * 5
 
 

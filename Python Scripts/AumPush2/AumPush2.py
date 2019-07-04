@@ -44,6 +44,7 @@ from aumhaa.v2.control_surface.mod_devices import *
 from aumhaa.v2.control_surface.components.mono_instrument import *
 from aumhaa.v2.base.debug import *
 from aumhaa.v2.control_surface.mod import *
+from aumhaa.v2.control_surface.components.tagged_defaults import *
 from .colors import make_default_skin
 from .Map import *
 from .ModDevices import *
@@ -467,6 +468,10 @@ class AumPush2(Push2):
 		self._send_reset.layer = Layer(priority = 9, send_a_button = self._with_select(self.elements.track_state_buttons_raw[4]), send_b_button = self._with_select(self.elements.track_state_buttons_raw[5]), send_c_button = self._with_select(self.elements.track_state_buttons_raw[6]), send_d_button = self._with_select(self.elements.track_state_buttons_raw[7]))
 		self._send_reset.set_enabled(False)
 
+		self._tagged_defaults = TaggedDefaultsComponent(self)
+		self._tagged_defaults.layer = Layer(priority = 9, reset_button = 'side_buttons_raw[7]')
+		self._tagged_defaults.set_enabled(False)
+
 		self._troll_submodes = ModesComponent()
 		self._troll_submodes.add_mode('Strip', [])
 		self._troll_submodes.add_mode('FX1', [])
@@ -476,7 +481,7 @@ class AumPush2(Push2):
 		self._troll_submodes.selected_mode = 'Strip'
 		self._troll_submodes.set_enabled(False)
 
-		static_modes = CompoundMode(self._crossfader_control, self._device_selector, self._send_reset, self._troll_submodes)
+		static_modes = CompoundMode(self._crossfader_control, self._device_selector, self._send_reset, self._troll_submodes, self._tagged_defaults)
 
 		self._troll_modes = ModesComponent()
 		self._troll_modes.add_mode('disabled', [], cycle_mode_button_color = 'DefaultButton.Off')
