@@ -1743,10 +1743,10 @@ RadioComponent.prototype._Callback = function(obj)
 	}
 }
 
-/*RadioComponent.prototype.receive = function(value)
+RadioComponent.prototype.receive = function(value)
 {
 	this.set_value(value);
-}*/
+}
 
 RadioComponent.prototype.set_controls = function(control)
 {
@@ -2703,7 +2703,13 @@ FloatingWindowModule.prototype.lock = function()
 
 FloatingWindowModule.prototype.unlock = function()
 {
-	this._pcontrol.close();
+	this._obj.window('flags', 'minimize');
+	this._obj.window('flags', 'zoom');
+	this._obj.window('flags', 'close');
+	this._obj.window('flags', 'grow');
+	this._obj.window('flags', 'title');
+	this._obj.window('flags', 'nofloat');
+	this._obj.window('exec');
 }
 
 FloatingWindowModule.prototype.resize = function(sizeX, sizeY)
