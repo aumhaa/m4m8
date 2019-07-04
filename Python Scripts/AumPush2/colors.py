@@ -1,4 +1,4 @@
- 
+
 #from __future__ import absolute_import, print_function
 from functools import partial
 from ableton.v2.control_surface import Skin
@@ -27,6 +27,14 @@ UNLIT_COLOR = Rgb.BLACK
 class Colors(ColorsBase):
 
 
+	class TaggedDefaults:
+
+		ResetOff = Rgb.RED
+		ResetOn = Rgb.WHITE
+
+
+
+
 	class Mod:
 
 		ShiftOn = Basic.ON
@@ -37,8 +45,8 @@ class Colors(ColorsBase):
 		class Nav:
 			OnValue = Rgb.RED
 			OffValue = Rgb.WHITE
-		
-	
+
+
 
 	class MonoInstrument:
 
@@ -56,7 +64,7 @@ class Colors(ColorsBase):
 			RootBlackValue = Rgb.RED_SHADE
 			WhiteValue = Rgb.SKY
 			BlackValue = Rgb.BLUE
-	
+
 
 		class Drums:
 			SelectedNote = Rgb.BLUE
@@ -69,6 +77,3 @@ def make_default_skin():
 
 def make_drum_pad_coloring_skin():
 	return Skin(ColorsWithDrumPadColoring)
-
-
-
