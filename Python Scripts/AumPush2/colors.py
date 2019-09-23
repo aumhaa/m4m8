@@ -33,6 +33,14 @@ class Colors(ColorsBase):
 
 
 
+	class TaggedDefaults:
+
+		ResetOff = Rgb.RED
+		ResetOn = Rgb.WHITE
+
+
+
+
 	class Mod:
 
 		ShiftOn = Basic.ON
