@@ -101,7 +101,7 @@ class DS1TransportComponent(TransportComponent):
 
 
 	def _update_stop_button_color(self):
-		self._stop_button.color = 'Transport.StopOn' if self._play_toggle.is_toggled else 'Transport.StopOff'
+		self.stop_button.color = 'Transport.StopOn' if self.play_button.is_toggled else 'Transport.StopOff'
 
 
 

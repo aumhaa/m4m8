@@ -359,7 +359,7 @@ class Cntrlr(LividControlSurface):
 
 	def _setup_transport_control(self):
 		self._transport = TransportComponent(name = 'Transport')
-		self._transport._play_toggle.view_transform = lambda value: 'Transport.PlayOn' if value else 'Transport.PlayOff'
+		self._transport.play_button.view_transform = lambda value: 'Transport.PlayOn' if value else 'Transport.PlayOff'
 		self._transport._record_toggle.view_transform = lambda value: 'Transport.RecordOn' if value else 'Transport.RecordOff'
 		self._transport.layer = Layer(priority = 5,
 									play_button = self._button[28],
