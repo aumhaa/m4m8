@@ -1,24 +1,30 @@
-//mod.js
+// aumhaa_mod.js
+// updated 7/5/19
 
 autowatch = 1;
 
-var util = require('util');
+var util = require('aumhaa_util');
 util.inject(this, util);
 
-var DEBUG_MOD = false;
+var Bindable = require('aumhaa_bindable').Bindable;
 
-ModComponent = function(parent, type, unique, legacy, attrs){
+var LOCAL_DEBUG = false;
+
+var MONOMODULAR=new RegExp(/(monomodular)/);
+var FUNCTION = new RegExp(/(function)/);
+var PROPERTY = new RegExp(/(property)/);
+var VERSION = 'b999';
+//var WS = new RegExp('');
+
+
+function ModComponent(parent, type, unique, legacy, args){
 	var self = this;
+	this.add_bound_properties(this, ['callback']);
 	this.parent = parent;
-	this.debug = DEBUG_MOD ? Debug : function(){};
+	this.debug = LOCAL_DEBUG ? Debug : function(){};
 	this.patch_type = type ? type : 'info';
 	this.unique = unique ? unique : '---';
-	this.legacy = legacy ? legacy : 0;
-	this.attrs = attrs||[];
-	this.MONOMODULAR=new RegExp(/(monomodular)/);
-	this.FUNCTION = new RegExp(/(function)/);
-	this.PROPERTY = new RegExp(/(property)/);
-	this.WS = new RegExp('');
+	this.legacy = legacy ? legacy : false;
 	this.modClientID = 0;
 	this.modFunctions = [];
 	this.modAddresses = [];
@@ -44,7 +50,11 @@ ModComponent = function(parent, type, unique, legacy, attrs){
 			}
 		}
 	}
+	ModComponent.super_.call(this, parent._name, args);
+
 }
+
+util.inherits(ModComponent, Bindable);
 
 ModComponent.prototype.connected_callback = function(args){
 	this.debug('ModComponent.prototype.connected_callback:', args);
@@ -70,8 +80,8 @@ ModComponent.prototype.assign_api = function(finder){
 
 ModComponent.prototype.init = function(){
 	var found = false;
-	this.debug('init_b996\n');
-	this.assign_attributes(this.attrs);
+	this.debug('ModComponent.init()', VERSION);
+	//this.assign_attributes(this.attrs);
 	if((this.finder instanceof LiveAPI)&&(this.finder.id!=0)){
 		this.finder.goto('this_device');
 		this.this_device_id = parseInt(this.finder.id);
@@ -88,19 +98,19 @@ ModComponent.prototype.init = function(){
 				var functions = [];
 				var properties = [];
 				for(var item in children){
-					if(this.FUNCTION.test(children[item])){
+					if(FUNCTION.test(children[item])){
 						//this.debug('adding function:', children[item].replace('function ', ''));
 						functions.push(children[item].replace('function ', ''));
 					}
-					if(this.PROPERTY.test(children[item])){
+					if(PROPERTY.test(children[item])){
 						//this.debug('adding property:', children[item].replace('property ', ''));
 						properties.push(children[item].replace('property ', ''));
 					}
 				}
 				for(var item in properties){
 					//this.debug('Property #', item, ':', properties[item]);
-					if(this.MONOMODULAR.test(properties[item])>0){
-						this.debug('in there\n');
+					if(MONOMODULAR.test(properties[item])>0){
+						//this.debug('in there\n');
 						found = true;
 						var new_id = this.finder.get('monomodular');
 						this.debug('found, focusing on', new_id);
@@ -117,7 +127,7 @@ ModComponent.prototype.init = function(){
 						this.finder.property = 'value';
 						var children = this.finder.info.toString().split(new RegExp("\n"));
 						for(var item in children){
-							if(this.FUNCTION.test(children[item])){
+							if(FUNCTION.test(children[item])){
 								this.debug('adding function:', children[item].replace('function ', ''));
 								this.modFunctions.push(children[item].replace('function ', ''));
 							}
@@ -156,13 +166,6 @@ ModComponent.prototype.init = function(){
 		if(!found){
 			this.restart.schedule(10000);
 		}
-	}
-}
-
-ModComponent.prototype.assign_attributes = function(attrs){
-	for(var i=0;i<attrs.length;i++){
-		var new_att = attrs.slice(1).toString();
-		this[new_att] = attrs[i];
 	}
 }
 
@@ -275,7 +278,7 @@ exports.ModComponent = ModComponent;
 
 ModProxyComponent = function(parent, props){
 	var self = this;
-	this.debug = DEBUG_MOD ? Debug : function(){};
+	this.debug = LOCAL_DEBUG ? Debug : function(){};
 	this.patch_type = 'mod_proxy';
 	this.unique = '---';
 	this.legacy = 0;
@@ -287,6 +290,10 @@ ModProxyComponent = function(parent, props){
 	this.control_surface_ids = {0:true};
 	this.wiki_addy = undefined;
 	this.finder = undefined;
+	this.Send = function(){};
+	this.SendDirect = function(){};
+	this.send_explicit = function(){};
+	this.restart = 	{'cancel':function(){}};
 	if(props!=undefined){
 		for(var i in props){
 			this[props[i]] = function(){}.bind(this);

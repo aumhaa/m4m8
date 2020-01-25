@@ -1,28 +1,6 @@
-autowatch = 1;
+//aumhaa_scales.js
 
-var notifiers = require('notifiers');
-
-for(var i in notifiers)
-{
-	this[i] = notifiers[i];
-}
-
-LOCAL_DEBUG = false;
-lcl_debug = LOCAL_DEBUG && Debug ? Debug : function(){}
-
-
-NOTE_TYPE = 'NOTE_TYPE';
-CC_TYPE = 'CC_TYPE';
-NONE_TYPE = 'NONE_TYPE';
-CHANNEL = 0;
-NONE = 'NONE';
-colors = {OFF : 0, WHITE : 1, YELLOW : 2, CYAN : 3, MAGENTA : 4, RED : 5, GREEN : 6, BLUE : 7};
-//LividColors = {OFF : 0, WHITE : 1, CYAN : 5, MAGENTA : 9, RED : 17, BLUE : 33, YELLOW : 65, GREEN : 127};
-//PushColors = {OFF : 0, WHITE : 120, CYAN : 30, MAGENTA : 12, RED : 20, BLUE : 65, YELLOW : 11, GREEN : 125};
-PushColors = {OFF : 0, WHITE : 1, YELLOW : 2, CYAN : 3, MAGENTA : 4, RED : 5, GREEN : 6, BLUE : 7};
-
-ScalesModule = function(parameters)
-{
+function Scales(parameters){
 	var self = this;
 	this.colors = {OFF : 0, WHITE : 1, CYAN : 5, MAGENTA : 9, RED : 17, BLUE : 33, YELLOW : 65, GREEN : 127};
 	this._grid = undefined;
@@ -31,9 +9,8 @@ ScalesModule = function(parameters)
 	this.height = function(){return !this._grid ? 0 : this._grid.height();}
 	this._NOTENAMES = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 	this.NOTENAMES = [];
-	for(var i=0;i<128;i++)
-	{
-		this.NOTENAMES[i]=(this._NOTENAMES[i%12] + ' ' + (Math.floor(i/12)-2) );
+	for(var i=0;i<128;i++){
+		this.NOTENAMES[i]=(_NOTENAMES[i%12] + ' ' + (Math.floor(i/12)-2) );
 	}
 	this.WHITEKEYS = {0:0, 2:2, 4:4, 5:5, 7:7, 9:9, 11:11, 12:12};
 	this.NOTES = [24, 25, 26, 27, 28, 29, 30, 31, 16, 17, 18, 19, 20, 21, 22, 23, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7];
@@ -80,26 +57,22 @@ ScalesModule = function(parameters)
 	var i = 0;
 	for (var name in this.SCALES){this.SCALENAMES[i] = name;i++};
 	this._noteMap = new Array(256);
-	for(var i=0;i<256;i++)
-	{
+	for(var i=0;i<256;i++){
 		this._noteMap[i] = [];
 	}
 	this.DEFAULT_SCALE = 'Major';
 	this.SPLIT_SCALES = {}; //{'DrumPad':1, 'Major':1};
-	for(var param in parameters)
-	{
+	for(var param in parameters){
 		self[param] = parameters[param];
 	}
-	this._update = function()
-	{
+	this._update = function(){
 		self._update_request = false;
 		self._noteMap = [];
-		for(var i=0;i<128;i++)
-		{
+		for(var i=0;i<128;i++){
 			self._noteMap[i] = [];
 		}
-		if(self._grid instanceof Grid)
-		{
+		// if(self._grid instanceof Grid){
+		if(isClass(self._grid, 'Grid')){
 			var keyoffset = -1;
 			var notes_in_step = self.notes_in_step();
 			var selected = self._stepsequencer && self._select._value ? self._stepsequencer.key_offset._value : -1;
@@ -111,10 +84,8 @@ ScalesModule = function(parameters)
 			var scale = SCALENAMES[self._scaleOffset._value];
 			self._current_scale = scale;
 			var scale_len = SCALES[scale].length;
-			for(var column=0;column<width;column++)
-			{
-				for(var row=0;row<height;row++)
-				{
+			for(var column=0;column<width;column++){
+				for(var row=0;row<height;row++){
 					var note_pos = column + (Math.abs((height-1)-row))*parseInt(vertoffset);
 					var note = offset + SCALES[scale][note_pos%scale_len] + (12*Math.floor(note_pos/scale_len));
 					var button = self._grid.get_button(column, row);
@@ -130,7 +101,8 @@ ScalesModule = function(parameters)
 	}
 }
 
-ScalesModule.prototype.set_grid_function = function(func){self.grid_function = func;}
+Scales.prototype.set_grid_function = function(func){
+	self.grid_function = func;
+}
 
-exports.ScalesModule = Scales;
-
+exports.Scales = Scales;

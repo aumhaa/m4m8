@@ -1,6 +1,6 @@
 autowatch = 1;
 
-var util = require('util');
+var util = require('_deprecated_util');
 
 for(var i in util)
 {

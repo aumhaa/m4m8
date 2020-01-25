@@ -1,23 +1,49 @@
 autowatch = 1;
 
-exports.mod = require('mod');
-exports.notifiers = require('notifiers');
-exports.util = require('util');
-//exports.scales = require('scales');
+var GLOBAL_DEBUG = false;
+var module_file_list;
+var global_exports;
 
-DEBUG = false;
-debug = DEBUG&&exports.util.Debug?exports.util.Debug:function(){};
+function parse_modules(){
+	module_file_list = [];
+	var f = new Folder('base');
+	while (!f.end) {
+		module_file_list.push(f.filename.split('.')[0]);
+		f.next();
+	}
+	f = new Folder('notifiers');
+	while (!f.end) {
+		module_file_list.push(f.filename.split('.')[0]);
+		f.next();
+	}
+	f = new Folder('components');
+	while (!f.end) {
+		module_file_list.push(f.filename.split('.')[0]);
+		f.next();
+	}
+	// for(var i in module_file_list){
+	// 	post(module_file_list[i]);
+	// }
+}
 
-exports.init = function(script)
-{
-	script['autowatch'] = 1;
-	var util = require('util');
-	var mod = require('mod');
-	var notifiers = require('notifiers');
-	//var scales = require('scales');
+function build_exports(){
+	global_exports = {};
+	for(var i in module_file_list){
+		var module = require(module_file_list[i]);
+		for(var j in module){
+			global_exports[j] = module[j];
+			exports[j] = module[j];
+		}
+	}
+}
 
-	Function.prototype.clone = function()
-	{
+parse_modules();
+
+build_exports();
+
+exports.init = function(script){
+
+	Function.prototype.clone = function(){
 		var that = this;
 		var temp = function temporary() { return that.apply(this, arguments); };
 		for(var key in this) {
@@ -26,46 +52,15 @@ exports.init = function(script)
 			}
 		}
 		return temp;
-	};
+	}
 
-	Function.prototype.getName = function()
-	{
+	Function.prototype.getName = function(){
 		return /function ([^(]*)/.exec( this+"" )[1];
 	}
 
-	var loadProtos = function(dict)
-	{
-		for(var i in dict)
-		{
-			//debug('adding:', i);
-			script[i] = dict[i];
-		}
+	for(var i in global_exports){
+		script[i]=global_exports[i];
 	}
-
-	loadProtos(util);
-	loadProtos(mod);
-	loadProtos(notifiers);
-	//loadProtos(scales);
-
-	script['debug'] = script['DEBUG'] ? util.Debug : function(){};
-	script['forceload'] = script['FORCELOAD'] ? util.Forceload : function(){};
-
-}
-
-
-exports.init_deprecated_prototypes = function(script)
-{
-	script['autowatch'] = 1;
-	var _deprecated = require('_deprecated');
-
-	var loadProtos = function(dict)
-	{
-		for(var i in dict)
-		{
-			debug('adding:', i);
-			script[i] = dict[i];
-		}
-	}
-	
-	loadProtos(_deprecated);
+	script['debug'] = (script['DEBUG']||GLOBAL_DEBUG) ? script.Debug : function(){};
+	script['forceload'] = script['FORCELOAD'] ? script.Forceload : function(){};
 }

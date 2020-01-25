@@ -13,7 +13,7 @@ var control_surface_type = jsarguments[1]||'None';
 
 var script = this;
 
-aumhaa = require('_base');
+aumhaa = require('_deprecated_base');
 var FORCELOAD = false;
 var DEBUG = false;
 aumhaa.init(this);

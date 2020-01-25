@@ -12,7 +12,7 @@ setinletassist(0,"to pattrstorage");
 
 var script = this;
 
-aumhaa = require('_base');
+aumhaa = require('_deprecated_base');
 var FORCELOAD = false;
 var DEBUG = false;
 aumhaa.init(this);
@@ -55,7 +55,7 @@ var BUTTON_COLORS = [1, 1, 2, 2, 3, 4, 5, 5];
 
 var ctlr = new Object;
 ctlr.ctls = new Object; //the control names, like "key 0" or "ring 2 2 0"
-ctlr.msgs = new Object; //messages 
+ctlr.msgs = new Object; //messages
 
 var GRIDMAP =[	[undefined, undefined, undefined, undefined, 'pads_0', 'pads_1', 'pads_2', 'pads_3'],
 				['buttons_0', 'buttons_1', 'buttons_2', 'buttons_3', 'pads_4', 'pads_5', 'pads_6', 'pads_7'],
@@ -169,7 +169,7 @@ function setup_translations()
 	}
 	mod.Send('add_translation', 'pads_batch', 'cntrlr_grid', 'cntrlr_pads', 0);
 	mod.Send('add_translation', 'keys_batch', 'cntrlr_key', 'cntrlr_keys', 0);
-	mod.Send('add_translation', 'keys2_batch', 'cntrlr_key', 'cntrlr_keys2', 1); 
+	mod.Send('add_translation', 'keys2_batch', 'cntrlr_key', 'cntrlr_keys2', 1);
 	for(var i=0;i<8;i++)
 	{
 		mod.Send('add_translation', 'buttons_'+i, 'cntrlr_encoder_button_grid', 'cntrlr_buttons', i);
@@ -187,7 +187,7 @@ function setup_translations()
 	}
 	//mod.Send('add_translation', 'pads_batch', 'grid', 'ohm_pads', 0);
 	//mod.Send('add_translation', 'keys_batch', 'grid', 'ohm_keys', 2);
-	//mod.Send('add_translation', 'keys2_batch', 'grid', 'ohm_keys2', 4); 
+	//mod.Send('add_translation', 'keys2_batch', 'grid', 'ohm_keys2', 4);
 	for(var i=0;i<8;i++)
 	{
 		mod.Send('add_translation', 'buttons_'+i, 'grid', 'ohm_buttons', i%4, Math.floor(i/4)+1);
@@ -238,7 +238,7 @@ function setup_modtranslations()
 			latch('add', 'keys_'+i, 'matrix', i, 0, 0, 4);
 		}
 		outlet(1, 'sequence[0]::seqactive', 1);
-	}		
+	}
 }
 
 function key(x, val)
@@ -300,7 +300,7 @@ function base_grid(x, y, val)
 				}
 			}
 		}
-	}	
+	}
 }
 
 function cntrlr_grid(x, y, val)
@@ -392,8 +392,8 @@ function update_all()
 }
 
 //function update_all(){}
-	
-function set_selected_seq(chain, num) 
+
+function set_selected_seq(chain, num)
 {
 	var COLORS = [3, 127, 127, 127];
 	selected_sequence_number = num;
@@ -447,7 +447,7 @@ function anything(){}
 
 function clear(){
 	ctlr.ctls = new Object; //the control names, like "key 0" or "ring 2 2 0"
-	ctlr.msgs = new Object; //messages 
+	ctlr.msgs = new Object; //messages
 }
 
 //turn mod message input into a pattrstorage message output
@@ -457,8 +457,8 @@ function ctl(){
 	var bval = val>0; //"bit" value - convert to 0/1
 	//var key = a.join(" "); //e.g., "key 1"
 	var key = a[0];
-	//debug("\nCT->>key",key,val); 
-	if(ctlr.ctls[key]){	   
+	//debug("\nCT->>key",key,val);
+	if(ctlr.ctls[key]){
 		var msgout = ctlr.ctls[key].message;
 		var min = parseInt(ctlr.ctls[key].rangelo);
 		var max = parseInt(ctlr.ctls[key].rangehi);
@@ -473,17 +473,17 @@ function ctl(){
 			if(bval){
 				sval=1-sval; //invert the toggle
 				ctlr.ctls[key].value=sval; //update the object's stored value
-				val = sval; 
+				val = sval;
 				outlet(1,msgout,val);
 			}
 			break;
-			
+
 			case 'button':
 			//scale the values if needed:
 			val = (1-bval)*min + (bval*max);
 			outlet(1,msgout,val);
 			break;
-			
+
 			case 'matrix':
 			if(bval){
 				var x = ctlr.ctls[key].matrix_x;
@@ -492,12 +492,12 @@ function ctl(){
 				//debug("\nCT-matrix--",x,y,bval);
 			}
 			break;
-			
+
 			case 'pot':
 			val = (range*val/127)+min;
 			outlet(1,msgout,val);
 			break;
-			
+
 			case 'cycle':
 			//don't want button release:
 			if(bval){
@@ -508,7 +508,7 @@ function ctl(){
 				outlet(1,msgout,sval);
 			}
 			break;
-			
+
 			case 'encoder':
 			ctlr.ctls[key].value = val; //update the object's stored value
 			val = (range*val/127)+min;
@@ -554,10 +554,10 @@ function update(){
 				mval = ctlr.ctls[key].vel_off;
 			}
 			//store these mtx coords in pvsmtx so we can turn it off on the next one:
-			ctlr.msgs[themess].pvsmtx = [ theval[0], theval[1] ];		 
+			ctlr.msgs[themess].pvsmtx = [ theval[0], theval[1] ];
 			ctlout(key, mval);
 		}else{ //pots, buttons, toggles, encoders, cycle
-		
+
 			key = ctlr.msgs[themess].control;
 			if(key&&ctlr.ctls[key]){
 				//debug("CT-<<key",key,themess);
@@ -574,7 +574,7 @@ function update(){
 					mval = Math.floor(127*(theval-min)/range);
 					//debug("CT-mval",mval,theval,min,"....",theval-min,range);
 					break;
-				
+
 					case 'button':
 					//buttons get their value changed based on color:
 					if(theval>0){
@@ -584,7 +584,7 @@ function update(){
 					}
 					//debug("CT-btns",themess,theval,"--",mval);
 					break;
-				
+
 					case 'toggle':
 					//toggles get their value changed based on color:
 					if(theval>0){
@@ -594,8 +594,8 @@ function update(){
 					}
 					//debug("CT-togs",themess,theval,"--",mval);
 					break;
-				
-					//with cycle we make a concession that it could cycle a range of, say, 2-9, so we want to  
+
+					//with cycle we make a concession that it could cycle a range of, say, 2-9, so we want to
 					case 'cycle':
 					var colorsout = [0,1,3,4,5,127,2,6]; //turn values 0-7 into color values for modjs. off, white, cyan,magenta,red,blue,yellow,green
 					var min = ctlr.ctls[key].rangelo;
@@ -603,13 +603,13 @@ function update(){
 					mval = colorsout[theval-min];
 					//debug("CT-cycle",themess,theval,"--",mval);
 					break;
-				
+
 					}
 					ctlout(key, mval);
 				}
 			}
 		}
-		//if(themess == 
+		//if(themess ==
 	}
 }
 
@@ -619,7 +619,7 @@ function mtxid(x,y){
 	return key;
 }
 
-//arguments for non-matrix are: 
+//arguments for non-matrix are:
 //	  message, ctl #, type ,range lo, range hi, vel (color) on, vel (color) off
 //and for a 'matrix'
 //	  message, ctl #, type, matrix_x, matrix_y, vel on,vel off
@@ -655,7 +655,7 @@ function latch(){
 		args[pnames[i]]=a[i];
 		//debug("CT-define",i,args[pnames[i]])
 	}
-	
+
 	//setup the ctlr.ctls object which is used to extract a pattr message from a given mod message
 	var key = args.control;
 	var mess = args.message;
@@ -679,7 +679,7 @@ function latch(){
 	if(!ctlr.msgs[mess]){
 		ctlr.msgs[mess]=new Object;
 	}
-	
+
 	//with matrix types, we need to fetch the key from the message using coordinates (i.e., "mtx 2 3 <val>" comes in, rather than "tog 5 <val>"), rather than ints, so we setup ctlr.msgs accordingly:
 	if(args.type=='matrix'){
 		ctlr.msgs[mess].matrix = true;
@@ -692,7 +692,7 @@ function latch(){
 		ctlr.msgs[mess].control=key;
 		ctlr.msgs[mess].matrix = false;
 	}
-	
+
 	//ctlr.msgs[themess].control
 }
 
@@ -705,7 +705,7 @@ function ctlout(){
 	var valout = a[1];
 	//debug('ctlout', keyout, valout);
 	Alive&&mod.Send('receive_translation', keyout, 'value', valout);
-	
+
 }
 
 
@@ -713,20 +713,20 @@ function ctlout(){
 //*******************************************************************************************
 // parse midi data direct from "midiin" object:
 var issysex = 0;
-//if cc data is coming in from the controller, 
-//we don't want to mirror it back to the controller - 
+//if cc data is coming in from the controller,
+//we don't want to mirror it back to the controller -
 //it's redundant and possibly causes action problems on encoders
-var midigate = 1; 
+var midigate = 1;
 
 function msg_int(v){
 	if(issysex==0){
 		midigate = 1; //is closed only by cc messages
-		if(v>=128 && v<=143){ 
+		if(v>=128 && v<=143){
 			miditype = 7; //notes off <noteID&ch,note#,vel>
 			counter = 0;
 			midichunk = new Array();
 		}
-		if(v>=144 && v<=159){ 
+		if(v>=144 && v<=159){
 			miditype = 1; //notes <noteID&ch,note#,vel>
 			counter = 0;
 			midichunk = new Array();
@@ -741,7 +741,7 @@ function msg_int(v){
 			counter = 0;
 			midichunk = new Array();
 		}
-		if(v>=192 && v<=207){ 
+		if(v>=192 && v<=207){
 			miditype = 4; //pgm ch <pgmID&ch,val>
 			counter = 0;
 			midichunk = new Array();
@@ -770,15 +770,15 @@ function msg_int(v){
 			if (counter==2) toctl(midichunk[0],midichunk[1],midichunk[2]);
 			counter++;
 		break;
-		
+
 		case 2: //after(poly)touch
 			 midichunk[counter] = v;
 			if (counter==2) toctl(midichunk[0],midichunk[1],midichunk[2]);
 			counter++;
 		break;
-		
+
 		case 3: //cc
-			midigate = mgate; //close the gate so cc data isn't mirrored back. 
+			midigate = mgate; //close the gate so cc data isn't mirrored back.
 			midichunk[counter] = v;
 			if (counter==2) {
 				toctl(midichunk[0],midichunk[1],midichunk[2]);
@@ -788,25 +788,25 @@ function msg_int(v){
 			}
 			counter++;
 		break;
-		
+
 		case 4: //pgm changes
 			 midichunk[counter] = v;
 			if (counter==1) toctl(midichunk[0],midichunk[1]);
 			counter++;
 		break;
-		
+
 		case 5: //ch. pressure
 			 midichunk[counter] = v;
 			if (counter==1) toctl(midichunk[0],midichunk[1]);
 			counter++;
 		break;
-		
+
 		case 6://pitch bend
 			midichunk[counter] = v;
 			if (counter==2) toctl(midichunk[0],midichunk[1],midichunk[2]);
 			counter++;
 		break;
-		
+
 		case 7: //note OFF - converted to noteon, vel=0 with the "+16" for matching purposes
 			midichunk[counter] = v;
 			if (counter==2)
@@ -827,7 +827,7 @@ function toctl(){
 	}else{
 		key = a[0];
 		value = a[1];
-	} 
+	}
 	ctl(key,value);
 }
 
@@ -897,8 +897,8 @@ function gitprop(prop){
 //lividsteppr_lcd
 
 var LiveClassNames = [
-'InstrumentGroupDevice', 'DrumGroupDevice', 'Operator', 
-'UltraAnalog', 'OriginalSimpler', 'MultiSampler', 'LoungeLizard', 'StringStudio', 
+'InstrumentGroupDevice', 'DrumGroupDevice', 'Operator',
+'UltraAnalog', 'OriginalSimpler', 'MultiSampler', 'LoungeLizard', 'StringStudio',
 'Collision', 'InstrumentImpulse'
 ];
 
@@ -925,7 +925,7 @@ var randoms = [];
 var Encoders = ['Encoder_0', 'Encoder_1', 'Encoder_2', 'Encoder_3', 'Encoder_4', 'Encoder_5', 'Encoder_6', 'Encoder_7', 'Encoder_8', 'Encoder_9', 'Encoder_10', 'Encoder_11'];
 
 var Warning = ['No device', 'was found.', 'Place a', 'DrumRack', 'next to', 'this mod', 'and press', '\"Detect',	'DrumRack\"', 'to', 'get', 'started.', ' '];
-var ChainNumbers = {0:12, 1:13, 2:14, 3:15, 4:8, 5:9, 6:10, 7:11, 8:4, 9:5, 10:6, 11:7, 12:0, 13:1, 14:2, 15:3}; 
+var ChainNumbers = {0:12, 1:13, 2:14, 3:15, 4:8, 5:9, 6:10, 7:11, 8:4, 9:5, 10:6, 11:7, 12:0, 13:1, 14:2, 15:3};
 // called from init
 
 function callback(){};
@@ -973,7 +973,7 @@ function init_device()
 			grooves[ChainNumbers[i]] = this.patcher.getnamed('sequence[0]').subpatcher().getnamed('groove');
 			randoms[ChainNumbers[i]] = this.patcher.getnamed('sequence[0]').subpatcher().getnamed('RandomWeight');
 		}
-	}	
+	}
 	else
 	{
 		for(var i=0;i<16;i++)
@@ -1122,7 +1122,7 @@ function encoder(num, val)
 		if(num<8)
 		{
 			mod.Send('receive_device', 'set_mod_parameter_value', num, val);
-		}				 
+		}
 		else
 		{
 			switch(num)
@@ -1140,7 +1140,7 @@ function encoder(num, val)
 					break;
 			}
 		}
-	}			 
+	}
 }
 
 //send the drumrack id to mod.js
@@ -1210,7 +1210,7 @@ function showCountError()
 	error_button.message('presentation_rect',error_rect);
 	post("\ne2API: Step\:r - Instrument not properly configured by user.");
 }
-	
+
 function hideerror()
 {
 	error_button = this.patcher.getnamed('errorui');
@@ -1261,4 +1261,3 @@ forceload(this);
 
 
 //notelock
-
