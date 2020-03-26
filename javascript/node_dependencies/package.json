@@ -1,0 +1,13 @@
+{
+  "name": "m4m8",
+  "version": "1.0.0",
+  "description": "all dependencies for m4m8 package",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "amounra",
+  "license": "ISC",
+  "dependencies": {
+  }
+}
