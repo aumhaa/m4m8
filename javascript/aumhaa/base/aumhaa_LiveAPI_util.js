@@ -169,15 +169,30 @@ APIUtility.prototype.drum_input_note_from_drumchain = function(id){
 	return note;
 }
 
+APIUtility.prototype.set_component_by_type = function (api_inst, comp_type){
+	var path = api_inst.path;
+	var comps = api_inst.get('components').filter(function(element){return element !== 'id';});
+	for(var i in comps){
+		api_inst.id = comps[i];
+		var type = api_inst.type;
+		// debug(type, '==', comp_type, type == comp_type);
+		if(type == comp_type){
+			// debug('found component', comp_type);
+			return
+		}
+	}
+	api_inst.id = 0;
+}
+
 //draft
-APIUtility.is_container = function(id){
+APIUtility.prototype.is_container = function(id){
 	finder.id = id;
 	var type = finder.type;
 	return ['Track', 'Chain', 'DrumChain', 'RackDevice', 'DrumPad'].indexOf(type)>-1;
 }
 
 //draft
-APIUtility.chain_ids_from_parent = function(id){
+APIUtility.prototype.chain_ids_from_parent = function(id){
 	var ids = [];
 	finder.id = id;
 	if(finder.get('can_have_chains')){
@@ -187,11 +202,12 @@ APIUtility.chain_ids_from_parent = function(id){
 }
 
 //draft
-APIUtility.device_ids_from_parent = function(id){
+APIUtility.prototype.device_ids_from_parent = function(id){
 	var ids = [];
 	finder.id = id;
 	ids = finder.get('devices').filter(function(element){return element !== 'id';});
 	return ids;
 }
+
 
 exports.APIUtility = APIUtility;
