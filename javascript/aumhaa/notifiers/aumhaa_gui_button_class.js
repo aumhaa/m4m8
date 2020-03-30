@@ -1,4 +1,5 @@
 // aumhaa_gui_button_class.js
+//this is only used in Hex1 and needs to be replaced with new Maxobj supporting module (aumhaa_gui_control) and removed from _base
 
 var util = require('aumhaa_util');
 util.inject(this, util);

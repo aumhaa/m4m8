@@ -1,4 +1,5 @@
 // aumhaa_gui_element.js
+//this is only used in OJI:samplechooser.js and needs to be moved there and removed from _base
 
 var util = require('aumhaa_util');
 util.inject(this, util);
