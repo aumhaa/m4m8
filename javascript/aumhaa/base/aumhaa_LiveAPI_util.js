@@ -184,6 +184,21 @@ APIUtility.prototype.set_component_by_type = function (api_inst, comp_type){
 	api_inst.id = 0;
 }
 
+APIUtility.prototype.set_component_by_name = function (api_inst, comp_name){
+	var path = api_inst.path;
+	var comps = api_inst.get('components').filter(function(element){return element !== 'id';});
+	for(var i in comps){
+		api_inst.id = comps[i];
+		var name = api_inst.get('name');
+		// debug(name, '==', comp_name, name == comp_name);
+		if(name == comp_name){
+			// debug('found component', comp_type);
+			return
+		}
+	}
+	api_inst.id = 0;
+}
+
 //draft
 APIUtility.prototype.is_container = function(id){
 	finder.id = id;
