@@ -199,6 +199,21 @@ APIUtility.prototype.set_component_by_name = function (api_inst, comp_name){
 	api_inst.id = 0;
 }
 
+APIUtility.prototype.set_control_by_name = function (api_inst, control_name){
+	var path = api_inst.path;
+	var controls = api_inst.get('controls').filter(function(element){return element !== 'id';});
+	for(var i in controls){
+		api_inst.id = controls[i];
+		var name = api_inst.get('name');
+		// debug(name, '==', comp_name, name == comp_name);
+		if(name == control_name){
+			// debug('found component', comp_type);
+			return
+		}
+	}
+	api_inst.id = 0;
+}
+
 //draft
 APIUtility.prototype.is_container = function(id){
 	finder.id = id;
