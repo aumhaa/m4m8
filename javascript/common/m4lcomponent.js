@@ -59,7 +59,7 @@ function init()
 				}
 			}
 			control_surface.id = finder.id;
-			control_surface.property = 'received_midi';
+			control_surface.property = 'pipe';
 			debug('control_surface is:', control_surface.path);
 			deprivatize_script_functions(script);
 			outlet(0, 'path', finder.path);
@@ -145,6 +145,26 @@ function _send_value()
 		obj.call('send_value', args[1], args[2], args[3]);
 	}
 }
+
+// function _observe(name)
+// {
+// 	debug('_observe:', name);
+// 	if(controls[name]!=undefined)
+// 	{
+// 		if(controls[name]==0)
+// 		{
+// 			var control = finder.call('get_control', name);
+// 			debug('control is:', control);
+// 			var obj = new LiveAPI(make_callback(name), control);
+// 			obj.property = 'value';
+// 			controls[name] = obj;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		debug('Control name:', name, 'isnt registered.');
+// 	}
+// }
 
 function _call_function()
 {

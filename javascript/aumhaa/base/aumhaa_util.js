@@ -70,12 +70,19 @@ SubClass.prototype.func = function(){
 }
 */
 
+/*in order for inherits to work correctly with util.isClass(), the object must be written
+in the old fashioned "function foo()" manner, not as "var foo = function()".  We're using
+a terrible hack with functionName() to get the className variable, and its basically
+just parsing the js code and doing its best to figure out what the value should be.*/
+
 function inherits(ctor, superCtor){
+
 	ctor.super_ = superCtor;
 	superCtor.prototype._className = functionName(superCtor);
 	ctor.prototype = Object.create(superCtor.prototype, {constructor:{value: ctor, enumerable: false, writable: true, configurable: true}});
 	ctor.prototype._className = functionName(ctor);
 	ctor.prototype.Super_ = function(){return superCtor;}
+	// post('inherits: '+superCtor.prototype._className+' '+ctor.prototype._className+'\n');
 }
 
 exports.inherits = inherits;
@@ -245,6 +252,32 @@ Debug = function(){
 }
 
 exports.Debug = Debug;
+
+
+DebugNamespace = function(prefix){
+	var prefix = typeof(prefix)=='string'?prefix:'debug->';
+	this.debug = function(){
+		var args = protoarrayfromargs(arguments);
+		for(var i in args){
+			if(args[i] instanceof Array){
+				args[i] = args[i].join(' ');
+			}
+		}
+		post(prefix, args, '\n');
+	}
+}
+
+// DebugNamespace.prototype.debug = function(){
+// 	var args = protoarrayfromargs(arguments);
+// 	for(var i in args){
+// 		if(args[i] instanceof Array){
+// 			args[i] = args[i].join(' ');
+// 		}
+// 	}
+// 	post(this.prefix, args, '\n');
+// }
+
+exports.DebugNamespace = DebugNamespace;
 
 
 //used to reinitialize the script immediately on saving;
@@ -432,26 +465,41 @@ function find_patcher_objects(container, patcher, names){
 exports.find_patcher_objects = find_patcher_objects;
 
 
-function introspect(obj, deep, level){
-	var current_level = level + 1;
+function introspect(obj, options, level){
+	var current_level = level != undefined ? level + 1 : 0;
+	opts = isObject(options) ? options : {deep:false, min_level:0, max_level:undefined};
+	var ret = [];
 	for(var i in obj){
-		var indent = [];
+		var prefix = '';
 		for(var j=0;j<current_level;j++){
-			indent.push("-");
+			prefix=prefix+'-';
 		}
-		// debug(indent, i, obj[i]);
-		if(deep){
-			introspect(obj[i], current_level)
+		if((opts.min_level==undefined)||(current_level>=opts.min_level)){
+			ret.push(prefix+':'+i+':'+obj[i]+'\n');
+		}
+		if((isObject(obj[i]))&&(opts.deep)&&(opts.max_level!=undefined)&&(current_level<opts.max_level)){
+			ret.push(introspect(obj[i], opts, current_level));
 		}
 	}
+	return ret;
 }
 
+exports.introspect = introspect;
+
+
 function introspect_object(object, deep){
-	// debug('introspect', object);
-	introspect(object, deep, 0);
+	post('introspect ' + object + ' \n');
+	ret = [];
+	return introspect(object, deep, 0, ret);
 }
 
 exports.introspect_object = introspect_object;
+
+function isObject(obj){
+	return ((typeof obj === 'object') && (obj !== null))
+}
+
+exports.isObject = isObject;
 
 
 aumhaaSetup = function(script){

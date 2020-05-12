@@ -3,7 +3,7 @@
 var util = require('aumhaa_util');
 util.inject(this, util);
 
-var LOCAL_DEBUG = true;
+var LOCAL_DEBUG = false;
 var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
 
 var Bindable = require('aumhaa_bindable').Bindable;
@@ -26,12 +26,12 @@ function FloatingWindowModule(name, args){
 	this._notitle = false;
 	this._float = false;
 	this._window_position = undefined;
-	this.add_bound_properties(this, ['input_from_patcher', '_toggle', 'toggle_window', '_sizeX', '_sizeY', '_origSizeX', '_origSizeY', '_obj', '_window_position', '_pcontrol', '_thispatcher', 'lock', 'unlock', 'open', 'close', 'store_window_position']);
+	this.add_bound_properties(this, ['input_from_patcher', '_float_toggle', 'toggle_float', '_toggle', 'toggle_window', '_sizeX', '_sizeY', '_origSizeX', '_origSizeY', '_obj', '_window_position', '_pcontrol', '_thispatcher', 'lock', 'unlock', 'open', 'close', 'store_window_position']);
 	FloatingWindowModule.super_.call(this, name, args);
 	this._toggle = new ToggledParameter(this._name + '_Toggle', {'onValue':colors.RED, 'offValue':colors.CYAN, 'value':0});
 	this._toggle.set_target(this.toggle_window);
 	this._floatToggle = new ToggledParameter(this._name + '_FloatToggle', {'onValue':colors.BLUE, 'offValue':colors.CYAN, 'value':0});
-	this._toggle.set_target(this.toggle_float);
+	this._floatToggle.set_target(this.toggle_float);
 }
 
 util.inherits(FloatingWindowModule, Bindable);
@@ -49,7 +49,7 @@ FloatingWindowModule.prototype.input_from_patcher = function(){
 }
 
 FloatingWindowModule.prototype.toggle_window = function(){
-	//debug('toggle window');
+	// debug('toggle window');
 	if(this._toggle._value){
 		this.open();
 	}

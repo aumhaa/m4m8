@@ -61,6 +61,7 @@ exports.init = function(script){
 	for(var i in global_exports){
 		script[i]=global_exports[i];
 	}
-	script['debug'] = (script['DEBUG']||GLOBAL_DEBUG) ? script.Debug : function(){};
+	// script['debug'] = (script['DEBUG']||GLOBAL_DEBUG) ? script.Debug : function(){};
+	script['debug'] = (script['DEBUG']||GLOBAL_DEBUG) ? new script.DebugNamespace(script.jsarguments[0]+'->').debug : function(){};
 	script['forceload'] = script['FORCELOAD'] ? script.Forceload : function(){};
 }
