@@ -502,6 +502,48 @@ function isObject(obj){
 exports.isObject = isObject;
 
 
+function fetchFromObject(obj, prop) {
+
+    if(typeof obj === 'undefined') {
+        return false;
+    }
+
+    var _index = prop.indexOf('.')
+    if(_index > -1) {
+        return fetchFromObject(obj[prop.substring(0, _index)], prop.substr(_index + 1));
+    }
+
+    return obj[prop];
+}
+
+exports.fetchFromObject = fetchFromObject;
+
+
+function report_error(err){
+  debug('--error:', err.message);
+  debug('--line:', err.lineNumber);
+  debug('--stack:', err.stack);
+}
+
+exports.report_error = report_error;
+
+
+function isNumber(obj) {
+  return obj !== undefined && typeof(obj) === 'number' && !isNaN(obj)
+}
+
+exports.isNumber = isNumber;
+
+
+function isString(obj) {
+  return obj !== undefined && typeof(obj) === 'string' && obj!== ''
+}
+
+exports.isString = isString;
+
+
+
+
 aumhaaSetup = function(script){
 	script['autowatch'] = 1;
 	Function.prototype.clone = function(){
