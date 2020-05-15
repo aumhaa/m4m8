@@ -1,7 +1,12 @@
 // aumhaa_node_script_proxy.js
 // 050920
 
-
+/**This object wraps the nodescript object with some async process handling
+*  methods.  It requires a corresponding asyncJS method to be added to its subject.
+*  There are two types of methods that handle async call/returns.
+*  -  asyncScriptCAll  communicates with the maxObj [nodescript] instance and
+*  deals with the state of the script (running, install, etc).
+*  -  asyncCall communicates with the running script via maxApi.handler asyncJS.
 /**
 *  TODO:
 *	 -handling for NSProxy.message rejections (async)
@@ -11,7 +16,7 @@
 *  -asyncResolve needs a way to forward calls from nodescript instance.
 */
 
-var LCL_DEBUG = true;
+var LCL_DEBUG = false;
 
 var util = require('aumhaa_util');
 util.inject(this, util);
@@ -100,20 +105,22 @@ function NodeScriptProxy(name, args){
 	this._debug = false;
 	this._debugTypes = ['error'];
 	this._terminationCallbacks = [];
-	this.add_bound_properties(this, ['_debug',
-																		'_callbacks',
-																		'_obj',
-																		'_cabled',
-																		'asyncScriptResolve',
-																		'asyncResolve',
-																		'asyncScriptCall',
-																		'asyncCall',
-																		'receive',
-																		'_messagePort',
-																		'_cabled',
-																		'message',
-																		'nodeDump',
-																		'initialize']);
+	this.add_bound_properties(this, [
+    '_debug',
+		'_callbacks',
+		'_obj',
+		'_cabled',
+		'asyncScriptResolve',
+		'asyncResolve',
+		'asyncScriptCall',
+		'asyncCall',
+		'receive',
+		'_messagePort',
+		'_cabled',
+		'message',
+		'nodeDump',
+		'initialize'
+  ]);
 	NodeScriptProxy.super_.call(this, name, args);
 	if((this._receive_name)&&(this._script)){
 		this._script[this._receive_name] = this.receive;
