@@ -174,6 +174,7 @@ CellBlockChooserComponent.prototype._report_selected = function(){
 }
 
 CellBlockChooserComponent.prototype.set = function(num){
+  // lcl_debug('set', num);
   if(this._contents[num]){
     this._contents[num].active = true;
     this._single_active = num;
@@ -185,6 +186,23 @@ CellBlockChooserComponent.prototype.set = function(num){
     this._single_active = undefined;
   }
   this._refresh();
+}
+
+CellBlockChooserComponent.prototype.set_multi = function(){
+  if(this.multiSelect){
+    var items = arrayfromargs(argumnents);
+    lcl_debug('set_multi', items, items.length);
+    this._active = [];
+    this._active_items = [];
+    this._active_indexes = [];
+    for(var i in this._contents){
+      this._contents[i].active = items.indexOf(i) > -1;
+      this._active.push(this._contents[i]);
+      this._active_items.push(this._contents[i]._value);
+      this._active_indexes.push(i);
+    }
+    this._refresh();
+  }
 }
 
 CellBlockChooserComponent.prototype.set_height = function(val){
@@ -203,4 +221,5 @@ CellBlockChooserComponent.prototype.back = function(){
     this._report_selected();
   }
 }
+
 exports.CellBlockChooserComponent = CellBlockChooserComponent;

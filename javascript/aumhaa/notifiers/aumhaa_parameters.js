@@ -118,7 +118,7 @@ exports.ArrayParameter = ArrayParameter;
 
 
 function ToggledParameter(name, args){
-	this.add_bound_properties(this, ['update_control']);
+	this.add_bound_properties(this, ['update_control', '_onValue', '_offValue']);
 	ToggledParameter.super_.call(this, name, args);
 	this._Callback.owner = this;
 }
@@ -424,6 +424,12 @@ OffsetComponent.prototype.set_inc_dec_buttons = function(incButton, decButton){
 OffsetComponent.prototype.set_enabled = function(val){
 	this._enabled = (val>0);
 	this._update_buttons();
+}
+
+OffsetComponent.prototype.set_range = function(min, max){
+	this._min = min;
+	this._max = max;
+	this.set_value(Math.max(this._min, Math.min(this._max, this._value)));
 }
 
 exports.OffsetComponent = OffsetComponent;

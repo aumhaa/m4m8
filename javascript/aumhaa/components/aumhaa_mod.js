@@ -13,7 +13,7 @@ var LOCAL_DEBUG = false;
 var MONOMODULAR=new RegExp(/(monomodular)/);
 var FUNCTION = new RegExp(/(function)/);
 var PROPERTY = new RegExp(/(property)/);
-var VERSION = 'b999';
+var VERSION = 'b9991';
 //var WS = new RegExp('');
 
 
@@ -128,26 +128,32 @@ ModComponent.prototype.init = function(){
 						var children = this.finder.info.toString().split(new RegExp("\n"));
 						for(var item in children){
 							if(FUNCTION.test(children[item])){
-								this.debug('adding function:', children[item].replace('function ', ''));
+								// this.debug('adding function:', children[item].replace('function ', ''));
 								this.modFunctions.push(children[item].replace('function ', ''));
 							}
 						}
 						this.modAddresses = this.finder.call('addresses');
 						this.debug('addresses:', this.modAddresses);
 						for(var address in this.modAddresses){
-							//this.debug('address length', this.modAddresses[address].length);
-							this.debug('making receive func:', this.modAddresses[address]);
+							// this.debug('address length', this.modAddresses[address].length);
+							// this.debug('making receive func:', this.modAddresses[address]);
 							this[this.modAddresses[address]] = this.make_receive_func(this.modAddresses[address]);
 						}
 						for(var func in this.modFunctions){
-							this.debug('making func:', this.modFunctions[func]);
+							// this.debug('making func:', this.modFunctions[func]);
 							this[this.modFunctions[func]] = this.make_func(this.modFunctions[func]);
 						}
 						this.debug('setting legacy', this.legacy);
 						this.finder.call('set_legacy', parseInt(this.legacy));
+						if(this._name){
+							this.finder.call('set_name', this._name);
+						}
 						if(this.parent.alive){
 							this.parent.alive(1);
 							//if(!this.parent.wiki){this.parent.wiki = this.wiki;}
+						}
+						if(this._init_callback){
+							this._init_callback(1);
 						}
 						this.send_stored_messages();
 					}
@@ -170,7 +176,7 @@ ModComponent.prototype.init = function(){
 }
 
 ModComponent.prototype.make_receive_func = function(address){
-	this.debug('make receive func', address);
+	// this.debug('make receive func', address);
 	var func = function(){
 		var args = protoarrayfromargs(arguments);
 		this.debug('accessing receive func', address);
@@ -180,7 +186,7 @@ ModComponent.prototype.make_receive_func = function(address){
 }
 
 ModComponent.prototype.make_receive_func = function(address){
-	this.debug('make receive func', address);
+	// this.debug('make receive func', address);
 	var func = function(){
 		var args = protoarrayfromargs(arguments);
 		this.debug('accessing Receive func', address);
@@ -190,7 +196,7 @@ ModComponent.prototype.make_receive_func = function(address){
 }
 
 ModComponent.prototype.make_func = function(address){
-	this.debug('make func', address);
+	// this.debug('make func', address);
 	var func = function(){
 		var args = protoarrayfromargs(arguments);
 		this.debug('accessing func', address, args.join('^').replace(',','^'));
@@ -200,7 +206,7 @@ ModComponent.prototype.make_func = function(address){
 }
 
 ModComponent.prototype.make_func = function(address){
-	this.debug('make func', address);
+	// this.debug('make func', address);
 	var func = function(){
 		var args = protoarrayfromargs(arguments);
 		this.debug('accessing Distribute func', address, args);

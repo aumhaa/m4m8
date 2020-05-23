@@ -361,19 +361,19 @@ class Grid(object):
 
 
     def mask_next_empty_x(self, x, y, value, *a):
-        debug('mask_next_empty_x', x, y, value)
+        #debug('mask_next_empty_x', x, y, value)
         for handler in self._active_handlers():
             x_off = handler.x_offset
             y_off = handler.y_offset
             next_empty_x = None
             for column in range(x_off, x_off+8):
-                debug('column:', column, 'sum:', sum([self._cell[column][y_off+row]._value for row in range(8)]))
+                #debug('column:', column, 'sum:', sum([self._cell[column][y_off+row]._value for row in range(8)]))
                 if not sum([self._cell[column][y_off+row]._value for row in range(8)]):
                     next_empty_x = column
                     break
             if next_empty_x:
                 if value:
-                    debug('sending:', self._name, next_empty_x + x + x_off, y + y_off, value)
+                    #debug('sending:', self._name, next_empty_x + x + x_off, y + y_off, value)
                     handler.receive_address(self._name, next_empty_x + x + x_off, y + y_off, value = value)
                 else:
                     element = self._cell[next_empty_x + x + x_off][y + y_off]
@@ -676,7 +676,7 @@ class ModHandler(Component):
     def _on_device_changed(self):
         #debug('modhandler on_device_changed')
         if not self.is_locked() or self.active_mod() is None:
-            debug('ModHandler _on_device_changed()')
+            #debug('ModHandler _on_device_changed()')
             self.select_appointed_device()
 
 
@@ -687,7 +687,7 @@ class ModHandler(Component):
 
 
     def select_appointed_device(self, *a):
-        debug('select_appointed_device' + str(a))
+        #debug('select_appointed_device' + str(a))
         self.select_mod(self.modrouter.is_mod(self._device_provider.device))
 
 
@@ -723,7 +723,7 @@ class ModHandler(Component):
 
     def nav_mod_down(self):
         new_mod = self.modrouter.get_previous_mod(self.active_mod())
-        debug('new_mod: ' + str(new_mod))
+        #debug('new_mod: ' + str(new_mod))
         if isinstance(new_mod, ModClient):
             device = new_mod.linked_device
             #debug('device: ' + str(device))
@@ -735,11 +735,23 @@ class ModHandler(Component):
 
     def nav_mod_up(self):
         new_mod = self.modrouter.get_next_mod(self.active_mod())
-        debug('new_mod: ' + str(new_mod))
+        #debug('new_mod: ' + str(new_mod))
         if isinstance(new_mod, ModClient):
             device = new_mod.linked_device
             if isinstance(device, Live.Device.Device):
                 self.song.view.select_device(device)
+                self.select_mod(new_mod)
+
+
+    def select_mod_by_name(self, name, view = False, *a, **k):
+        debug('select_mod_by_name', name, view)
+        new_mod = self.modrouter.get_mod_by_name(name)
+        debug('new_mod:', new_mod);
+        if isinstance(new_mod, ModClient):
+            device = new_mod.linked_device
+            if isinstance(device, Live.Device.Device):
+                if view:
+                    self.song.view.select_device(device)
                 self.select_mod(new_mod)
 
 
@@ -909,7 +921,7 @@ class ModHandler(Component):
 
 
     def set_offset(self, x, y):
-        debug('setting offset:' + str(x) + str(y))
+        #debug('setting offset:' + str(x) + str(y))
         self.x_offset = max(0, min(x, 12))
         self.y_offset = max(0, min(y, 12))
         if self._active_mod and self._active_mod.legacy:
@@ -1070,7 +1082,7 @@ class NavigationBox(Component):
                 new_y = (newy+yinc)-self._window_y
             #new_x = x * self._x_inc
             #new_y = y * self._y_inc
-            debug('new offsets:', new_x, new_y)
+            # debug('new offsets:', new_x, new_y)
             self.set_offset(new_x, new_y)
 
 
@@ -1297,7 +1309,6 @@ class ModParameterProxy(ControlManager, EventObject):
         super(ModParameterProxy, self).__init__(*a, **k)
 
 
-
 class ModDeviceProxy(ControlManager, EventObject):
 
 
@@ -1322,7 +1333,7 @@ class ModDeviceProxy(ControlManager, EventObject):
 
 
     def set_bank_dict_entry(self, bank_type, bank_num, *a):
-        debug('set bank dict_entry for proxy:', self._name, 'type:', bank_type, 'num:', bank_num, 'contents:', *a)
+        #debug('set bank dict_entry for proxy:', self._name, 'type:', bank_type, 'num:', bank_num, 'contents:', *a)
         if not bank_type in self._bank_dict.keys():
             self._bank_dict[bank_type] = []
         self._bank_dict[bank_type].insert(bank_num, [item for item in a])
@@ -1387,11 +1398,11 @@ class DisplayParameter(InternalParameter):
         super(DisplayParameter, self).__init__(*a, **k)
 
     def set_name(self, name):
-        debug(self._name, 'set_name:', name)
+        #debug(self._name, 'set_name:', name)
         self._name = name
 
     def set_value(self, value):
-        debug(self._name, 'set_value:', value)
+        #debug(self._name, 'set_value:', value)
         self._value = value
 
     def _get_value(self):
@@ -1474,7 +1485,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
 
     def _select_drum_pad(self, pad, force = False):
-        debug('_select_drum_pad', pad, force, 'parent:', self._device_parent)
+        #debug('_select_drum_pad', pad, force, 'parent:', self._device_parent)
         if self._device_parent != None:
             if isinstance(self._device_parent, Live.Device.Device):
                 #debug('is device')
@@ -1492,20 +1503,20 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
     @listens('devices')
     def _parent_device_changed(self):
-        debug('parent_device_changed')
+        #debug('parent_device_changed')
         self._set_device_parent(None)
         self._parent.send('lcd', 'parent', 'check')
 
 
     @listens('devices')
     def _device_changed(self):
-        debug('device_changed')
+        #debug('device_changed')
         self._assign_parameters(None)
         self._parent.send('lcd', 'device', 'check')
 
 
     def _assign_parameters(self, device, force = False, *a):
-        debug('_assign_parameters:', device, device.class_name if device and hasattr(device, 'class_name') else 'no name')
+        #debug('_assign_parameters:', device, device.class_name if device and hasattr(device, 'class_name') else 'no name')
         self._assigned_device = device
         new_parameters = [self._mod_device.parameters[0]]
         for param in self._params:
@@ -1516,9 +1527,9 @@ class LegacyModDeviceProxy(ModDeviceProxy):
             class_name = device.class_name
         else:
             class_name = 'Other'
-        debug('class name is:', class_name, 'keys:', self._bank_dict.keys());
+        #debug('class name is:', class_name, 'keys:', self._bank_dict.keys());
         if (class_name in self._bank_dict.keys()):
-            debug('class name in keys...')
+            #debug('class name in keys...')
             bank_index = clamp(self._bank_index, 0, len(self._bank_dict[class_name]))
             #debug('bank index is:', bank_index)
             bank = [name for name in self._bank_dict[class_name][bank_index]]
@@ -1531,11 +1542,11 @@ class LegacyModDeviceProxy(ModDeviceProxy):
             param.parameter = parameter
         self.parameters = new_parameters
         self._parent.send('lcd', 'device_name', 'lcd_name', generate_strip_string(str(device.name)) if hasattr(device, 'name') else ' ')
-        debug('params are now:', [param.parameter.name if hasattr(param.parameter, 'name') else None for param in self._params])
+        #debug('params are now:', [param.parameter.name if hasattr(param.parameter, 'name') else None for param in self._params])
 
 
     def get_parameter_by_name(self, device, name):
-        debug('get parameter: device-', device, 'name-', name)
+        #debug('get parameter: device-', device, 'name-', name)
         result = None
         if device:
             for i in device.parameters:
@@ -1563,7 +1574,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
             #debug('checking for ModDevice...')
             if match('ModDevice_', name) and self._mod_device != None:
                 name = name.replace('ModDevice_', '')
-                debug('modDevice with name:', name)
+                #debug('modDevice with name:', name)
                 for i in self._mod_device.parameters:
                     if (i.name == name):
                         result = i
@@ -1577,7 +1588,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
                 index = int(name.replace('ModDisplayParameter_', ''))
                 if len(self._display_parameters)>index:
                     result = self._display_parameters[index]
-                    debug('passing ModDisplayParameter:', result)
+                    #debug('passing ModDisplayParameter:', result)
         return result
 
 
@@ -1597,7 +1608,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
 
     def set_number_params(self, number, *a):
-        debug('set number params', number)
+        #debug('set number params', number)
         for param in self._params:
             param.parameter = None
         self._params = [ParamHolder(self, index) for index in range(number)]
@@ -1605,45 +1616,45 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
 
     def set_mod_device_type(self, mod_device_type, *a):
-        debug('set type ' + str(mod_device_type))
+        #debug('set type ' + str(mod_device_type))
         self._type = mod_device_type
 
 
     def set_mod_device(self, mod_device, *a):
-        debug('set_mod_device:', mod_device)
+        #debug('set_mod_device:', mod_device)
         self._assign_parameters(mod_device)
 
 
     def set_mod_device_parent(self, mod_device_parent, single=None, *a):
-        debug('set_mod_device_parent:', mod_device_parent, single)
+        #debug('set_mod_device_parent:', mod_device_parent, single)
         self._set_device_parent(mod_device_parent, single)
 
 
     def set_mod_device_chain(self, chain, *a):
-        debug('set_mod_device_chain:', chain)
+        #debug('set_mod_device_chain:', chain)
         self._select_parent_chain(chain, True)
 
 
     def set_mod_drum_pad(self, pad, *a):
-        debug('set_mod_drum_pad:', pad)
+        #debug('set_mod_drum_pad:', pad)
         self._select_drum_pad(pad, True)
 
 
     def set_mod_device_bank(self, bank_index, *a):
-        debug('set_mod_device_bank:', bank_index)
+        #debug('set_mod_device_bank:', bank_index)
         if bank_index != self._bank_index:
             self._bank_index = bank_index
             self.rebuild_parameters()
 
 
     def set_mod_display_parameter_name(self, num = 0, val = 'default', *a):
-        debug('set_mod_display_parameter_name:', num, val)
+        #debug('set_mod_display_parameter_name:', num, val)
         if num < self._display_parameters:
             self._display_parameters[num].set_name(val)
 
 
     def set_mod_display_parameter_value(self, num = 0, val = 0, *a):
-        debug('set_mod_display_parameter_name:', num, val)
+        #debug('set_mod_display_parameter_name:', num, val)
         if num < self._display_parameters:
             self._display_parameters[num].set_value(val)
 
@@ -1680,9 +1691,9 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
     def set_custom_parameter(self, number, parameter, rebuild = True, *a):
         if number < len(self._custom_parameter):
-            debug('custom=', parameter)
+            #debug('custom=', parameter)
             if isinstance(parameter, Live.DeviceParameter.DeviceParameter) or parameter is None:
-                debug('custom is device:', parameter)
+                #debug('custom is device:', parameter)
                 self._custom_parameter[number] = parameter
                 rebuild and self.rebuild_parameters()
 
@@ -1696,7 +1707,7 @@ class LegacyModDeviceProxy(ModDeviceProxy):
 
 
     def set_all_params_to_defaults(self):
-        debug('set all params to default')
+        #debug('set all params to default')
         for param in self._parameters:
             if param:
                 name = param.name
@@ -1708,7 +1719,8 @@ class LegacyModDeviceProxy(ModDeviceProxy):
                             if vals[0] in ['rst', 'def', 'defaults']:
                                 self.set_param_to_default(param, vals[1])
                             else:
-                                debug('no def value...')
+                                #debug('no def value...')
+                                pass
 
 
     def set_param_to_default(self, param, val):
@@ -1867,7 +1879,7 @@ class ModClient(NotifyingControlElement):
 
     #@listens('devices')
     def _device_listener(self, *a, **k):
-        debug('devices listener....', liveobj_valid(self.device))
+        #debug('devices listener....', liveobj_valid(self.device))
         liveobj_valid(self.device) or self._disconnect_client()
 
 
@@ -1972,6 +1984,11 @@ class ModClient(NotifyingControlElement):
             handler.update()
 
 
+    def set_name(self, name):
+        # debug('set_name:', name)
+        self.name = name
+
+
     def select_device_from_key(self, key):
         key = str(key)
         preset = None
@@ -2016,10 +2033,10 @@ class ModClient(NotifyingControlElement):
 
 
     def get_handler_offsets(self):
-        debug('get handler offsets')
+        #debug('get handler offsets')
         offsets = (0, 0)
         if len(self.active_handlers())==1:
-            debug('theres one handler, getting offsets...')
+            #debug('theres one handler, getting offsets...')
             handler = self.active_handlers()[0]
             offsets = (handler.x_offset, handler.y_offset)
         return offsets
@@ -2144,7 +2161,7 @@ class ModRouter(Component):
 
 
     def get_mod(self, device):
-        debug('getting mod...')
+        #debug('getting mod...')
         mod_client = None
         for mod in self.mods:
             if mod.device == device:
@@ -2168,6 +2185,15 @@ class ModRouter(Component):
             return self._mods[-1]
         else:
             return active_mod
+
+
+    def get_mod_by_name(self, name):
+        # debug('getting mod by name...', name)
+        mod_client = None
+        for mod in self.mods:
+            if mod.name == name:
+                mod_client = mod
+        return mod_client
 
 
     def add_mod(self, device):
@@ -2271,7 +2297,7 @@ class ModRouter(Component):
             #        if str(name) == str(alias_name):
             #            device = drumrack_device
             #            break;
-        debug('pass device: ' + str(device.name) if liveobj_valid(device) else str(device))
+        #debug('pass device: ' + str(device.name) if liveobj_valid(device) else str(device))
         if not device is None:
             for mod in self._mods:
                 #debug('mod in mods: ' + str(mod.device))
