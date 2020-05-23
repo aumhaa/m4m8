@@ -34,7 +34,8 @@ DS1_ENCODER_BUTTONS = [25, 26, 27, 28]
 
 DS1_SIDE_DIALS = [50, 51, 52, 53]
 
-KNOBS_ARE_SENDS = False
+SEND_KNOBS = 0 # Knobs mapped to sends (remaining mapped to track parameters or pan)
+PAN_KNOB = False # Knob 5 mapped to Pan
 
 
 class DS1Colors:
