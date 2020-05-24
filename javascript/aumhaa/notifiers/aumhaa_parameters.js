@@ -95,10 +95,6 @@ exports.MomentaryParameter = MomentaryParameter;
 
 
 
-function isArray(value) {
-  return Object.prototype.toString.call(value) === '[object Array]';
-}
-
 function ArrayParameter(name, args){
 	ArrayParameter.super_.call(this, name, args);
 }
@@ -107,8 +103,14 @@ util.inherits(ArrayParameter, ParameterClass);
 
 ArrayParameter.prototype.receive = function(value){
 	//lcl_debug('array change', arguments, arrayfromargs(arguments));
-	lcl_debug('receive:', value);
-	if(isArray(value)){
+	// lcl_debug('receive:', value);
+	// if(arguments.length>1){
+	// 	this._value = arrayfromargs(arguments);
+	// }
+	// else{
+	// 	this._value = value;
+	// }
+	if(util.isArray(value)){
 		this._value = value;
 	}
 	else if(typeof value == 'string'){
@@ -117,12 +119,6 @@ ArrayParameter.prototype.receive = function(value){
 	else{
 		this._value = [];
 	}
-	// if(arguments.length>1){
-	// 	this._value = arrayfromargs(arguments);
-	// }
-	// else{
-	// 	this._value = value;
-	// }
 
 	this.update_control();
 	this.notify();

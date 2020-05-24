@@ -501,7 +501,6 @@ function isObject(obj){
 
 exports.isObject = isObject;
 
-
 function fetchFromObject(obj, prop) {
 
     if(typeof obj === 'undefined') {
@@ -541,7 +540,11 @@ function isString(obj) {
 
 exports.isString = isString;
 
+function isArray(value) {
+	return Object.prototype.toString.call(value) === '[object Array]';
+}
 
+exports.isArray = isArray;
 
 
 aumhaaSetup = function(script){
