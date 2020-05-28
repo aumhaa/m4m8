@@ -13,10 +13,6 @@ import os, __builtin__, __main__, _ast, _codecs, _functools, _md5, _random, _sha
 
 modules = []
 
-DIRS_TO_REBUILD = ['Debug', 'AumPC20_b995_9', 'AumPC40_b995_9', 'AumPush_b995', 'AumTroll_b995_9', 'AumTroll_b995_9_G', 'Base_9_LE', 'BlockMod_b995_9', 'Codec_b995_9', 'Codex', 'LaunchMod_b995_9', 'Lemur256_b995_9', 'LemurPad_b995_9', 'Livid_Alias8', 'Livid_Base', 'Livid_Block', 'Livid_CNTRLR', 'Livid_CodeGriid', 'Livid_CodeRemoteScriptLinked', 'Livid_Ohm64', 'Livid_OhmModes', 'MonOhm_b995_9', 'Monomodular_b995_9']
-
-MODS_TO_REBUILD = ['Debug', 'AumPC20', 'AumPC40', 'AumPush', 'AumTroll', 'AumTroll_G', 'Base', 'BlockMod', 'Codec', 'LaunchMod', 'Lemur256', 'LemurPad', 'Alias8', 'Block', 'CNTRLR', 'CodeGriid', 'Ohm64', 'MonOhm', 'Monomodular']
-
 from re import *
 
 from ableton.v2.control_surface.control_surface import *
@@ -121,41 +117,45 @@ def log_flattened_arguments(*a, **k):
 debug = log_flattened_arguments
 
 
-try:
-	import builtins
-except ImportError:
-	import __builtin__ as builtins
-
-try:
-	sys.path.append('/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python')
-	
-	import StringIO, socket, code
-except:
-	debug('couldnt append path')
 
 
 
 
-
-# import debugpy
-
-
-class Debug(ControlSurface):
+def nop(*a, **k):
+	pass
 
 
-	def __init__(self, c_instance, *a, **k):
-		super(Debug, self).__init__(c_instance, *a, **k)
+
+class TelnetDebugger(object):
+
+	def __init__(self, script, c_instance, port=23):
+		self._script = script
 		self._LiveTelnet__c_instance = c_instance
-		self.originalstdin = sys.stdin
-		self.originalstdout = sys.stdout
-		self.originalstderr = sys.stderr
+		self._port = port
+		debug('Telnet port is:', port)
+		try:
+			import builtins
+		except ImportError:
+			import __builtin__ as builtins
+
+		try:
+			sys.path.append('/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python')
+			# sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python')
+
+			import StringIO, socket, code
+		except:
+			debug('couldnt append path')
+		# self.originalstdin = sys.stdin
+		# self.originalstdout = sys.stdout
+		# self.originalstderr = sys.stderr
 
 		self.stdin = StringIO.StringIO()
 		self.stdout = StringIO.StringIO()
 		self.stderr = StringIO.StringIO()
 
 		self.telnetSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.telnetSocket.bind( ('', 23) )
+		# debug('base port:', 25, 'is in use', self.is_port_in_use(25))
+		self.telnetSocket.bind( ('', int(port) ))
 		self.telnetSocket.setblocking(False)
 		self.telnetSocket.listen(1)
 		self.telnetConnection = None
@@ -166,51 +166,16 @@ class Debug(ControlSurface):
 		self.lastData = ""
 		self.commandBuffer = []
 
-		# import pydevd_pycharm
+		self._script.handle = self.handle
 
-		# pydevd_pycharm.settrace('localhost', port=2334, stdoutToServer=True, stderrToServer=True)
-
-		# pydevd_pycharm.settrace(<host name>, port=<port number>)
-		# import pydevd
-
-		# pydevd.settrace('localhost', port=63342, stdoutToServer=True, stderrToServer=True)
-
-		# debugpy.listen(5678);
-
-		# self._log_version_data()
-		# self._log_sys_modules()
-		# self._log_dirs()
-		# self._log_C_modules()
-		# self.log_filenames()
-		self.log_message('_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_ DEBUG ON _^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_')
-		self._scripts = []
-		#self._scan()
-
-	def connect_script_instances(self, instanciated_scripts):
-		return
-
-	# def application(self):
-	# 	return Live.Application.get_application()
-	#
-	# def song(self):
-	# 	return self._LiveTelnet__c_instance.song
+	def is_port_in_use(self, port):
+	    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+	        return s.connect_ex(('localhost', port)) == 0
 
 	def handle(self):
 		return self._LiveTelnet__c_instance.handle()
 
-	def refresh_state(self):
-		return
-
-	def is_extension(self):
-		return False
-
-	def request_rebuild_midi_map(self):
-		return
-
-	def build_midi_map(self, midi_map_handle):
-		return
-
-	def update_display(self):
+	def update(self):
 		#Keep trying to accept a connection until someone actually connects
 		if not self.telnetConnection:
 			try:
@@ -274,30 +239,64 @@ class Debug(ControlSurface):
 				self.telnetBuffer = self.telnetBuffer + data
 			self.lastData = data
 
-	def send_midi(self, midi_event_bytes):
-		pass
+	def disconnect(self):
+		#Be nice and return stdio to their original owners
+		# sys.stdin = self.originalstdin
+		# sys.stdout = self.originalstdout
+		# sys.stderr = self.originalstderr
+		self.telnetSocket.close()
 
-	def receive_midi(self, midi_bytes):
+
+
+class Debug(ControlSurface):
+
+
+	def __init__(self, c_instance, *a, **k):
+		super(Debug, self).__init__(c_instance, *a, **k)
+		self._telnet_enabled = False
+		# self.initialize_telnet_debug()
+		# self.initialize_vscode_debug()
+		# self.initialize_pycharm2016_debug()
+		# self.initialize_pycharm2020_debug()
+		self.log_message('_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_ DEBUG ON _^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_')
+		self._scripts = []
+
+		# self._scan()
+		# self._log_version_data()
+		# self._log_sys_modules()
+		# self._log_dirs()
+		# self._log_C_modules()
+		# self.log_filenames()
+
+	def connect_script_instances(self, instanciated_scripts):
 		return
 
-	def can_lock_to_devices(self):
-		return False
+	def initialize_vscode_debug(self):
+		sys.modules['ctypes'] = '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ctypes/'
+		import debugpy
+		debugpy.listen(5678)
+		# debugpy.wait_for_client()
 
-	def suggest_input_port(self):
-		return ''
+	def initialize_pycharm2016_debug(self):
+		import pydevd
+		pydevd.settrace('localhost', port=2334, stdoutToServer=True, stderrToServer=True)
 
-	def suggest_output_port(self):
-		return ''
+	def initialize_pycharm2020_debug(self):
+		sys.modules['ctypes'] = '/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/ctypes/'
+		sys.stderr.flush = nop
+		sys.stdout.flush = nop
+		import pydevd_pycharm
+		pydevd_pycharm.settrace('localhost', port=2334, stdoutToServer=True, stderrToServer=True)
+		# pydevd_pycharm.settrace(<host name>, port=<port number>)
 
-	def suggest_map_mode(self, cc_no):
-		result = Live.MidiMap.MapMode.absolute
-		if (cc_no in range(FID_PANNING_BASE, (FID_PANNING_BASE + NUM_CHANNEL_STRIPS))):
-			result = Live.MidiMap.MapMode.relative_signed_bit
-		return result
+	def initialize_telnet_debug(self, port = 23):
+		self._telnet = TelnetDebugger(self, self._c_instance, port)
+		self._telnet_enabled = True
 
-	def __handle_display_switch_ids(self, switch_id, value):
-		pass
 
+	def update_display(self):
+		if self._telnet_enabled:
+			self._telnet.update()
 
 	def log_filenames(self):
 		modules = [m.__file__ for m in sys.modules.values() if m and getattr(m, '__file__', None)]
@@ -361,185 +360,7 @@ class Debug(ControlSurface):
 
 
 	def disconnect(self):
-
-		#Be nice and return stdio to their original owners
-		sys.stdin = self.originalstdin
-		sys.stdout = self.originalstdout
-		sys.stderr = self.originalstderr
-		self.telnetSocket.close()
+		if self._telnet_enabled:
+			self._telnet.disconnect()
 		self.log_message('_v_v_v_v_v_v_v_v_v_v_v_v_v_v_v_v_ DEBUG OFF _v_v_v_v_v_v_v_v_v_v_v_v_v_v_v_v_')
 		super(Debug, self).disconnect()
-
-
-
-# _baseimport = builtins.__import__
-# _blacklist = None
-# _dependencies = dict()
-# _parent = None
-
-# # Jython doesn't have imp.reload().
-# if not hasattr(imp, 'reload'):
-# 	imp.reload = reload
-
-# # PEP 328 changed the default level to 0 in Python 3.3.
-# _default_level = -1 if sys.version_info < (3, 3) else 0
-
-
-# class Reloader(object):
-
-
-# 	def enable(self, blacklist=None):
-# 		"""Enable global module dependency tracking.
-
-# 		A blacklist can be specified to exclude specific modules (and their import
-# 		hierachies) from the reloading process.	 The blacklist can be any iterable
-# 		listing the fully-qualified names of modules that should be ignored.  Note
-# 		that blacklisted modules will still appear in the dependency graph; they
-# 		will just not be reloaded.
-# 		"""
-# 		global _blacklist
-# 		_blacklist = ['Debug']
-# 		builtins.__import__ = self._import
-# 		if blacklist is not None:
-# 			_blacklist = frozenset(blacklist)
-
-
-# 	def disable(self):
-# 		"""Disable global module dependency tracking."""
-# 		global _blacklist, _parent
-# 		builtins.__import__ = _baseimport
-# 		_blacklist = None
-# 		_dependencies.clear()
-# 		_parent = None
-
-
-# 	def get_dependencies(self, m):
-# 		"""Get the dependency list for the given imported module."""
-# 		try:
-# 			name = m.__name__
-# 		except:
-# 			name = m
-# 		#name = m.__name__ if isinstance(m, _types.ModuleType) else m
-# 		return _dependencies.get(name, None)
-
-
-# 	def _deepcopy_module_dict(self, m):
-# 		"""Make a deep copy of a module's dictionary."""
-# 		import copy
-
-# 		# We can't deepcopy() everything in the module's dictionary because some
-# 		# items, such as '__builtins__', aren't deepcopy()-able.  To work around
-# 		# that, we start by making a shallow copy of the dictionary, giving us a
-# 		# way to remove keys before performing the deep copy.
-# 		d = vars(m).copy()
-# 		del d['__builtins__']
-# 		return copy.deepcopy(d)
-
-
-# 	def _reload(self, m, visited):
-# 		"""Internal module reloading routine."""
-# 		name = m.__name__
-
-# 		#print_debug('reloading: ' + str(m))
-# 		# If this module's name appears in our blacklist, skip its entire
-# 		# dependency hierarchy.
-# 		if _blacklist and name in _blacklist:
-# 			return
-
-# 		# Start by adding this module to our set of visited modules.  We use this
-# 		# set to avoid running into infinite recursion while walking the module
-# 		# dependency graph.
-# 		visited.add(m)
-
-# 		# Start by reloading all of our dependencies in reverse order.	Note that
-# 		# we recursively call ourself to perform the nested reloads.
-# 		deps = _dependencies.get(name, None)
-# 		if deps is not None:
-# 			for dep in reversed(deps):
-# 				if dep not in visited:
-# 					self._reload(dep, visited)
-
-# 		# Clear this module's list of dependencies.	 Some import statements may
-# 		# have been removed.  We'll rebuild the dependency list as part of the
-# 		# reload operation below.
-# 		try:
-# 			del _dependencies[name]
-# 		except KeyError:
-# 			pass
-
-# 		# Because we're triggering a reload and not an import, the module itself
-# 		# won't run through our _import hook below.	 In order for this module's
-# 		# dependencies (which will pass through the _import hook) to be associated
-# 		# with this module, we need to set our parent pointer beforehand.
-# 		global _parent
-# 		_parent = name
-
-# 		# If the module has a __reload__(d) function, we'll call it with a copy of
-# 		# the original module's dictionary after it's been reloaded.
-# 		callback = getattr(m, '__reload__', None)
-# 		if callback is not None:
-# 			d = self._deepcopy_module_dict(m)
-# 			imp.reload(m)
-# 			callback(d)
-# 		else:
-# 			imp.reload(m)
-
-# 		# Reset our parent pointer now that the reloading operation is complete.
-# 		_parent = None
-
-
-# 	def reload(self, m):
-
-# 		"""Reload an existing module.
-# 		Any known dependencies of the module will also be reloaded.
-# 		If a module has a __reload__(d) function, it will be called with a copy of
-# 		the original module's dictionary after the module is reloaded."""
-
-# 		self._reload(m, set())
-
-
-# 	def _import(self, name, globals=None, locals=None, fromlist=None, level=_default_level):
-# 		"""__import__() replacement function that tracks module dependencies."""
-# 		# Track our current parent module.	This is used to find our current place
-# 		# in the dependency graph.
-
-# 		#print_debug('importing: ' + str(name))
-# 		global _parent
-# 		parent = _parent
-# 		_parent = name
-
-# 		# Perform the actual import work using the base import function.
-# 		base = _baseimport(name, globals, locals, fromlist, level)
-
-# 		if base is not None and parent is not None:
-# 			m = base
-
-# 			# We manually walk through the imported hierarchy because the import
-# 			# function only returns the top-level package reference for a nested
-# 			# import statement (e.g. 'package' for `import package.module`) when
-# 			# no fromlist has been specified.  It's possible that the package
-# 			# might not have all of its descendents as attributes, in which case
-# 			# we fall back to using the immediate ancestor of the module instead.
-# 			if fromlist is None:
-# 				for component in name.split('.')[1:]:
-# 					try:
-# 						m = getattr(m, component)
-# 					except AttributeError:
-# 						m = sys.modules[m.__name__ + '.' + component]
-
-# 			# If this is a nested import for a reloadable (source-based) module,
-# 			# we append ourself to our parent's dependency list.
-# 			if hasattr(m, '__file__'):
-# 				l = _dependencies.setdefault(parent, [])
-# 				l.append(m)
-
-# 		# Lastly, we always restore our global _parent pointer.
-# 		_parent = parent
-
-# 		return base
-
-
-# mod_path = "/Users/amounra/Documents/Max/Packages/mod/Python Scripts"
-# livid_path = "/Users/amounra/monomodular_git/Livid Python Scripts"
-
-

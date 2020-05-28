@@ -114,7 +114,7 @@ class DeviceSelectorComponent(Component):
 	def assign_device(self, index):
 		device = self.song.appointed_device
 		if not device is None and hasattr(device, 'name'):
-			prefix = str(self._prefix)+':'
+			prefix = str(self._prefix)+'_'
 			offset = self._offset
 			key =  prefix + str(index + 1 + offset)
 			name = device.name.split(' ')
@@ -155,6 +155,7 @@ class DeviceSelectorComponent(Component):
 		#debug('scan all--------------------------------')
 		self._device_registry = [None for index in range(len(self._buttons))]
 		prefix = str(self._prefix)+':'
+		prefix2 = str(self._prefix)+'_'
 		offset = self._offset
 		preset = None
 		tracks = self.song.tracks + self.song.return_tracks + tuple([self.song.master_track])
@@ -162,7 +163,10 @@ class DeviceSelectorComponent(Component):
 			for device in enumerate_track_device(track):
 				for index, entry in enumerate(self._device_registry):
 					key = str(prefix + str(index + 1 + offset))
+					key2 = str(prefix2 + str(index + 1 + offset))
 					if device.name.startswith(key+' ') or device.name == key:
+						self._device_registry[index] = device
+					elif device.name.startswith(key2+' ') or device.name == key2:
 						self._device_registry[index] = device
 					elif (device.name.startswith('*' +key+' ') or device.name == ('*' +key))  and device.can_have_chains and len(device.chains) and len(device.chains[0].devices):
 						self._device_registry[index] = device.chains[0].devices[0]
