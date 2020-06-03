@@ -19,7 +19,7 @@ var VERSION = 'b9991';
 
 function ModComponent(parent, type, unique, legacy, args){
 	var self = this;
-	this.add_bound_properties(this, ['callback']);
+	this.add_bound_properties(this, ['callback', 'debug']);
 	this.parent = parent;
 	this.debug = LOCAL_DEBUG ? Debug : function(){};
 	this.patch_type = type ? type : 'info';

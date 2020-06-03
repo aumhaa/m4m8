@@ -87,7 +87,7 @@ function asyncCall(callback, arg){
   {
     asyncTimer = true;
     //asyncSetTimer(asyncFlush, 0);
-    asyncSetTimer.schedule(1);
+    asyncSetTimer.schedule(0);
   }
 }
 

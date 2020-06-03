@@ -142,7 +142,17 @@ function ModeClass(number_of_modes, name, args){
 			self._behaviour.press_delayed(button);
 		}
 	}
-	this.add_bound_properties(this, ['_task_server', '_behaviour', '_behaviour_timer', '_timered', '_mode_stack', 'mode_value', 'mode_toggle']);
+	this.add_bound_properties(this, ['_task_server',
+	 '_behaviour',
+	 '_behaviour_timer',
+	 '_timered',
+	 '_mode_stack',
+	 'mode_value',
+	 'mode_toggle',
+	 'mode_cycle_value',
+	 'change_mode',
+	 'update'
+ ]);
 	ModeClass.super_.call(this, name, args);
 	//lcl_debug('making timer for:', this._name, this._main_script);
 	//this._behaviour_timer = new Task(this._timered, this._main_script ? this._main_script : this, undefined); //, self);
@@ -189,7 +199,7 @@ ModeClass.prototype.mode_cycle_value = function(button){
 }
 
 ModeClass.prototype.mode_cycle_value = function(button){
-	lcl_debug('mode_cycle_value:', button);
+	lcl_debug('mode_cycle_value:', button, button._name);
 	if(this._task_server){
 		if(button.pressed()){
 			this._task_server.removeTask(this._timered)
@@ -208,7 +218,7 @@ ModeClass.prototype.mode_cycle_value = function(button){
 	}
 	else{
 		if(button.pressed()){
-			this.change_mode((this._value + 1) % this._mode_callbacks.length)
+			this.change_mode((this._value + 1) % this._mode_callbacks.length);
 		}
 	}
 	this.notify();
@@ -276,6 +286,7 @@ ModeClass.prototype.toggle_value = function(button){
 }
 
 ModeClass.prototype.change_mode = function(value, force){
+	// debug('change_mode', value, this._mode_callbacks.length);
 	if (value < (this._mode_callbacks.length)){
 		if((this._value != value)||(force)){
 			this._value = value;
@@ -286,6 +297,7 @@ ModeClass.prototype.change_mode = function(value, force){
 }
 
 ModeClass.prototype.update = function(){
+	debug('update');
 	var callback = this._mode_callbacks[this._value];
 	if(callback){
 		try{
