@@ -8,7 +8,8 @@ util.inject(this, util);
 
 var Bindable = require('aumhaa_bindable').Bindable;
 
-var LOCAL_DEBUG = false;
+var LCL_DEBUG = false;
+var lcl_debug = LCL_DEBUG ? new util.DebugNamespace('aumhaa_mod->').debug : function(){};
 
 var MONOMODULAR=new RegExp(/(monomodular)/);
 var FUNCTION = new RegExp(/(function)/);
@@ -17,11 +18,12 @@ var VERSION = 'b9991';
 //var WS = new RegExp('');
 
 
+
 function ModComponent(parent, type, unique, legacy, args){
 	var self = this;
 	this.add_bound_properties(this, ['callback', 'debug']);
 	this.parent = parent;
-	this.debug = LOCAL_DEBUG ? Debug : function(){};
+	this.debug = LCL_DEBUG ? new util.DebugNamespace('aumhaa_mod->').debug : function(){};
 	this.patch_type = type ? type : 'info';
 	this.unique = unique ? unique : '---';
 	this.legacy = legacy ? legacy : false;
@@ -50,6 +52,10 @@ function ModComponent(parent, type, unique, legacy, args){
 			}
 		}
 	}
+	this.add_bound_properties(this, [
+		'legacy',
+		'unique'
+	]);
 	ModComponent.super_.call(this, parent._name, args);
 
 }
@@ -143,8 +149,8 @@ ModComponent.prototype.init = function(){
 							// this.debug('making func:', this.modFunctions[func]);
 							this[this.modFunctions[func]] = this.make_func(this.modFunctions[func]);
 						}
-						this.debug('setting legacy', this.legacy);
-						this.finder.call('set_legacy', parseInt(this.legacy));
+						this.debug('setting legacy', this.legacy, Math.floor(this.legacy));
+						this.finder.call('set_legacy', Math.floor(this.legacy));
 						if(this._name){
 							this.finder.call('set_name', this._name);
 						}

@@ -519,9 +519,9 @@ exports.fetchFromObject = fetchFromObject;
 
 
 function report_error(err){
-  debug('--error:', err.message);
-  debug('--line:', err.lineNumber);
-  debug('--stack:', err.stack);
+  post('--error:', err.message);
+  post('--line:', err.lineNumber);
+  post('--stack:', err.stack);
 }
 
 exports.report_error = report_error;
@@ -546,6 +546,68 @@ function isArray(value) {
 
 exports.isArray = isArray;
 
+function autobind(self) {
+	var keys = Object.getOwnPropertyNames(self.constructor.prototype);
+	// Debug(self._name, 'autobind, keys:', keys);
+	for (var i = 0; i < keys.length; i++) {
+		var key = keys[i];
+		var val = self[key];
+		if (key !== 'constructor' && typeof val === 'function') {
+			// Debug('binding:', key);
+			self[key] = val.bind(self);
+		}
+	}
+
+	return self;
+};
+
+exports.autobind = autobind;
+
+function eventify(self){
+    self.events = {};
+    self.on = function (event, listener) {
+        if (typeof self.events[event] !== 'object') {
+            self.events[event] = [];
+        }
+        self.events[event].push(listener);
+    }
+		self.on.bind(self);
+    self.removeListener = function (event, listener) {
+        var idx;
+        if (typeof self.events[event] === 'object') {
+            idx = self.events[event].indexOf(listener);
+            if (idx > -1) {
+                self.events[event].splice(idx, 1);
+            }
+        }
+    }
+		self.removeListener.bind(self);
+    self.emit = function (event) {
+        var i, listeners, length, args = [].slice.call(arguments, 1);
+        if (typeof self.events[event] === 'object') {
+            listeners = self.events[event].slice();
+            length = listeners.length;
+            for (i = 0; i < length; i++) {
+							try{
+                	listeners[i].apply(self, args);
+								}
+							catch(e){
+								report_error(e);
+							}
+            }
+        }
+    }
+		self.emit.bind(self);
+    self.once = function (event, listener) {
+        self.on(event, function g () {
+            self.removeListener(event, g);
+            listener.apply(self, arguments);
+        })
+    }
+		self.once.bind(self);
+}
+
+exports.eventify = eventify;
 
 aumhaaSetup = function(script){
 	script['autowatch'] = 1;

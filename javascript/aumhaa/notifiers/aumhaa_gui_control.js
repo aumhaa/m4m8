@@ -4,7 +4,7 @@
 var util = require('aumhaa_util');
 util.inject(this, util);
 
-var LOCAL_DEBUG = false;
+var LOCAL_DEBUG = true;
 var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
 
 var ControlClass = require('aumhaa_control_class').ControlClass;

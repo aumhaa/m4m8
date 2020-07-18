@@ -112,44 +112,46 @@ util.inherits(TextButtonClass, ButtonClass);
 TextButtonClass.prototype.update_textbutton = function(){
 	//debug('update_textbutton', this._name, this._text_button);
 	var target = this.get_target();
-	this._text_button && this._text_button.message('text', target ? target.owner._name : '');
+	this._text_button && this._text_button.message('text', target ? target.owner ? target.owner._name : ' ' : ' ');
 }
 
 TextButtonClass.prototype.set_target = function(target){
-	if (target){
-		if (target in this._target_heap){
-			this._target_heap.unshift(this._target_heap.splice(this._target_heap.indexOf(target), 1));
-			//this._text_button && this._text_button.message('text', '');
-		}
-		else{
-			this._target_heap.unshift(target);
-			//this._text_button && this._text_button.message('text', target.owner ? target.owner._name : 'No Name');
-		}
-	}
-	else{
-		this.remove_target();
-		//this._text_button && this._text_button.message('text', '');
-	}
+	// if (target){
+	// 	if (target in this._target_heap){
+	// 		this._target_heap.unshift(this._target_heap.splice(this._target_heap.indexOf(target), 1));
+	// 		//this._text_button && this._text_button.message('text', '');
+	// 	}
+	// 	else{
+	// 		this._target_heap.unshift(target);
+	// 		//this._text_button && this._text_button.message('text', target.owner ? target.owner._name : 'No Name');
+	// 	}
+	// }
+	// else{
+	// 	this.remove_target();
+	// 	//this._text_button && this._text_button.message('text', '');
+	// }
+	ButtonClass.prototype.set_target.call(this, target);
 	this.update_textbutton();
 }
 
 TextButtonClass.prototype.remove_target = function(target){
-	if (target){
-		for(var item in this._target_heap){
-			if(target === this._target_heap[item]){
-				this._target_heap.splice(item, 1);
-				break;
-			}
-		}
-	}
-	else{
-		this._target_heap.shift();
-	}
+	// if (target){
+	// 	for(var item in this._target_heap){
+	// 		if(target === this._target_heap[item]){
+	// 			this._target_heap.splice(item, 1);
+	// 			break;
+	// 		}
+	// 	}
+	// }
+	// else{
+	// 	this._target_heap.shift();
+	// }
+	ButtonClass.prototype.remove_target.call(this, target);
 	this.update_textbutton();
 }
 
 TextButtonClass.prototype.clear_targets = function(){
-	this._target_heap = [];
+	this.Super_().prototype.clear_targets.call(this, target);
 	this.update_textbutton();
 }
 

@@ -1,5 +1,6 @@
 // aumhaa_control_surface.js
 // transferred 070519
+// updated 060620
 
 var util = require('aumhaa_util');
 util.inject(this, util);
@@ -13,16 +14,12 @@ var M4LCOMPONENT=new RegExp(/(M4LInterface)/);
 
 function ControlSurfaceClass(name, parent, control_surface_type, init_callback, args){
 	var self = this;
-	this.add_bound_properties(this, []);
-	this.__dependencies = {parent:parent, control_surface_type:control_surface_type, init_callback:init_callback};
-	for(var i in this.__dependencies)
-	if(this.__dependencies[i] == undefined){
-		lcl_debug(i + ' must be provided to ControlSurfaceClass.');
-	}
 	this._parent = parent;
 	this._init_callback = init_callback
 	this._control_surface_type = control_surface_type||'None';
+	this.require_dependencies(['_parent', '_control_surface_type', '_init_callback']);
 	ControlSurfaceClass.super_.call(this, name, args);
+	this.add_bound_properties(this, ['_parent', '_control_surface_type', '_init_callback']);
 	this._finder = this._finder ? this._finder : new LiveAPI(this._callback, 'control_surfaces');
 	this._control_surface_id = undefined;
 	this.init();

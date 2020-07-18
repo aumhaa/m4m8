@@ -4,26 +4,34 @@
 /**This object wraps the nodescript object with some async process handling
 *  methods.  It requires a corresponding asyncJS method to be added to its subject.
 *  There are two types of methods that handle async call/returns.
-*  -  asyncScriptCAll  communicates with the maxObj [nodescript] instance and
+*  -  asyncScriptCall  communicates with the maxObj [nodescript] instance and
 *  deals with the state of the script (running, install, etc).
 *  -  asyncCall communicates with the running script via maxApi.handler asyncJS.
+*  The jsobject instance does not need to be cabled to the nodescript object,
+*  but the nodescript object needs both its outlets cabled to the jsobject's input.
+*  Inputs from nodescript must be manually configured in the script containing this
+*  object, there are not yet automatic methods to deal with that.
 /**
 *  TODO:
 *	 -handling for NSProxy.message rejections (async)
 *  -collect list of available asyncCall _targets
 *  -handling for non-compliant node.script modules (asyncJS not available in script)
 *
+*  -auto-route the parent-scripts inputs so they reach this object (nodeDump, js, etc)
 *  -asyncResolve needs a way to forward calls from nodescript instance.
 */
 
-var LCL_DEBUG = false;
-
+var LCL_DEBUG = true;
+//if you want to see detailed debug from nodescript obj, be sure to set this._debug to true also
 var util = require('aumhaa_util');
 util.inject(this, util);
 
 var Bindable = require('aumhaa_bindable').Bindable;
+var EventEmitter = require('aumhaa_event_emitter').EventEmitter;
 var ArrayParameter = require('aumhaa_parameters').ArrayParameter;
 var Promise = require('aumhaa_promise').Promise;
+var AumhaaGlobalProxy = require('aumhaa_global_proxy').AumhaaGlobalProxy;
+var DictModule = require('aumhaa_dict_module').DictModule;
 
 var lcl_debug = LCL_DEBUG ? new util.DebugNamespace('nodeproxy->').debug : function(){};
 var dump_log = new util.DebugNamespace('NS.dump===>').debug;
@@ -101,7 +109,7 @@ function NodeScriptProxy(name, args){
 	this._callbacks = {};
 	this._scriptCallbacks = {};
 	this._messagePort = 0;
-	this._cabled = true;
+	this._cabled = false;
 	this._debug = false;
 	this._debugTypes = ['error'];
 	this._terminationCallbacks = [];
@@ -127,7 +135,7 @@ function NodeScriptProxy(name, args){
 	}
 }
 
-util.inherits(NodeScriptProxy, Bindable);
+util.inherits(NodeScriptProxy, EventEmitter);
 
 NodeScriptProxy.prototype.__defineGetter__('is_running', function(){
 	return this._obj.getattr('running');
@@ -210,6 +218,7 @@ NodeScriptProxy.prototype.asyncResolve = function(){
 		// 	lcl_debug(log);
 		// }
 		// }
+    // debug('callback:', this._callbacks[args[0]].callback);
 		this._callbacks[args[0]].callback.apply(this, args.slice(1));
 	}
 }
@@ -251,6 +260,7 @@ NodeScriptProxy.prototype.asyncScriptCall = function(){
 				outlet.apply(self, new_args);
 			}
 			else{
+        // lcl_debug('asyncScriptCall', argsClone);
 				self._obj.message(['script'].concat(argsClone));
 			}
 		} catch(error) {
@@ -261,7 +271,7 @@ NodeScriptProxy.prototype.asyncScriptCall = function(){
 }
 
 NodeScriptProxy.prototype.asyncScriptResolve = function(){
-	/**Counterpart to asyncScriptCAll method, used to resolve promise and make callbacks*/
+	/**Counterpart to asyncScriptCall method, used to resolve promise and make callbacks*/
 	var args = arrayfromargs(arguments);
 	var action = args[0];
 	var state = args[1];
@@ -317,7 +327,7 @@ NodeScriptProxy.prototype.initialize = function(){
 			respond(self._name + ' node_script instance is already running.');
 		}
 		else{
-			self.check_dependencies().then( function(){
+			self.verify_module_dependencies().then( function(){
 				return self.start();
 			}).then(function(){
 				return self.init_routines();
@@ -338,13 +348,16 @@ NodeScriptProxy.prototype.initialize = function(){
 }
 
 NodeScriptProxy.prototype.init_routines = function(){
-	/**Placeholder for user specific code, called at end of initialize*/
+	/**Placeholder for user specific code, called at end of initialize
+  These methods are called directly by proxy whenever this.start() is but
+  before any further constructor functions from overlaid classes have fired.
+  **/
 	lcl_debug('NSProxy.init_routines has not been overridden');
 	return Promise.resolve(true)
 }
 
-NodeScriptProxy.prototype.check_dependencies = function(){
-	lcl_debug('NSProxy.check_dependencies');
+NodeScriptProxy.prototype.verify_module_dependencies = function(){
+	lcl_debug('NSProxy.verify_module_dependencies');
 	/**Currently not implemented, perhaps use "npm ls"?*/
 	return Promise.resolve(true)
 }
@@ -428,28 +441,38 @@ NodeScriptProxy.prototype.running = function(){
 }
 
 
-
-function MIDIRouterNodeScriptProxy(name, args){
-	var self = this;
-	this.add_bound_properties(this, ['receive', '_inputs', '_outputs', 'available_outputs', 'available_inputs']);
-	this._input_ports = new ArrayParameter(this._name + '_inputPorts', {'value':[]});
-	this._output_ports = new ArrayParameter(this._name + '_outputPorts', {'value':[]});
-	MIDIRouterNodeScriptProxy.super_.call(this, name, args);
-	this.available_inputs = this._input_ports.receive;
-	this.available_outputs = this._output_ports.receive;
-}
-
-util.inherits(MIDIRouterNodeScriptProxy, NodeScriptProxy);
-
-MIDIRouterNodeScriptProxy.prototype.receive = function(){
-	var args = arrayfromargs(arguments);
-	//debug(this._name+'.receive():', args);
-	//debug('in?:', args[0], args[0] in this, this[args[0]]);
-	this[args[0]]&&this[args[0]].apply(this, args.slice(1));
-}
-
-MIDIRouterNodeScriptProxy.prototype.node_script_init = function(){
-	this._obj.message('set_input_port', inputPort);
-}
-
-exports.MIDIRouterNodeScriptProxy = MIDIRouterNodeScriptProxy;
+/*
+// function MIDIRouterNodeScriptProxy(name, args){
+// 	var self = this;
+// 	this.add_bound_properties(this, [
+//     'input',
+//     '_inputs',
+//     '_outputs',
+//     '_input_ports',
+//     '_output_ports',
+//     'available_outputs',
+//     'available_inputs'
+//   ]);
+// 	this._input_ports = new ArrayParameter(this._name + '_inputPorts', {'value':[]});
+// 	this._output_ports = new ArrayParameter(this._name + '_outputPorts', {'value':[]});
+// 	MIDIRouterNodeScriptProxy.super_.call(this, name, args);
+// 	this.available_inputs = this._input_ports.set_value;
+// 	this.available_outputs = this._output_ports.set_value;
+// }
+//
+// util.inherits(MIDIRouterNodeScriptProxy, NodeScriptProxy);
+//
+// MIDIRouterNodeScriptProxy.prototype.input = function(){
+// 	var args = arrayfromargs(arguments);
+// 	lcl_debug(this._name+'.input():', args);
+// 	//debug('in?:', args[0], args[0] in this, this[args[0]]);
+//   //we need to send ArrayParameters [], so we use call here....probably a better way
+// 	this[args[0]]&&this[args[0]].call(this, args.slice(1));
+// }
+//
+// MIDIRouterNodeScriptProxy.prototype.init_routines = function(){
+// 	// this._obj.message('set_input_port', inputPort);
+// }
+//
+// exports.MIDIRouterNodeScriptProxy = MIDIRouterNodeScriptProxy;
+*/

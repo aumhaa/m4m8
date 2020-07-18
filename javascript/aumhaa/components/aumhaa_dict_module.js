@@ -85,8 +85,7 @@ DictModule.prototype.hasKey = function(address){
 }
 
 DictModule.prototype.refresh_window = function(){
-	this._VIEW_DEVICEDICT&&this._obj.message('wclose');
-	this._VIEW_DEVICEDICT&&this._obj.message('edit');
+	this._VIEW_DEVICEDICT&&this._obj.message('wclose')&&this._obj.message('edit');
 }
 
 DictModule.prototype.remove = function(address){

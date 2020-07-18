@@ -1,51 +1,50 @@
 var util = require('aumhaa_util');
 util.inject(this, util);
 
+
 var LOCAL_DEBUG = false;
-var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
+var lcl_debug = LOCAL_DEBUG && util.DebugNamespace ? new util.DebugNamespace('GlobalProxy').debug : function(){}
 
 var Bindable = require('aumhaa_bindable').Bindable;
 
 function AumhaaGlobalProxy(name, args){
 	var self = this;
-	this.add_bound_properties(this, []);
-	this.__dependencies = {};
-	for(var i in this.__dependencies)
-	if(this.__dependencies[i] == undefined){
-		lcl_debug(i + ' must be provided to ControlSurfaceClass.');
-	}
+	this.add_bound_properties(this, [
+		'_global',
+		'has_scope',
+		'set_scope',
+		'get_scope'
+	]);
 	AumhaaGlobalProxy.super_.call(this, name, args);
-	this.init();
+	this.init.call(this);
 }
 
 util.inherits(AumhaaGlobalProxy, Bindable);
 
+AumhaaGlobalProxy.prototype.__defineGetter__('global', function(){
+	return this._global;
+})
+
 AumhaaGlobalProxy.prototype.init = function(){
-	//debug('setup_global()');
 	this._global = new Global('aumhaaGlobal');
 }
 
 AumhaaGlobalProxy.prototype.has_scope = function(name){
-	return this._global.hasOwnProperty(name);
+	return this.global.hasOwnProperty(name);
 }
 
 AumhaaGlobalProxy.prototype.set_scope = function(name, value){
 	if(!this.has_scope(name)){
-		this[name] = value;
+		this.global[name] = value;
 	}
 }
 
 AumhaaGlobalProxy.prototype.get_scope = function(name){
 	if(!this.has_scope(name)){
-		return this[name];
+		post('WARNING! '+this._name+' missing scope: '+name+'\n');
+		this.global[name]={};
 	}
-	else{
-		return false;
-	}
-}
-
-AumhaaGlobalProxy.prototype.global = function(){
-	return this._global;
+	return this.global[name];
 }
 
 exports.AumhaaGlobalProxy = AumhaaGlobalProxy;

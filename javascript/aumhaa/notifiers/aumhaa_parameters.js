@@ -20,7 +20,18 @@ var colors = require('aumhaa_notifier_consts').consts.colors;
 
 
 function ParameterClass(name, args){
-	this.add_bound_properties(this, ['_onValue', '_offValue', 'receive', 'set_value', 'update_control', '_apiCallback', '_Callback', 'set_control', 'set_on_off_values']);
+	this.add_bound_properties(this, [
+		'_onValue',
+		'_offValue',
+		'receive',
+		'set_value',
+		'update_control',
+		'_apiCallback',
+		'_Callback',
+		'set_control',
+		'set_on_off_values',
+		'_parent'
+	]);
 	this._parameter = undefined;
 	this._num = 0;
 	this._value = 0;
@@ -29,7 +40,7 @@ function ParameterClass(name, args){
 	this._text_length = 10;
 	this._unassigned = 'None';
 	this._apiProperty = 'value';
-	this._parent = {tasks:util.nop};
+	//this._parent = {tasks:util.nop};
 	ParameterClass.super_.call(this, name, args);
 	this._Callback.owner = this;
 }
@@ -279,9 +290,10 @@ RangedButtonParameter.prototype.update_control = function(){
 exports.RangedButtonParameter = RangedButtonParameter;
 
 
-
+//no idea what this is used by, but some of it's dependencies were altered without testing 071720
 function DelayedRangedParameter(name, args){
 	this._delay = 1;
+	this.require_dependencies(this, ['_parent']);
 	DelayedRangedParameter.super_.call(this, name, args);
 }
 
@@ -329,7 +341,16 @@ exports.ParameterGroup = ParameterGroup;
 //Notifier that uses two buttons to change an offset value
 
 function OffsetComponent(name, minimum, maximum, initial, callback, onValue, offValue, increment, args){
-	this.add_bound_properties(this, ['receive', 'set_value', 'update_control', '_apiCallback', '_Callback', 'set_control', 'incCallback', 'decCallback']);
+	this.add_bound_properties(this, [
+		'receive',
+		'set_value',
+		'update_control',
+		'_apiCallback',
+		'_Callback',
+		'set_control',
+		'incCallback',
+		'decCallback'
+	]);
 	this._min = minimum!=undefined?minimum:0;
 	this._max = maximum!=undefined?maximum:127;
 	this._increment = increment!=undefined?increment:1;
@@ -338,12 +359,22 @@ function OffsetComponent(name, minimum, maximum, initial, callback, onValue, off
 	this._onValue = onValue!=undefined?onValue:127;
 	this._offValue = offValue!=undefined?offValue:0;
 	this._displayValues = [this._onValue, this._offValue];
-	this._scroll_hold = true;
+	this._scroll_hold = false;
+	this._scroll_delay = 1;
 	this._callback = callback;
-	OffsetComponent.super_.call(this, name);
+	OffsetComponent.super_.call(this, name, args);
+	//something, somewhere uses this bc it sends its parent's task group to constructor
+	//...find it and kill it.  In the meantime....
+	if(this._parent&&this._parent.tasks){
+		this._scroll_hold = true;
+		this._tasks = this._parent.tasks;
+	}
+	this._scroll_hold&&this.require_dependencies(this, ['_tasks']);
+	this.check_dependencies();
 	this._value = initial!=undefined?initial:0;
 	this.incCallback.owner = this;
 	this.decCallback.owner = this;
+
 	//if(callback!=undefined)
 	//{
 	//	this._callback = callback;
@@ -365,7 +396,7 @@ OffsetComponent.prototype.incCallback = function(obj){
 		this._update_buttons();
 		this.notify();
 		if(this._scroll_hold){
-			this._parent.tasks.addTask(this.incCallback, [obj], 1, false, this._name+'_UpHoldKey');
+			this._tasks.addTask(this.incCallback, [obj], this._scroll_delay, false, this._name+'_UpHoldKey');
 		}
 	}
 }
@@ -376,7 +407,7 @@ OffsetComponent.prototype.decCallback = function(obj){
 		this._update_buttons();
 		this.notify();
 		if(this._scroll_hold){
-			this._parent.tasks.addTask(this.decCallback, [obj], 1, false, this._name+'_DnHoldKey');
+			this._tasks.addTask(this.decCallback, [obj], this._scroll_delay, false, this._name+'_DnHoldKey');
 		}
 	}
 }

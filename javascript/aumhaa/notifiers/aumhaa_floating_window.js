@@ -42,9 +42,7 @@ FloatingWindowModule.prototype.input_from_patcher = function(){
     this[args[0]].apply(this, args.slice(1));
   }
   catch(err){
-    debug('input error:', err.message);
-    debug('--line:', err.lineNumber);
-    debug('--stack:', err.stack);
+		util.report_error(err);
   }
 }
 
@@ -73,6 +71,8 @@ FloatingWindowModule.prototype.toggle_float = function(){
 FloatingWindowModule.prototype.open = function(){
 	//this._pcontrol.open();
 	this._obj.front();
+	this._toggle._value = 1;
+	this._toggle.update_control();
 }
 
 FloatingWindowModule.prototype.floattoggle = function(){
@@ -84,6 +84,8 @@ FloatingWindowModule.prototype.floattoggle = function(){
 FloatingWindowModule.prototype.close = function(){
 	//this._pcontrol.close();
 	this._obj.wclose();
+	this._toggle._value = 0;
+	this._toggle.update_control();
 }
 
 FloatingWindowModule.prototype.lock = function(){
