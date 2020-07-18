@@ -3,7 +3,7 @@
 var util = require('aumhaa_util');
 util.inject(this, util);
 
-var LOCAL_DEBUG = true;
+var LOCAL_DEBUG = false;
 var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
 
 var EventEmitter = require('aumhaa_event_emitter').EventEmitter;
