@@ -307,6 +307,16 @@ Promise.all = function(promises){
   });
 };
 
+Promise.each = function(promises, fn) {
+  if(!isArray(promises))
+    return Promise.reject(new Error("Non array passed to .each"));
+  if(promises.length === 0)
+    return Promise.resolve();
+  return promises.reduce(function(prev, cur) {
+    return prev.then(function(){fn(cur)})
+  }, Promise.resolve());
+}
+
 Promise.race = function(promises){
   var Class = this;
 
