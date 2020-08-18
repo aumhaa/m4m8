@@ -21,7 +21,7 @@
 *  -asyncResolve needs a way to forward calls from nodescript instance.
 */
 
-var LCL_DEBUG = true;
+var LCL_DEBUG = false;
 //if you want to see detailed debug from nodescript obj, be sure to set this._debug to true also
 var util = require('aumhaa_util');
 util.inject(this, util);
