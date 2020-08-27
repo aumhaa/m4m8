@@ -128,7 +128,26 @@ exports.CyclePageStackBehaviour = CyclePageStackBehaviour;
 
 function ModeClass(number_of_modes, name, args){
 	var self = this;
-	this.add_bound_properties(this, ['mode_cycle_value', 'mode_value', 'toggle_value', 'change_mode', 'update', 'add_mode', 'set_mode_buttons', 'set_mode_cycle_button', 'current_mode', 'recalculate_mode', 'push_mode', 'splice_mode']);
+	this.add_bound_properties(this, [
+		'mode_cycle_value',
+		'mode_value',
+		'toggle_value',
+		'change_mode',
+		'update',
+		'add_mode',
+		'set_mode_buttons',
+		'set_mode_cycle_button',
+		'current_mode',
+		'recalculate_mode',
+		'push_mode',
+		'splice_mode',
+		'_task_server',
+		'_behaviour',
+		'_behaviour_timer',
+		'_timered',
+		'_mode_stack',
+		'mode_toggle',
+	]);
 	this._value = 0;
 	this._mode_callbacks = new Array(number_of_modes);
 	this._mode_stack = [];
@@ -136,23 +155,11 @@ function ModeClass(number_of_modes, name, args){
 	this.mode_cycle_button = undefined;
 	this._mode_colors = [0, 1];
 	this._timered = function(){
-		//debug('timered...', arguments[0]._name, self._name);
 		var button = arguments[0];
 		if(button&&button.pressed()){
 			self._behaviour.press_delayed(button);
 		}
 	}
-	this.add_bound_properties(this, ['_task_server',
-	 '_behaviour',
-	 '_behaviour_timer',
-	 '_timered',
-	 '_mode_stack',
-	 'mode_value',
-	 'mode_toggle',
-	 'mode_cycle_value',
-	 'change_mode',
-	 'update'
- ]);
 	ModeClass.super_.call(this, name, args);
 	//lcl_debug('making timer for:', this._name, this._main_script);
 	//this._behaviour_timer = new Task(this._timered, this._main_script ? this._main_script : this, undefined); //, self);
@@ -305,11 +312,11 @@ ModeClass.prototype.update = function(){
 		}
 		catch(err){
 			lcl_debug('callback error:', err, 'for mode index', this._value,'for', this._name, 'mode component');
+			util.report_error(err);
 		}
 	}
 	for(var i in this.mode_buttons){
 		if (i == this._value){
-
 			this.mode_buttons[i].turn_on();
 		}
 		else{

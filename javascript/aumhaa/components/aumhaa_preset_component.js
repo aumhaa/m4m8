@@ -13,14 +13,33 @@ var Bindable = require('aumhaa_bindable').Bindable;
 
 function PresetComponent(name, storage, storage_menu, args){
 	var self = this;
-	this.add_bound_properties(this, ['_presets', '_storage', '_storage_menu', '_current_pset']);
+	this.add_bound_properties(this, [
+		 '_presets',
+		 '_storage',
+		 '_storage_menu',
+		 '_current_pset',
+		 '_init',
+		 '_current_pset_Obj'
+	 ]);
 	this._storage = storage;
 	this._storage_menu = storage_menu;
 	this._current_pset = 0;
+	// this._current_pset_Obj = undefined;
 	PresetComponent.super_.call(this, name, args);
+	// this._init();
+
 }
 
 util.inherits(PresetComponent, Bindable);
+
+PresetComponent.prototype._init = function(){
+	var stored_pset_number = 0;
+	if(this._current_pset_Obj!=undefined){
+		var stored_pset_number = this._current_pset_Obj.getvalueof();
+	}
+	debug('stored_pset_number:', stored_pset_number);
+	this.recall(stored_pset_number);
+}
 
 PresetComponent.prototype.read = function(){
 	this._storage.message('read');
@@ -51,6 +70,9 @@ PresetComponent.prototype.recall = function(){
 		//Device._dict._initialize();
 		args[1] = args[1] ? args[1] : 1;
 		this._current_pset = args[1];
+		// if(this._current_pset_Obj!=undefined){
+		// 	this._current_pset_Obj.setvalueof(this._current_pset);
+		// }
 		storage_menu.message('set', this._current_pset-1);
 	}
 }
