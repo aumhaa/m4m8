@@ -21,7 +21,6 @@ var VERSION = 'b9991';
 
 function ModComponent(parent, type, unique, legacy, args){
 	var self = this;
-	this.add_bound_properties(this, ['callback', 'debug']);
 	this.parent = parent;
 	this.debug = LCL_DEBUG ? new util.DebugNamespace('aumhaa_mod->').debug : function(){};
 	this.patch_type = type ? type : 'info';
@@ -54,7 +53,13 @@ function ModComponent(parent, type, unique, legacy, args){
 	}
 	this.add_bound_properties(this, [
 		'legacy',
-		'unique'
+		'unique',
+		'callback',
+		'debug',
+		'finder',
+		'dissolve',
+		'restart',
+		'disconnect'
 	]);
 	ModComponent.super_.call(this, parent._name, args);
 
@@ -76,7 +81,7 @@ ModComponent.prototype.disconnect = function(){
 	for(var func in this.modFunctions){
 		delete this[this.modFunctions[func]];
 	}
-	self.restart.schedule(3000);
+	this.restart.schedule(3000);
 }
 
 ModComponent.prototype.assign_api = function(finder){
@@ -284,6 +289,12 @@ ModComponent.prototype.wiki = function(){
 	max.launchbrowser(this.wiki_addy);
 }
 
+ModComponent.prototype.dissolve = function(){
+	this.finder.property = '';
+	this.finder.id = 0;
+	this.restart.cancel();
+}
+
 exports.ModComponent = ModComponent;
 
 
@@ -306,6 +317,7 @@ ModProxyComponent = function(parent, props){
 	this.SendDirect = function(){};
 	this.send_explicit = function(){};
 	this.restart = 	{'cancel':function(){}};
+	this.dissolve = function(){};
 	if(props!=undefined){
 		for(var i in props){
 			this[props[i]] = function(){}.bind(this);

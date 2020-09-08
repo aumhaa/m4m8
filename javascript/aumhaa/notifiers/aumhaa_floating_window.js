@@ -3,8 +3,8 @@
 var util = require('aumhaa_util');
 util.inject(this, util);
 
-var LOCAL_DEBUG = false;
-var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
+var LCL_DEBUG = false;
+var lcl_debug = LCL_DEBUG?new util.DebugNamespace('floating_window').debug:function(){};
 
 var Bindable = require('aumhaa_bindable').Bindable;
 var ToggledParameter = require('aumhaa_parameters').ToggledParameter;

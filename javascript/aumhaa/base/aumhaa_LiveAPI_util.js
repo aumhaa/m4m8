@@ -14,6 +14,10 @@ function APIUtility(){
 	this.id_list = [];
 }
 
+APIUtility.prototype.dissolve = function(){
+	this.finder.id = 0;
+}
+
 APIUtility.prototype.is_valid = function(id){
 	//catch doesn't work when liveAPI throws for some reason, but finally does.
 	//we're posting to suppress the red jsliveapi warning in the max log....because its irritating.
