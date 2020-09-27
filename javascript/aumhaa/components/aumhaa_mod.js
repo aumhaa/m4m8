@@ -22,7 +22,7 @@ var VERSION = 'b9991';
 function ModComponent(parent, type, unique, legacy, args){
 	var self = this;
 	this.parent = parent;
-	this.debug = LCL_DEBUG ? new util.DebugNamespace('aumhaa_mod->').debug : function(){};
+	this.debug = lcl_debug;
 	this.patch_type = type ? type : 'info';
 	this.unique = unique ? unique : '---';
 	this.legacy = legacy ? legacy : false;
@@ -91,7 +91,11 @@ ModComponent.prototype.assign_api = function(finder){
 
 ModComponent.prototype.init = function(){
 	var found = false;
+	try{
 	this.debug('ModComponent.init()', VERSION);
+	}catch(e){
+		util.report_error(e);
+	}
 	//this.assign_attributes(this.attrs);
 	if((this.finder instanceof LiveAPI)&&(this.finder.id!=0)){
 		this.finder.goto('this_device');
@@ -293,6 +297,7 @@ ModComponent.prototype.dissolve = function(){
 	this.finder.property = '';
 	this.finder.id = 0;
 	this.restart.cancel();
+	this.restart.freepeer();
 }
 
 exports.ModComponent = ModComponent;

@@ -663,5 +663,9 @@ MidiIoNodeModule.prototype._on_enable_output = function(val){
 	this.output_enable = val>0;
 }
 
+MidiIoNodeModule.prototype.dissolve = function(){
+	this._global.midiNodes[this._uid]=null;
+	delete this._global[this._uid];
+}
 
 exports.MidiIoNodeModule = MidiIoNodeModule;

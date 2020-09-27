@@ -331,4 +331,9 @@ MidiEventRouterModule.prototype.set_output_port = function(port){
 	}
 }
 
+MidiEventRouterModule.prototype.dissolve = function(){
+	this.aumhaaGlobal._global[this._uid] = null;
+	delete this.aumhaaGlobal._global[this._uid];
+}
+
 exports.MidiEventRouterModule = MidiEventRouterModule;

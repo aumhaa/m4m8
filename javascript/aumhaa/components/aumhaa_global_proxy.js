@@ -47,4 +47,13 @@ AumhaaGlobalProxy.prototype.get_scope = function(name){
 	return this.global[name];
 }
 
+AumhaaGlobalProxy.prototype.clear_scope = function(name){
+	if(!this.has_scope(name)){
+		post('WARNING! '+this._name+' missing scope: '+name+'\n');
+		this.global[name]=null;
+		delete this.global[name];
+	}
+}
+
+
 exports.AumhaaGlobalProxy = AumhaaGlobalProxy;

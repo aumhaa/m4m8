@@ -4,6 +4,8 @@ var GLOBAL_DEBUG = false;
 var module_file_list;
 var global_exports;
 
+var aumhaa_filenames = require('aumhaa_filenames').filenames;
+
 function parse_modules(){
 	module_file_list = [];
 	var f = new Folder('base');
@@ -20,6 +22,11 @@ function parse_modules(){
 	while (!f.end) {
 		module_file_list.push(f.filename.split('.')[0]);
 		f.next();
+	}
+	for(var i in aumhaa_filenames){
+		if(module_file_list.indexOf(aumhaa_filenames[i])==-1){
+			module_file_list.push(aumhaa_filenames[i]);
+		}
 	}
 	// for(var i in module_file_list){
 	// 	post(module_file_list[i]);

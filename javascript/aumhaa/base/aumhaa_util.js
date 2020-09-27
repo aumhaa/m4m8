@@ -285,12 +285,14 @@ exports.DebugNamespace = DebugNamespace;
 //should only be turned on while editing
 //Setup in js by:
 //forceload = (FORCELOAD&&Forceload) ? Forceload : function(){};
-Forceload = function(script){
+
+function Forceload(script){
 	post('FORCELOAD!!!!!!!\n');
 	script.init(1);
 }
 
 exports.Forceload = Forceload;
+
 
 /*function concat_properties(instance, new_properties)
 {
@@ -495,11 +497,13 @@ function introspect_object(object, deep){
 
 exports.introspect_object = introspect_object;
 
+
 function isObject(obj){
 	return ((typeof obj === 'object') && (obj !== null))
 }
 
 exports.isObject = isObject;
+
 
 function fetchFromObject(obj, prop) {
 
@@ -540,11 +544,13 @@ function isString(obj) {
 
 exports.isString = isString;
 
+
 function isArray(value) {
 	return Object.prototype.toString.call(value) === '[object Array]';
 }
 
 exports.isArray = isArray;
+
 
 function autobind(self) {
 	var keys = Object.getOwnPropertyNames(self.constructor.prototype);
@@ -562,6 +568,7 @@ function autobind(self) {
 };
 
 exports.autobind = autobind;
+
 
 function eventify(self){
     self.events = {};
@@ -609,7 +616,8 @@ function eventify(self){
 
 exports.eventify = eventify;
 
-aumhaaSetup = function(script){
+
+function aumhaaSetup(script){
 	script['autowatch'] = 1;
 	Function.prototype.clone = function(){
 		var that = this;
