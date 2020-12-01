@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import, print_function
 import Live
+import math
 from itertools import izip, izip_longest, product, chain
 from ableton.v2.base import listens, listens_group, EventObject, liveobj_valid, nop, clamp, listenable_property, liveobj_changed
 import ableton.v2.base.task as Task
@@ -142,9 +143,26 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 	_eq_device = None
 	_record_button_value = 0
 	_arming_select_button = None
+	_output_meter_level_control = None
+	_output_meter_left_control = None
+	_output_meter_right_control = None
 
 	def __init__(self, *a, **k):
 		super(MonoChannelStripComponent, self).__init__(*a, **k)
+
+		def make_property_slot(name, alias = None):
+			alias = alias or name
+			return self.register_slot(None, getattr(self, u'_on_%s_changed' % alias), name)
+		self._track_property_slots.append(make_property_slot(u'output_meter_level'))
+		self._track_property_slots.append(make_property_slot(u'output_meter_left'))
+		self._track_property_slots.append(make_property_slot(u'output_meter_right'))
+
+		# def make_control_slot(name):
+		#     return self.register_slot(None, getattr(self, u'_%s_value' % name), u'value')
+		self.register_slot(None, getattr(self, u'_output_meter_level_value'), u'value')
+		self.register_slot(None, getattr(self, u'_output_meter_left_value'), u'value')
+		self.register_slot(None, getattr(self, u'_output_meter_right_value'), u'value')
+
 		self._device_provider = ChannelStripStaticDeviceProvider()
 		self._device_component = ChannelStripDeviceComponent(device_provider = self._device_provider, device_bank_registry = DeviceBankRegistry(), *a, **k)
 		self._device_component._show_msg_callback = lambda message: None
@@ -176,6 +194,64 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self._update_device_selection()
 		self._detect_eq(track)
 		super(MonoChannelStripComponent,self).set_track(track)
+
+
+	def set_output_meter_level_control(self, control):
+		if control != self._output_meter_level_control:
+			release_control(self._output_meter_level_control)
+			self._output_meter_level_control = control
+			self.update()
+
+
+	def set_output_meter_left_control(self, control):
+		if control != self._output_meter_left_control:
+			release_control(self._output_meter_left_control)
+			self._output_meter_left_control = control
+			self.update()
+
+	def set_output_meter_right_control(self, control):
+		if control != self._output_meter_right_control:
+			release_control(self._output_meter_right_control)
+			self._output_meter_right_control = control
+			self.update()
+
+	def _scaled_value(self, pos, minp = 0, maxp= 1):
+		minv = 0
+		maxv = math.log(127)
+		scale = (maxv-minv) / (maxp-minp)
+		return math.exp(minv + scale*(pos-minp))
+
+
+	def _on_output_meter_level_changed(self):
+		if self.is_enabled() and self._output_meter_level_control != None:
+			if liveobj_valid(self._track):
+				level = self._track.output_meter_level
+				# debug('level is:', level)
+				maxp = 1 if self._track.has_audio_output else 8
+				scaled_level = self._scaled_value(level, 0, maxp)
+				# debug('scaled_level is:', scaled_level)
+				self._output_meter_level_control.send_value(scaled_level)
+
+	def _on_output_meter_left_changed(self):
+		if self.is_enabled() and self._output_meter_left_control != None:
+			if liveobj_valid(self._track) and self._track.has_audio_output:
+				level = self._track.output_meter_left
+				# debug('level is:', level)
+				# maxp = 1 if self._track.has_audio_output else 8
+				scaled_level = self._scaled_value(level, 0, 1)
+				# debug('scaled_left_level is:', scaled_level)
+				self._output_meter_left_control.send_value(scaled_level)
+
+
+	def _on_output_meter_right_changed(self):
+		if self.is_enabled() and self._output_meter_right_control != None:
+			if liveobj_valid(self._track) and self._track.has_audio_output:
+				level = self._track.output_meter_right
+				# debug('level is:', level)
+				# maxp = 1 if self._track.has_audio_output else 8
+				scaled_level = self._scaled_value(level, 0, 1)
+				# debug('scaled_right_level is:', scaled_level)
+				self._output_meter_right_control.send_value(scaled_level)
 
 
 	def _on_mute_changed(self):
@@ -339,6 +415,17 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		else:
 			self._fold_task.kill()
 
+	@listens('value')
+	def _output_meter_level_value(self, value):
+		pass
+
+	@listens('value')
+	def _output_meter_left_value(self, value):
+		pass
+
+	@listens('value')
+	def _output_meter_right_value(self, value):
+		pass
 
 	def _do_toggle_arm(self, exclusive = False):
 		if self._track.can_be_armed:
@@ -431,6 +518,16 @@ class MonoMixerComponent(MixerComponentBase):
 		super(MonoMixerComponent, self)._reassign_tracks()
 		for track, channel_strip in izip(self.song.return_tracks, self._return_strips):
 			channel_strip.set_track(track)
+
+
+	def set_output_meter_level_controls(self, controls):
+		for strip, control in izip_longest(self._channel_strips, controls or []):
+			strip.set_output_meter_level_control(control)
+
+
+	def set_output_meter_left_controls(self, controls):
+		for strip, control in izip_longest(self._channel_strips, controls or []):
+			strip.set_output_meter_left_control(control)
 
 
 	def set_send_controls(self, controls):
