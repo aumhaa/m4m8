@@ -176,7 +176,8 @@ class OhmTransportComponent(TransportComponent):
 
 
 	def _update_stop_button_color(self):
-		self.stop_button.color = 'Transport.StopOn' if self.play_button.is_toggled else 'Transport.StopOff'
+		if hasattr(self, '_play_toggle'):
+			self._stop_button.color = 'Transport.StopOn' if self._play_toggle.is_toggled else 'Transport.StopOff'
 
 
 
