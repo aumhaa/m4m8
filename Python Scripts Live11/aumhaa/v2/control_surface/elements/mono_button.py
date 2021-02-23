@@ -148,7 +148,7 @@ class MonoButtonElement(ButtonElement):
 
 	def send_value(self, value, force = False):
 		# debug(self.name, 'send_value', value)
-		if (value != None) and isinstance(value, int) and (value in range(128)):
+		if (value != None) and isinstance(value, int) and (value in list(range(128))):
 			if (force or self._force_next_send or ((value != self._last_sent_value) and self._is_being_forwarded)):
 				data_byte1 = self._original_identifier
 				if value in range(1, 127):
@@ -172,7 +172,7 @@ class MonoButtonElement(ButtonElement):
 				if self._report_output:
 					is_input = True
 					self._report_value(value, (not is_input))
-				self._flash_state = round((value -1)/self._num_colors)
+				self._flash_state = math.floor((value -1)/self._num_colors)
 				self._force_next_value = False
 		else:
 			debug('Button bad send value:', value)
@@ -190,7 +190,7 @@ class MonoButtonElement(ButtonElement):
 
 
 	def flash(self, timer):
-		if (self._is_being_forwarded and self._flash_state in range(1, self._num_flash_states) and (timer % self._flash_state) == 0):
+		if (self._is_being_forwarded and self._flash_state in list(range(1, self._num_flash_states)) and (timer % self._flash_state) == 0):
 			data_byte1 = self._original_identifier
 			data_byte2 = self._color if math.floor((timer % (self._flash_state * 2)) > 0) else self._darkened
 			status_byte = self._original_channel
