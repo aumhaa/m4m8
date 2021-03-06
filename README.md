@@ -2,18 +2,35 @@ mod ===
 
 monomodular b999
 
-How to make this work:
+How to make this work in Live10:
 
-1) You MUST be using the most current version of Live! (as of this writing, version 10.0.4).
+1) You MUST be using the most current version of Live! (as of this writing, version 10.1.30).
 
 2) Download this repository.  Put the “m4m8” or “m4m8-master” folder
 inside Max’s packages folder:  ~/Documents/Max 8/packages
 
 3) Copy all the FOLDERS* from inside the m4m8/Python Scripts/ folder to Live’s MIDI Remote Scripts folder.
+This folder is contained inside your User Library, and will need to be created by the user.
+The default location is ~/Music/Ableton/User Library/Remote Scripts.
 (The individual scripts require the "aumhaa" and "Debug" folders in order to work)
 
 4) If you are using a Livid controller, you'll also want to copy all the FOLDERS* from the
 m4m8/Livid Python Scripts/ folder to Live's MIDI Remote Scripts folder.
+
+How to make this work in Live11:
+
+1) You MUST be using the most current version of Live! (as of this writing, version 11.0.0).
+
+2) Download this repository.  Put the “m4m8” or “m4m8-master” folder
+inside Max’s packages folder:  ~/Documents/Max 8/packages
+
+3) Copy all the FOLDERS* from inside the m4m8/Python Scripts Live11/ folder to Live’s MIDI Remote Scripts folder.
+This folder is contained inside your User Library, and will need to be created by the user.
+The default location is ~/Music/Ableton/User Library/Remote Scripts.
+(The individual scripts require the "aumhaa" and "Debug" folders in order to work)
+
+4) If you are using a Livid controller, you'll also want to copy all the FOLDERS* from the
+m4m8/Livid Python Scripts Live11/ folder to Live's MIDI Remote Scripts folder.
 
 Notes:
 
