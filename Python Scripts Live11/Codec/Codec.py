@@ -728,6 +728,7 @@ class Codec(LividControlSurface):
 		self.modhandler.alt_layer = AddLayerMode(self.modhandler, Layer(priority = 4, lock_button = self._livid))
 
 		self._device_provider.restart_mod()
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_modswitcher(self):

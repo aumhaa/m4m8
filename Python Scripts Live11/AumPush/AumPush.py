@@ -714,6 +714,7 @@ class AumPush(Push):
 		self.modhandler.alt_layer = AddLayerMode( self.modhandler, Layer( priority = 6,
 																			alt_name_display_line = self.elements.display_line3,
 																			alt_value_display_line = self.elements.display_line4 ))
+        self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _init_matrix_modes(self):

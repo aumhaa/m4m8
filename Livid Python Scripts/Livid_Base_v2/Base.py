@@ -1,12 +1,12 @@
 # by amounra 0216 : http://www.aumhaa.com
 # written against Live 10.0.5 on 102318
 
-from __future__ import absolute_import, print_function
+
 import Live
 import math
 import sys
 from re import *
-from itertools import imap, chain, starmap
+from itertools import chain, starmap
 
 from ableton.v2.base import inject, listens, listens_group
 from ableton.v2.control_surface import ControlSurface, ControlElement, Layer, Skin, PrioritizedResource, Component, ClipCreator, DeviceBankRegistry
@@ -146,14 +146,14 @@ class BasePhysicalDisplayElement(PhysicalDisplayElement):
 
 
 	def set_translation_table(self, translation_table):
-		assert('?' in translation_table.keys())
+		assert('?' in list(translation_table.keys()))
 		self._translation_table = translation_table
 
 
 	def _send_message(self):
 		if not self._block_messages:
 			if self._message_to_send is None:
-				self._message_to_send = self._build_message(map(first, self._central_resource.owners))
+				self._message_to_send = self._build_message(list(map(first, self._central_resource.owners)))
 			self.send_midi(self._message_to_send)
 
 
@@ -325,7 +325,7 @@ class BaseSessionComponent(SessionComponent):
 				slot = scene.clip_slot(x)
 				slot.set_launch_button(button)
 		else:
-			for x, y in product(xrange(self._session_ring.num_tracks), xrange(self._session_ring.num_scenes)):
+			for x, y in product(range(self._session_ring.num_tracks), range(self._session_ring.num_scenes)):
 				scene = self.scene(y)
 				slot = scene.clip_slot(x)
 				slot.set_launch_button(None)
@@ -342,7 +342,7 @@ class BaseSessionComponent(SessionComponent):
 					button.send_value(7, True)
 
 		else:
-			for x in xrange(self._session_ring.num_scenes):
+			for x in range(self._session_ring.num_scenes):
 				scene = self.scene(x)
 				scene.set_launch_button(None)
 
@@ -688,7 +688,7 @@ class Base(LividControlSurface):
 			self._setup_main_modes()
 			self._setup_m4l_interface()
 		self._on_device_changed.subject = self._device_provider
-		self.set_feedback_channels(range(14, 15))
+		self.set_feedback_channels(list(range(14, 15)))
 
 
 	def set_feedback_channels(self, channels, *a, **k):
@@ -729,7 +729,7 @@ class Base(LividControlSurface):
 		self._touchpad_multi = MultiElement(self._touchpad[0], self._touchpad[1], self._touchpad[2], self._touchpad[3], self._touchpad[4], self._touchpad[5], self._touchpad[6], self._touchpad[7],)
 		self._runner = [MonoButtonElement(is_momentary = is_momentary, msg_type = MIDI_NOTE_TYPE, channel = CHANNEL, identifier = BASE_RUNNERS[index], name = 'Runner_' + str(index), script = self, skin = self._skin, color_map = COLOR_MAP, optimized_send_midi = optimized, resource_type = resource) for index in range(8)]
 		self._runner_matrix = ButtonMatrixElement(name = 'RunnerMatrix', rows = [self._runner])
-		self._stream_pads = [self._pad[index%8 + (abs((index/8)-3)*8)] for index in range(32)]
+		self._stream_pads = [self._pad[index%8 + int(abs((index/8)-3)*8)] for index in range(32)]
 		self._mode_buttons = ButtonMatrixElement( name = 'mode_buttons' , rows = [self._button[0:4]])
 		self._nav_buttons = ButtonMatrixElement( name = 'nav_buttons', rows = [self._button[4:8]] )
 		self._base_grid = ButtonMatrixElement(name = 'BaseGrid', rows = [self._pad[(index*8):(index*8)+8] for index in range(4)] )
@@ -902,6 +902,7 @@ class Base(LividControlSurface):
 		self.modhandler._device_selector._selection_layer = AddLayerMode(self.modhandler._device_selector, Layer(priority = 7,
 													matrix = self._mode_buttons))
 		self.modhandler.set_enabled(False)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_instrument(self):

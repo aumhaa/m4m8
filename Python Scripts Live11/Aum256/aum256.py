@@ -424,6 +424,7 @@ class Aum256(ControlSurface):
 																			#key_buttons = self.elements.select_buttons))
 																			#key_buttons = self.elements.track_state_buttons))
 		self._device_provider.restart_mod()
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_modswitcher(self):

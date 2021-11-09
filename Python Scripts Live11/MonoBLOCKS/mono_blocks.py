@@ -338,6 +338,7 @@ class MonoBlocks(ControlSurface):
 																			))
 																			#key_buttons = self.elements.select_buttons))
 																			#key_buttons = self.elements.track_state_buttons))
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 		self._device_provider.restart_mod()
 
 

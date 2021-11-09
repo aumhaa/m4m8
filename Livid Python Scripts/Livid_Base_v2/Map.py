@@ -125,7 +125,7 @@ DEFAULT_SCALE = 'Auto'
 """This is the default SplitMode used for all MIDI Channels"""
 DEFAULT_MODE = 'seq'
 
-SCALENAMES = [scale for scale in sorted(SCALES.iterkeys())]
+SCALENAMES = [scale for scale in sorted(SCALES.keys())]
 
 """It is possible to create a custom list of scales to be used by the script.  For instance, the list below would include major, minor, auto, drumpad, and chromatic scales, in that order."""
 #SCALENAMES = ['Major', 'Minor', 'Auto', 'DrumPad', 'Chromatic']

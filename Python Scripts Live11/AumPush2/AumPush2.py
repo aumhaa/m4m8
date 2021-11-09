@@ -19,7 +19,6 @@ from ableton.v2.control_surface.control import ButtonControl
 from ableton.v2.control_surface.elements import DisplayDataSource, adjust_string, ButtonElement, ButtonMatrixElement, ComboElement, DoublePressElement, DoublePressContext, MultiElement, OptionalElement, to_midi_value
 from ableton.v2.control_surface.mode import CompoundMode, AddLayerMode, ReenterBehaviour, ModesComponent, SetAttributeMode, DelayMode
 from ableton.v2.control_surface.input_control_element import ParameterSlot
-from ableton.v2.control_surface.elements import ButtonElement
 
 from Push2.push2 import Push2
 from pushbase.value_component import ValueComponent
@@ -317,6 +316,9 @@ class AumPushCrossfader(Component):
 
 
 
+
+
+
 class AumPush2(Push2):
 
 
@@ -391,6 +393,11 @@ class AumPush2(Push2):
 																			#key_buttons = self.elements.select_buttons))
 																			#key_buttons = self.elements.track_state_buttons))
 		self._device_provider.restart_mod()
+
+
+		# self._modHandle = ModControl(monomodular = self.monomodular, is_momentary = True, msg_type = MIDI_NOTE_TYPE, channel = 15, identifier = 0, name = 'ModHandle')
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
+
 
 
 	def _init_matrix_modes(self):

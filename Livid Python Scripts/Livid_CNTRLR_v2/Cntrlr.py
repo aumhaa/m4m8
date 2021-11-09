@@ -1,7 +1,7 @@
 # by amounra 0218 : http://www.aumhaa.com
 # written against Live 10.0.5 on 102318
 
-from __future__ import absolute_import, print_function
+
 import Live
 import time
 import math
@@ -55,7 +55,7 @@ check_model = (240, 126, 127, 6, 1, 247)
 factoryreset = (240,0,1,97,8,6,247)
 SLOWENCODER = (240, 0, 1, 97, 8, 30, 69, 00, 247)
 NORMALENCODER = (240, 0, 1, 97, 8, 30, 00, 00, 247)
-FASTENCODER = (240, 0, 1, 97, 8, 30, 04, 00, 247)
+FASTENCODER = (240, 0, 1, 97, 8, 30, 0o4, 00, 247)
 
 
 
@@ -159,10 +159,10 @@ class CntrlrMonoInstrumentComponent(MonoInstrumentComponent):
 		super(CntrlrMonoInstrumentComponent, self).__init__(*a, **k)
 		self._keypad._note_sequencer._playhead_component._notes=tuple(range(16,32))
 		self._keypad._note_sequencer._playhead_component._triplet_notes=tuple(range(16, 28))
-		self._keypad._note_sequencer._note_editor._visible_steps_model = lambda indices: filter(lambda k: k % 16 not in (13, 14, 15, 16), indices)
+		self._keypad._note_sequencer._note_editor._visible_steps_model = lambda indices: [k for k in indices if k % 16 not in (13, 14, 15, 16)]
 		self._drumpad._step_sequencer._playhead_component._notes=tuple(range(16,32))
 		self._drumpad._step_sequencer._playhead_component._triplet_notes=tuple(range(16, 28))
-		self._drumpad._step_sequencer._note_editor._visible_steps_model = lambda indices: filter(lambda k: k % 16 not in (13, 14, 15, 16), indices)
+		self._drumpad._step_sequencer._note_editor._visible_steps_model = lambda indices: [k for k in indices if k % 16 not in (13, 14, 15, 16)]
 		self._matrix_modes.add_mode('disabled', [DelayMode(self.update, delay = .1, parent_task_group = self._parent_task_group)])
 		self._matrix_modes.add_mode('enabled', [DelayMode(self.update, delay = .1, parent_task_group = self._parent_task_group)], behaviour = DefaultedBehaviour())
 		self._matrix_modes._last_selected_mode = 'enabled'
@@ -290,7 +290,7 @@ class Cntrlr(LividControlSurface):
 			self._setup_modes()
 			self._setup_m4l_interface()
 			self._on_device_changed.subject = self.song
-			self.set_feedback_channels(range(14, 15))
+			self.set_feedback_channels(list(range(14, 15)))
 
 
 	def _initialize_script(self):
@@ -525,6 +525,7 @@ class Cntrlr(LividControlSurface):
 										cntrlr_keys = self._key_matrix.submatrix[:,:],)
 										#parameter_controls = self._dial_matrix.submatrix[:,:])
 		self.modhandler.set_enabled(False)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_instrument(self):

@@ -13,11 +13,12 @@ from itertools import chain
 from ableton.v2.base import clamp, flatten, depends, listenable_property, listens, listens_group, liveobj_changed, liveobj_valid, EventObject
 from ableton.v2.control_surface import ControlSurface, Component, ControlElement, NotifyingControlElement, InputSignal
 from ableton.v2.control_surface.device_provider import DeviceProvider
-from ableton.v2.control_surface.elements import ButtonMatrixElement
+from ableton.v2.control_surface.elements import ButtonElement, ButtonMatrixElement, SysexElement
 from ableton.v2.control_surface.control import ControlManager
 from ableton.v2.base.task import *
 from ableton.v2.base import Event, listens, listens_group, Signal, in_range, Disconnectable, listenable_property
 from ableton.v2.control_surface.internal_parameter import InternalParameter
+from ableton.v2.control_surface.input_control_element import MIDI_NOTE_TYPE
 
 from aumhaa.v2.control_surface.components import DeviceSelectorComponent, MonoParamComponent, MonoDeviceComponent
 from aumhaa.v2.control_surface.mod_devices import *
@@ -975,6 +976,7 @@ class ModHandler(Component):
 		super(ModHandler, self).on_enabled_changed()
 		#if not self.is_enabled():
 		#    self._instrument and self._instrument.set_enabled(False)
+
 
 
 
@@ -2484,4 +2486,98 @@ class ModDeviceProvider(EventObject):
 			self.notify_device()
 
 
+
+
+# class ModControl(ButtonElement):
+class ModControl(SysexElement):
+
+	def __init__(self, modscript, monomodular, *a, **k):
+		self._monomodular = monomodular
+		self.modscript = modscript
+		# self.pipe = modscript.pipe
+		# self.get_control_names = self.modscript.get_control_names
+		super(ModControl, self).__init__(*a, **k)
+		self.modscript._do_send_midi = self._monkeypatch__do_send_midi(modscript)
+
+
+	def _monkeypatch__do_send_midi(self, modscript):
+		cls = type(modscript)
+		debug('class is:', cls)
+		def _do_send_midi(midi_event_bytes):
+			super(cls, modscript)._do_send_midi(midi_event_bytes)
+			bytes = list(midi_event_bytes)
+			self.notify_pipe('midi', *bytes)
+		return _do_send_midi
+
+	@listenable_property
+	def pipe(self):
+		return None
+
+	def _send(self, **a):
+		notify_pipe(a)
+
+	@property
+	def monomodular(self):
+		return self._monomodular
+
+	# @property
+	# def script_components(self):
+	# 	return self.modscript._components
+
+	@property
+	def components(self):
+		# comps = list(component.__name__ for component in self.modscript._components)
+		# debug('components:', comps)
+		# for component in comps:
+		# 	debug('component name:', component, component.__name__)
+		return tuple(component for component in self.modscript.components)
+
+	# @property
+	# def script_controls(self):
+	# 	return tuple(self.modscript._controls)
+
+	@property
+	def controls(self):
+		# return tuple(self.modscript._controls)
+		return tuple(control for control in self.modscript.controls)
+
+	# @property
+	# def script_functions(self):
+	# 	return tuple(item for item in dir(self.modscript) if not item.startswith('_'))
+
+	@property
+	def functions(self):
+		return tuple(item for item in dir(self.modscript) if not item.startswith('_'))
+
+	# def get_script_component(self, name):
+	# 	if hasattr(self.modscript, name):
+	# 		return getattr(self.modscript, name)
+	# 	else:
+	# 		return None
+
+	def get_control(self, name):
+		debug('get control:', name)
+		return self._get_cs_control(self.modscript, name)
+
+	def _get_cs_control(self, cs, name):
+		for control in cs.controls:
+			if hasattr(control, u'name') and control.name == name:
+				return control
+
+	def call_script_function(self, func, *a, **k):
+		debug('call_script_function:', func, a, k)
+		# if hasattr(self.script, func) and callable(getattr(self.script, func)):
+		try:
+			debug('trying func:', func, *a, **k)
+			getattr(self.modscript, func)(*a, **k)
+		except:
+			pass
+
+	def receive_note(self, num, val, chan=0):
+		debug('receive_note', num, val)
+		self.modscript.receive_midi(tuple([144+chan, num, val]))
+
+	def receive_cc(self, num, val, chan=0):
+		# debug('receive_cc', num, val)
+		self.modscript.receive_midi(tuple([176+chan, num, val]))
 #a

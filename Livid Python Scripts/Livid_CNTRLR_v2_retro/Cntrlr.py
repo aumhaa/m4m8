@@ -1,7 +1,7 @@
 # by amounra 0218 : http://www.aumhaa.com
 # written against Live 10.0.4 100918
 
-from __future__ import absolute_import, print_function
+
 import Live
 import time
 import math
@@ -53,7 +53,7 @@ check_model = (240, 126, 127, 6, 1, 247)
 factoryreset = (240,0,1,97,8,6,247)
 SLOWENCODER = (240, 0, 1, 97, 8, 30, 69, 00, 247)
 NORMALENCODER = (240, 0, 1, 97, 8, 30, 00, 00, 247)
-FASTENCODER = (240, 0, 1, 97, 8, 30, 04, 00, 247)
+FASTENCODER = (240, 0, 1, 97, 8, 30, 0o4, 00, 247)
 
 def enumerate_track_device(track):
 	devices = []
@@ -77,7 +77,7 @@ def xstr(s):
 def special_number_of_parameter_banks(device, device_dict = DEVICE_DICT):
 	""" Determine the amount of parameter banks the given device has """
 	if device != None:
-		if device.class_name in device_dict.keys():
+		if device.class_name in list(device_dict.keys()):
 			device_bank = device_dict[device.class_name]
 			return len(device_bank)/4 + (1 if len(device_bank)%4 else 0)
 		else:
@@ -95,7 +95,7 @@ def special_number_of_parameter_banks(device, device_dict = DEVICE_DICT):
 
 def special_parameter_bank_names(device, bank_name_dict = BANK_NAME_DICT):
 	if device != None:
-		if device.class_name in bank_name_dict.keys():
+		if device.class_name in list(bank_name_dict.keys()):
 			ret = group(bank_name_dict[device.class_name], 4)
 			ret1 = [[i for i in bank_names if not i is None] for bank_names in ret]
 			return [' - '.join(i) for i in ret1]
@@ -113,13 +113,13 @@ def special_parameter_bank_names(device, bank_name_dict = BANK_NAME_DICT):
 				except:
 					name = None
 				if name:
-					return str(filter(_is_ascii, name))
+					return str(list(filter(_is_ascii, name)))
 				else:
 					return _default_bank_name(bank_index)
 
-			return map(_bank_name, range(0, banks))
+			return list(map(_bank_name, list(range(0, banks))))
 		else:
-			return map(_default_bank_name, range(0, banks))
+			return list(map(_default_bank_name, list(range(0, banks))))
 	return []
 
 
@@ -128,11 +128,11 @@ def special_parameter_banks(device, device_dict = DEVICE_DICT):
 	if device != None:
 		if device.class_name is 'LegacyModDeviceProxy':
 			return group(device_parameters_to_map(device), 12)
-		elif device.class_name in device_dict.keys():
+		elif device.class_name in list(device_dict.keys()):
 			def names_to_params(bank):
-				return map(partial(get_parameter_by_name, device), bank)
+				return list(map(partial(get_parameter_by_name, device), bank))
 
-			return group([i for i in flatten(map(names_to_params, device_dict[device.class_name]))], 12)
+			return group([i for i in flatten(list(map(names_to_params, device_dict[device.class_name])))], 12)
 		else:
 			if device.class_name in MAX_DEVICES:
 				try:
@@ -150,7 +150,7 @@ def special_parameter_banks(device, device_dict = DEVICE_DICT):
 						else:
 							return [ (device.parameters[i] if i != -1 else None) for i in parameter_indices ]
 
-					return map(_bank_parameters, range(0, banks))
+					return list(map(_bank_parameters, list(range(0, banks))))
 			return group(device_parameters_to_map(device), 12)
 	return []
 
@@ -226,7 +226,7 @@ class CancellableBehaviour(ModeButtonBehaviour):
 	def press_immediate(self, component, mode):
 		active_modes = component.active_modes
 		groups = component.get_mode_groups(mode)
-		can_cancel_mode = mode in active_modes or any(imap(lambda other: groups & component.get_mode_groups(other), active_modes))
+		can_cancel_mode = mode in active_modes or any(map(lambda other: groups & component.get_mode_groups(other), active_modes))
 		if can_cancel_mode:
 			if groups:
 				component.pop_groups(groups)
@@ -355,7 +355,7 @@ class CntrlrTransportComponent(TransportComponent):
 
 
 	def _update_stop_button_color(self):
-		if hasattr(self, '_play_toggle'):
+		if hasattr(self, '_stop_button'):
 			self._stop_button.color = 'Transport.StopOn' if self._play_toggle.is_toggled else 'Transport.StopOff'
 
 
@@ -725,6 +725,7 @@ class Cntrlr(LividControlSurface):
 										cntrlr_keys = self._key_matrix.submatrix[:,:],)
 										#parameter_controls = self._dial_matrix.submatrix[:,:])
 		self.modhandler.set_enabled(False)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_modswitcher(self):

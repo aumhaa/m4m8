@@ -1,12 +1,12 @@
 # by amounra 0216 : http://www.aumhaa.com
 # written against Live 10.0.4 100918
 
-from __future__ import absolute_import, print_function
+
 import Live
 import math
 import sys
 from re import *
-from itertools import imap, chain, starmap, izip, izip_longest
+from itertools import chain, starmap, zip_longest
 
 from ableton.v2.base import inject, listens, listens_group
 from ableton.v2.control_surface import ControlSurface, ControlElement, Layer, Skin, PrioritizedResource, Component, ClipCreator, DeviceBankRegistry
@@ -74,7 +74,7 @@ class OhmMixerComponent(MonoMixerComponent):
 	def set_instrument_send_controls(self, controls):
 		self._send_controls = controls
 		if controls:
-			for strip, control in izip(self._channel_strips, controls or []):
+			for strip, control in zip(self._channel_strips, controls or []):
 				strip.set_send_controls([control])
 		else:
 			for strip in self._channel_strips:
@@ -98,13 +98,13 @@ class OhmMixerComponent(MonoMixerComponent):
 
 	#sorry, too tired to think of a good way to do this
 	def set_pan_controls(self, controls):
-		for strip, control in izip(self._channel_strips, controls or []):
+		for strip, control in zip(self._channel_strips, controls or []):
 			#debug('strip is:', strip, 'control is:', control)
 			strip.set_pan_control(control)
 
 
 	def set_end_pan_controls(self, controls):
-		for strip, control in izip(self._channel_strips[4:], controls or []):
+		for strip, control in zip(self._channel_strips[4:], controls or []):
 			#debug('strip is:', strip, 'control is:', control)
 			strip.set_pan_control(control)
 
@@ -123,7 +123,7 @@ class OhmSessionComponent(SessionComponent):
 				slot.set_launch_button(button)
 
 		else:
-			for x, y in product(xrange(self._session_ring.num_tracks), xrange(self._session_ring.num_scenes)):
+			for x, y in product(range(self._session_ring.num_tracks), range(self._session_ring.num_scenes)):
 				scene = self.scene(y)
 				slot = scene.clip_slot(x)
 				slot.set_launch_button(None)
@@ -139,7 +139,7 @@ class OhmSessionComponent(SessionComponent):
 				button.set_light('Session.Scene')
 
 		else:
-			for x in xrange(self._session_ring.num_scenes):
+			for x in range(self._session_ring.num_scenes):
 				scene = self.scene(x)
 				scene.set_launch_button(None)
 
@@ -172,12 +172,14 @@ class OhmDeviceComponent(DeviceComponent):
 
 	"""
 
+
+
 class OhmTransportComponent(TransportComponent):
 
 
 	def _update_stop_button_color(self):
-		if hasattr(self, '_play_toggle'):
-			self._stop_button.color = 'Transport.StopOn' if self._play_toggle.is_toggled else 'Transport.StopOff'
+		if hasattr(self, '_stop_button'):
+			self._stop_button.color = 'Transport.StopOn' if hasattr(self, '_play_toggle') and self._play_toggle.is_toggled else 'Transport.StopOff'
 
 
 
@@ -431,7 +433,7 @@ class OhmModes(LividControlSurface):
 		self._scale_mode.set_enabled(False)
 		self._on_scale_change.subject = self._scale_mode
 
-		self._octave_offset_component = ScrollingChannelizedSettingsComponent(name = 'NoteOffset', parent_task_group = self._task_group, value_dict = range(104), default_value_index = 36, default_channel = 0, bank_increment = 12, bank_on_color = 'MonoInstrument.OffsetOnValue', bank_off_color = 'MonoInstrument.OffsetOffValue')
+		self._octave_offset_component = ScrollingChannelizedSettingsComponent(name = 'NoteOffset', parent_task_group = self._task_group, value_dict = list(range(104)), default_value_index = 36, default_channel = 0, bank_increment = 12, bank_on_color = 'MonoInstrument.OffsetOnValue', bank_off_color = 'MonoInstrument.OffsetOffValue')
 		self._octave_offset_component.layer = Layer(priority = 5, bank_up_button = self._menu[2], bank_down_button = self._menu[5])
 		self._on_octave_change.subject = self._octave_offset_component
 
@@ -474,6 +476,7 @@ class OhmModes(LividControlSurface):
 
 		self.modhandler.set_enabled(False)
 		self.modhandler.set_mod_button(self._livid)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_modswitcher(self):
