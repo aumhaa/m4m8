@@ -63,7 +63,9 @@ GridClass.prototype.add_control = function(x, y, button){
 }
 
 GridClass.prototype.send = function(x, y, value){
+	lcl_debug('GridClass.send:', x, y, value);
 	this._grid[x][y].send(value);
+	// this.emit('NotifySend', x, y, value);
 }
 
 GridClass.prototype.mask = function(x, y, value){

@@ -14,15 +14,16 @@ var lcl_debug = LCL_DEBUG ? new util.DebugNamespace('aumhaa_mod->').debug : func
 var MONOMODULAR=new RegExp(/(monomodular)/);
 var FUNCTION = new RegExp(/(function)/);
 var PROPERTY = new RegExp(/(property)/);
-var VERSION = 'b9991';
+var VERSION = 'b9992';
 //var WS = new RegExp('');
 
 
 
 function ModComponent(parent, type, unique, legacy, args){
 	var self = this;
+	this.add_bound_properties(this, ['callback', 'debug']);
 	this.parent = parent;
-	this.debug = lcl_debug;
+	this.debug = LCL_DEBUG ? new util.DebugNamespace('aumhaa_mod->').debug : function(){};
 	this.patch_type = type ? type : 'info';
 	this.unique = unique ? unique : '---';
 	this.legacy = legacy ? legacy : false;
@@ -107,28 +108,17 @@ ModComponent.prototype.init = function(){
 		for(var i=0;i<number_children;i++){
 			this.debug('Checking control surface #:', i);
 		  this.finder.goto('control_surfaces', i);
-			if(!this.control_surface_ids[parseInt(this.finder.id)]){
-				this.debug('Control surface #:', i, 'was NOT in list of excluded surfaces.');
-				var children = this.finder.info.toString().split(new RegExp("\n"));
-				var functions = [];
-				var properties = [];
-				for(var item in children){
-					if(FUNCTION.test(children[item])){
-						//this.debug('adding function:', children[item].replace('function ', ''));
-						functions.push(children[item].replace('function ', ''));
-					}
-					if(PROPERTY.test(children[item])){
-						//this.debug('adding property:', children[item].replace('property ', ''));
-						properties.push(children[item].replace('property ', ''));
-					}
-				}
-				for(var item in properties){
-					//this.debug('Property #', item, ':', properties[item]);
-					if(MONOMODULAR.test(properties[item])>0){
-						//this.debug('in there\n');
+			// this.debug('finder:', JSON.stringify(this.finder), 'id:', this.finder.id, 'name:', this.finder.get('type_name'));
+			// var children = this.finder.info.toString().split(new RegExp("\n"));
+			// this.debug('children:', children);
+			var modHandleId = parseInt(this.finder.call('get_control_by_name', 'ModHandle')[1]);
+			// this.debug('modHandleId:', modHandleId);
+			if(modHandleId!=0){
+					this.restart.cancel();
+					this.finder.id = modHandleId;
 						found = true;
 						var new_id = this.finder.get('monomodular');
-						this.debug('found, focusing on', new_id);
+					// this.debug('found, focusing on', new_id);
 						this.finder.id = parseInt(new_id[1]);
 						this.monomodular_id = parseInt(new_id[1]);
 						router = new LiveAPI(this.connected_callback.bind(this));
@@ -171,16 +161,6 @@ ModComponent.prototype.init = function(){
 							this._init_callback(1);
 						}
 						this.send_stored_messages();
-					}
-					else{
-						//this.control_surface_ids[parseInt(this.finder.id)] = true;
-					}
-				}
-			}
-			else{
-				this.debug('Control surface #:', i, 'WAS in list of excluded surfaces.');
-			}
-			if(found){
 				break;
 			}
 		}

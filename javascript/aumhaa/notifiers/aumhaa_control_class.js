@@ -65,15 +65,17 @@ ControlClass.prototype.identifier = function(){
 }
 
 ControlClass.prototype._send = function(value){
-	lcl_debug('ControlClass.send()');
+	lcl_debug('ControlClass._send()');
 }//this should be overridden by subclass
 
 ControlClass.prototype._mask = function(value){}//this should be overridden by subclass
 
 ControlClass.prototype.send = function(value){
-	//debug('ControlClass.send():', value);
+	lcl_debug('ControlClass.send():', value);
 	this._last_sent_value = value;
 	this._send(value);
+	this.emit('NotifySend', this, value);
+	// debug('NotifySend events:', this._events.NotifySend);
 }
 
 ControlClass.prototype.reset = function(){

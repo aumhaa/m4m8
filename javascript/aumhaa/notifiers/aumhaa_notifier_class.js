@@ -28,6 +28,7 @@ function NotifierClass(name, args){
 		'remove_target',
 		'notify',
 		'set_enabled',
+		'_value'
 	]);
 	this._value = -1;
 	this._target_heap = [];
@@ -38,6 +39,7 @@ function NotifierClass(name, args){
 	NotifierClass.super_.call(this, name, args);
 	this._events.Notify = [];
 	this._events.NotifyTarget = [];
+	this._events.NotifySend = [];
 	if(this._callback!=undefined){
 		this.set_target(this._callback);
 	}

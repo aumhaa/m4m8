@@ -7,6 +7,7 @@ var filenames = [
   'aumhaa_node_script_proxy',
   'aumhaa_event_emitter',
   'aumhaa_floating_window',
+  'aumhaa_button_class',
   'aumhaa_util',
   'aumhaa_LiveAPI_util',
   'aumhaa_chooser',

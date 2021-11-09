@@ -196,7 +196,9 @@ APIUtility.prototype.set_component_by_type = function (api_inst, comp_type){
 	var path = api_inst.path;
 	var comps = api_inst.get('components').filter(function(element){return element !== 'id';});
 	for(var i in comps){
+		// debug('testing:', comps[i]);
 		api_inst.id = comps[i];
+		// debug('name:', api_inst.get('name'));
 		var type = api_inst.type;
 		// debug(type, '==', comp_type, type == comp_type);
 		if(type == comp_type){

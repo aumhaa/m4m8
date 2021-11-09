@@ -15,13 +15,24 @@ var consts = require('aumhaa_notifier_consts').consts;
 
 function GUIControl(name, args){
 	var self = this;
-	this.add_bound_properties(this, ['set_send_function', 'get_coords', 'receive', 'receive_notifier', '_x', '_y', '_send', 'send']);
+	this.add_bound_properties(this, [
+		'set_send_function',
+		'get_coords',
+		'receive',
+		'receive_notifier',
+		'_x',
+		'_y',
+		'_send',
+		'send',
+		'_momentary'
+	]);
 	this._valueListener = undefined;
+	this._momentary = false;
 	GUIControl.super_.call(this, 0, name, args);
 	if(this._jsObj){
 		this._valueListener = new MaxobjListener(this._jsObj, this.receive);
 	}
-	lcl_debug('GUIControl created:', this._name);
+	// lcl_debug('GUIControl created:', this._name);
 }
 
 util.inherits(GUIControl, ControlClass);
@@ -29,9 +40,14 @@ util.inherits(GUIControl, ControlClass);
 GUIControl.prototype.receive = function(maxJsObjListenerData){
 	// debug('receive:', this._name, value);
 	if(this._enabled){
-		this._value = maxJsObjListenerData.value;
+		var value = maxJsObjListenerData.value;
+		this._value = value != undefined ? value : this._momentary ? 1 : 0;
 		//lcl_debug('receive:', this._name, this._value);
 		this.notify();
+		if(this._momentary){
+			this._value = 0;
+			this.notify();
+		}
 	}
 }
 
