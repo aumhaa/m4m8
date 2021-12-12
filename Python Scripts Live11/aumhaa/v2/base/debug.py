@@ -41,7 +41,7 @@ def get_control_surfaces():
 		return getattr(__builtins__, CS_LIST_KEY)
 
 
-DEBUG = True
+DEBUG = False
 
 def _normalize_filename(filename):
 	if filename is not None:
@@ -108,24 +108,25 @@ def log_flattened_arguments(*a, **k):
 	logger.info(args)
 
 
-def initialize_debug():
+def initialize_debug(local_debug = DEBUG, *a, **k):
 	debug = no_debug
-	logger.info('getting control_surfaces:')
-	for module in get_control_surfaces():
-		logger.info('module is:' + str(module))
-		logger.info('isinstance:' + str(isinstance(module, Debug)) + ' ' + str(Debug))
-		if isinstance(module, Debug):
-			logger.info('setting to flattened_arguments')
-			debug = log_flattened_arguments
-			break
+	if local_debug:
+		logger.info('getting control_surfaces:')
+		for module in get_control_surfaces():
+			logger.info('module is:' + str(module))
+			logger.info('isinstance:' + str(isinstance(module, Debug)) + ' ' + str(Debug))
+			if isinstance(module, Debug):
+				logger.info('setting to flattened_arguments')
+				debug = log_flattened_arguments
+				break
 	return debug
 
 
-def initialize_debug():
-	return log_flattened_arguments if DEBUG else no_debug
+def initialize_debug(local_debug = DEBUG, *a, **k):
+	return log_flattened_arguments if (local_debug or DEBUG) else no_debug
 
 
-debug = log_flattened_arguments
+debug = log_flattened_arguments if DEBUG else no_debug
 
 
 
