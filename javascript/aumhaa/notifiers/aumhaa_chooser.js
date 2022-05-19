@@ -12,11 +12,28 @@ var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
 function CellBlockChooserComponent(name, args){
   var self = this;
   if(!args.obj){
-    throw new Error('CellBlockChooserComponent requires [cellblock] as its second arguent');
+    throw new Error('CellBlockChooserComponent requires [cellblock] as its second argument');
   }
+  this.add_bound_properties(this, [
+    'input',
+    'clear',
+    'set',
+    'set_height',
+    'append',
+    'multiselect',
+    'doublepress_timer',
+    '_last_pressed',
+    '_bgcolor',
+    'back',
+    '_max_size',
+    '_single_active',
+    '_last_single_active'
+  ]);
+  this._max_size = 100000;
   this._row_height = 12;
   this._contents = [];
   this._single_active = undefined;
+  this._last_single_active = undefined;
   this._active = [];
   this._active_items = [];
   this._active_indexes = [];
@@ -24,6 +41,7 @@ function CellBlockChooserComponent(name, args){
   this._reselect = false;
   this._doublepress_delay = 250;
   this._last_pressed = undefined;
+  this._last_selected = undefined;
   this._doublepressed = false;
   this.COLORS = {
     transparent:[255, 255, 255, 0],
@@ -38,18 +56,8 @@ function CellBlockChooserComponent(name, args){
     selected:[220, 150, 0, 130]
   };
   this._bgcolor = [.8, .8, .8, 1.];
-  this.add_bound_properties(this, [
-    'input',
-    'clear',
-    'set',
-    'set_height',
-    'append',
-    'multiselect',
-    'doublepress_timer',
-    '_last_pressed',
-    '_bgcolor',
-    'back'
-  ]);
+  this._selected_color = 'selected';
+
   CellBlockChooserComponent.super_.call(this, name, args);
   this.doublepress_timer = new Task(function(){
     // lcl_debug('doublepress_timer');
@@ -93,6 +101,20 @@ CellBlockChooserComponent.prototype.append = function(){
   //_refresh();
 }
 
+CellBlockChooserComponent.prototype.set_contents_from_obj = function(obj){
+  // lcl_debug('cellblock_chooser.set_contents_from_obj', obj.length);
+  this._contents = obj;
+  this._contents.length = this._contents.length < this._max_size ? this._contents.length : this._max_size;
+  // lcl_debug('cellblock_chooser.set_contents_from_obj new length:', obj.length);
+  this._obj.message('rows', parseInt(this._contents.length));
+  var len = this._contents.length;
+  for(var i=0;i<len;i++){
+    this._obj.message('set', 0, i, this._contents[i].value);
+  }
+  this._obj.message('vscroll', this._contents.length>this._row_height);
+  this._refresh();
+}
+
 CellBlockChooserComponent.prototype.clear = function(){
   this._obj.message('rows', 0);
   this._obj.message('set', 0, 0, '');
@@ -125,8 +147,11 @@ CellBlockChooserComponent.prototype._refresh = function(){
     this._active_indexes = this._single_active ? [this._single_active] : [];
     for(var i in this._contents){
       this._contents[i].active = i == this._single_active;
-      this._obj.message('cell', 0, parseInt(i), 'brgb', parseInt(i) == this._single_active ? this.COLORS.selected : this.COLORS.transparent);
+      // this._obj.message('cell', 0, parseInt(i), 'brgb', parseInt(i) == this._single_active ? this.COLORS[this._selected_color]: this.COLORS.transparent);
     }
+    this._obj.message('cell', 0, parseInt(this._last_single), 'brgb');
+    this._last_single = this._single_active;
+    this._obj.message('cell', 0, parseInt(this._single_active), 'brgb', this.COLORS.selected);
   }
   this._obj.message('vscroll', this._contents.length>this._row_height);
 }
