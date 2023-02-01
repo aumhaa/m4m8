@@ -19,9 +19,9 @@ autowatch = 1;
 outlets = 4;
 inlets = 5;
 
-aumhaa = require('_deprecated_base');
+aumhaa = require('_base');
 var FORCELOAD = false;
-var DEBUG = true;
+var DEBUG = false;
 aumhaa.init(this);
 
 var NEW_DEBUG = false;
@@ -240,8 +240,7 @@ var current_rule = 0;
 var handlers = [];
 var codec_handler = false;
 
-//var Protos = require('protos');
-var Protos = require('_deprecated_protos');
+var Protos = require('protos');
 //var ButtonClass = require('ButtonClass');
 //include('protos');
 

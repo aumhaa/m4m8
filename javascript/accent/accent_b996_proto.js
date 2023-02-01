@@ -21,7 +21,7 @@ autowatch = 1;
 outlets = 4;
 inlets = 5;
 
-aumhaa = require('_deprecated_base');
+aumhaa = require('_base');
 
 var FORCELOAD = false;
 var NEW_DEBUG = false;

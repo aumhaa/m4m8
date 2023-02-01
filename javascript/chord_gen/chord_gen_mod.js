@@ -9,7 +9,7 @@ var mod_finder;
 
 var unique = jsarguments[1];
 
-aumhaa = require('_deprecated_base');
+aumhaa = require('_base');
 var FORCELOAD = false;
 var DEBUG = false;
 aumhaa.init(this);

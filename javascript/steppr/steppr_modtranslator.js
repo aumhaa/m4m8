@@ -12,7 +12,7 @@ setinletassist(0,"to pattrstorage");
 
 var script = this;
 
-aumhaa = require('_deprecated_base');
+aumhaa = require('_base');
 var FORCELOAD = false;
 var DEBUG = false;
 aumhaa.init(this);
