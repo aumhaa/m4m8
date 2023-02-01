@@ -725,6 +725,7 @@ class Cntrlr(LividControlSurface):
 										cntrlr_keys = self._key_matrix.submatrix[:,:],)
 										#parameter_controls = self._dial_matrix.submatrix[:,:])
 		self.modhandler.set_enabled(False)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_modswitcher(self):

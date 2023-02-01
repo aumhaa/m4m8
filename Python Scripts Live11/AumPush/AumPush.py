@@ -88,7 +88,7 @@ AUMPUSH_SCALENAMES = ['Keys', 'Major', 'Minor', 'Auto', 'Chromatic']
 ####post 9.5
 
 def tracks_to_use_from_song(song):
-    return tuple(song.visible_tracks) + tuple(song.return_tracks)
+	return tuple(song.visible_tracks) + tuple(song.return_tracks)
 
 
 
@@ -691,7 +691,7 @@ class AumPush(Push):
 		self.monomodular = get_monomodular(self)
 		self.monomodular.name = 'monomodular_switcher'
 		#with inject(register_component = const(self._register_component), song = const(self.song)).everywhere():
-        #with inject(song = const(self.song)).everywhere():
+		#with inject(song = const(self.song)).everywhere():
 		self.modhandler = PushModHandler(self) ## song = self.song, register_component = self._register_component)
 		self.modhandler.name = 'ModHandler'
 		self.modhandler.layer = Layer( priority = 6, lock_button = self.elements.note_mode_button,
@@ -714,7 +714,7 @@ class AumPush(Push):
 		self.modhandler.alt_layer = AddLayerMode( self.modhandler, Layer( priority = 6,
 																			alt_name_display_line = self.elements.display_line3,
 																			alt_value_display_line = self.elements.display_line4 ))
-        self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _init_matrix_modes(self):

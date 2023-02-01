@@ -2230,10 +2230,10 @@ class ModRouter(Component):
 		for mod in self._mods:
 			mod._disconnect_client()
 		self._mods = []
-		for surface in get_control_surfaces():
-			if hasattr(surface, 'monomodular'):
-				debug('deleting monomodular for ' + str(surface))
-				del surface.monomodular
+		# for surface in get_control_surfaces():
+			# if hasattr(surface, 'monomodular'):
+			# 	debug('deleting monomodular for ' + str(surface))
+			# 	del surface.monomodular
 		old_host = self._host
 		self._host = None
 		self._handlers = []

@@ -123,7 +123,6 @@ class ChannelStripDeviceComponent(DeviceComponent):
 
 class MonoChannelStripComponent(ChannelStripComponentBase):
 
-
 	_mute_on_color = 'DefaultButton.On'
 	_mute_off_color = 'DefaultButton.Off'
 	_solo_on_color = 'DefaultButton.On'
@@ -146,16 +145,19 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 	_output_meter_level_control = None
 	_output_meter_left_control = None
 	_output_meter_right_control = None
+	_device_component = None
+	_device_provider = None
 
 	def __init__(self, *a, **k):
 		super(MonoChannelStripComponent, self).__init__(*a, **k)
-
 		def make_property_slot(name, alias = None):
 			alias = alias or name
 			return self.register_slot(None, getattr(self, '_on_%s_changed' % alias), name)
 		self._track_property_slots.append(make_property_slot('output_meter_level'))
 		self._track_property_slots.append(make_property_slot('output_meter_left'))
 		self._track_property_slots.append(make_property_slot('output_meter_right'))
+
+		self._playing_clip = None
 
 		# def make_control_slot(name):
 		#     return self.register_slot(None, getattr(self, u'_%s_value' % name), u'value')
@@ -164,8 +166,7 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self.register_slot(None, getattr(self, '_output_meter_right_value'), 'value')
 
 		self._device_provider = ChannelStripStaticDeviceProvider()
-		self._device_component = ChannelStripDeviceComponent(device_provider = self._device_provider, device_bank_registry = DeviceBankRegistry(), *a, **k)
-		self._device_component._show_msg_callback = lambda message: None
+		self._device_component = self._create_device(device_provider=self._device_provider)
 		self._track_state = self.register_disconnectable(TrackArmState())
 		self._fold_task = self._tasks.add(Task.sequence(Task.wait(TRACK_FOLD_DELAY), Task.run(self._do_fold_track))).kill()
 		self._on_arm_state_changed.subject = self._track_state
@@ -173,7 +174,29 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self._ChannelStripComponent__on_selected_track_changed = self.__on_selected_track_changed
 		self.__on_selected_track_changed.subject = self.song.view
 		self.__on_selected_track_changed()
+		self._update_playing_clip()
 
+
+	def _create_device(self, device_provider):
+		device_component = ChannelStripDeviceComponent(device_provider = device_provider, device_bank_registry = DeviceBankRegistry())
+		device_component._show_msg_callback = lambda message: None
+		return device_component
+
+
+	@listens('playing_slot_index')
+	def __on_playing_slot_index_changed(self):
+		debug('channelstrip.__on_playing_slot_index_changed')
+		self._update_playing_clip()
+
+	def _update_playing_clip(self):
+		if liveobj_valid(self._track) and self._track.can_be_armed:
+			clip = self._track.clip_slots[self._track.playing_slot_index].clip
+			self._playing_clip = clip if liveobj_valid(clip) else None
+		self.notify_playing_clip(self._playing_clip)
+
+	@listenable_property
+	def playing_clip(self):
+		return self._playing_clip
 
 	@listens('selected_track')
 	def __on_selected_track_changed(self):
@@ -188,11 +211,14 @@ class MonoChannelStripComponent(ChannelStripComponentBase):
 		self._update_device_selection()
 
 
+
 	def set_track(self, track):
 		assert(isinstance(track, (type(None), Live.Track.Track)))
 		self._on_devices_changed.subject = track
+		self.__on_playing_slot_index_changed.subject = track
 		self._update_device_selection()
 		self._detect_eq(track)
+		self._update_playing_clip()
 		super(MonoChannelStripComponent,self).set_track(track)
 
 

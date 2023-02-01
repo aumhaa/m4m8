@@ -902,6 +902,7 @@ class Base(LividControlSurface):
 		self.modhandler._device_selector._selection_layer = AddLayerMode(self.modhandler._device_selector, Layer(priority = 7,
 													matrix = self._mode_buttons))
 		self.modhandler.set_enabled(False)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_instrument(self):

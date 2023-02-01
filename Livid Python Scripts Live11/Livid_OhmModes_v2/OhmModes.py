@@ -476,6 +476,7 @@ class OhmModes(LividControlSurface):
 
 		self.modhandler.set_enabled(False)
 		self.modhandler.set_mod_button(self._livid)
+		self._modHandle = ModControl(modscript = self, monomodular = self.monomodular, name = 'ModHandle')
 
 
 	def _setup_modswitcher(self):

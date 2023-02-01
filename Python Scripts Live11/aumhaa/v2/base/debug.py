@@ -123,10 +123,12 @@ def initialize_debug(local_debug = DEBUG, *a, **k):
 
 
 def initialize_debug(local_debug = DEBUG, *a, **k):
-	return log_flattened_arguments if (local_debug or DEBUG) else no_debug
+	return log_flattened_arguments if (local_debug) else no_debug
 
 
 debug = log_flattened_arguments if DEBUG else no_debug
+
+
 
 
 
@@ -151,7 +153,7 @@ class TelnetDebugger(object):
 			import builtins as builtins
 
 		try:
-			sys.path.append('/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
+			sys.path.append('/Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python')
 			# sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/2.7/Resources/Python.app/Contents/MacOS/Python')
 
 			import io, socket, code
@@ -275,14 +277,14 @@ class Debug(ControlSurface):
 		# self.initialize_telnet_debug()
 		# self.initialize_vscode_debug()
 		# self.initialize_pycharm2016_debug()
-		# self.initialize_pycharm2020_debug()
+		#self.initialize_pycharm2020_debug()
 		self.log_message('_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_ DEBUG ON _^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_^_')
 		self._scripts = []
 
 		# self._scan()
 		# self._log_version_data()
 		# self._log_sys_modules()
-		# self._log_dirs()
+		self._log_dirs()
 		# self._log_C_modules()
 		# self.log_filenames()
 		# self._log_functools()
@@ -301,9 +303,9 @@ class Debug(ControlSurface):
 		# sys.modules['subprocess'] = '/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/ctypes/'
 		try:
 			# sys.path.append('/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
-			sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
+			sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python')
 		except:
-			debug('couldnt append path')
+			debug('couldnt prepend native python path')
 		self._log_version_data()
 		import debugpy
 		debugpy.listen(5678)
@@ -311,11 +313,13 @@ class Debug(ControlSurface):
 
 	def initialize_pycharm2016_debug(self):
 		# sys.modules['ctypes'] = '/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/ctypes/'
-		try:
-			# sys.path.append('/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
-			sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
-		except:
-			debug('couldnt append path')
+		if not '/Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python' in sys.path:
+			debug('adding Python 3.8 to sys.path')
+			try:
+				# sys.path.append('/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
+				sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python')
+			except:
+				debug('couldnt prepend native python path')
 		sys.stderr.flush = nop
 		sys.stdout.flush = nop
 		import pydevd
@@ -325,12 +329,12 @@ class Debug(ControlSurface):
 		# sys.modules['ctypes'] = '/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/ctypes/'
 		try:
 			# sys.path.append('/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
-			sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python')
+			sys.path.insert(0, '/Library/Frameworks/Python.framework/Versions/3.8/Resources/Python.app/Contents/MacOS/Python')
 		except:
-			debug('couldnt append path')
+			debug('couldnt prepend native python path')
 		sys.stderr.flush = nop
 		sys.stdout.flush = nop
-		import pydevd_pycharm
+		import pydevd
 		pydevd_pycharm.settrace('localhost', port=2334, stdoutToServer=True, stderrToServer=True)
 		# pydevd_pycharm.settrace(<host name>, port=<port number>)
 
