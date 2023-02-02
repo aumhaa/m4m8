@@ -1,10 +1,11 @@
-// aumhaa_bindable.js
+// aumhaa_APIUtility.js
 // transferred 070219
-// completely untested
 
 var util = require('aumhaa_util');
 util.inject(this, util);
 
+var LOCAL_DEBUG = false;
+var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
 
 function APIUtility(){
 	var self = this;
@@ -22,29 +23,34 @@ APIUtility.prototype.is_valid = function(id){
 	//catch doesn't work when liveAPI throws for some reason, but finally does.
 	//we're posting to suppress the red jsliveapi warning in the max log....because its irritating.
 	//do yourself a favor and don't adjust this, it seems to be working.
+	var finder = this.finder;
 	id = parseInt(id);
 	if(id!=0){
 		try{
 			post('is_valid: '+id);
-			this.finder.id = id;
-			post(this.finder.id == id ? 'true' : 'false');
+			finder.id = id;
+			post(finder.id == id ? 'true' : 'false');
 		}catch(e){}finally{
 			post('\n');
-			return (this.finder.id == id)
+			return (finder.id == id)
 		}
 	}
 	return false
 }
 
 APIUtility.prototype.track_from_id = function(id){
-	this.finder.id = id;
+	var finder = this.finder;
+	// lcl_debug('finder:', finder.type);
+	finder.id = id;
+	// lcl_debug('finder.id:', id);
+	// lcl_debug('finder:', finder.type);
 	var recurse = function(id){
 		if(id == 0){
 			return 0;
 		}
-		this.finder.goto('canonical_parent');
-		if(this.finder.type=='Track'){
-			return parseInt(this.finder.id);
+		finder.goto('canonical_parent');
+		if(finder.type=='Track'){
+			return parseInt(finder.id);
 		}
 		else{
 			return recurse(id);
@@ -54,20 +60,22 @@ APIUtility.prototype.track_from_id = function(id){
 }
 
 APIUtility.prototype.container_from_id = function(id){
-	this.finder.id = id;
-	this.finder.goto('canonical_parent');
-	return parseInt(this.finder.id);
+	var finder = this.finder;
+	finder.id = id;
+	finder.goto('canonical_parent');
+	return parseInt(finder.id);
 }
 
 APIUtility.prototype.previous_device = function(track, device){
+	var finder = this.finder;
 	var device_id = device;
-	this.finder.id = device;
-	this.finder.goto('canonical_parent');
-	if(!(this.finder.type=='Chain')){
+	finder.id = device;
+	finder.goto('canonical_parent');
+	if(!(finder.type=='Chain')){
 		//debug('container is track')
-		this.finder.id = track;
+		finder.id = track;
 	}
-	var devices = this.finder.get('devices').filter(function(element){return element !== 'id';});
+	var devices = finder.get('devices').filter(function(element){return element !== 'id';});
 	var index = devices.indexOf(device_id);
 	if(index > 0){
 		device_id = devices[index-1];
@@ -76,14 +84,15 @@ APIUtility.prototype.previous_device = function(track, device){
 }
 
 APIUtility.prototype.next_device = function(track, device){
+	var finder = this.finder;
 	var device_id = device;
-	this.finder.id = device;
-	this.finder.goto('canonical_parent');
-	if(!(this.finder.type=='Chain')){
+	finder.id = device;
+	finder.goto('canonical_parent');
+	if(!(finder.type=='Chain')){
 		//debug('container is track')
-		this.finder.id = track;
+		finder.id = track;
 	}
-	var devices = this.finder.get('devices').filter(function(element){return element !== 'id';});
+	var devices = finder.get('devices').filter(function(element){return element !== 'id';});
 	var index = devices.indexOf(device_id);
 	if(index < (devices.length-1)){
 		device_id = devices[index+1];
@@ -92,16 +101,17 @@ APIUtility.prototype.next_device = function(track, device){
 }
 
 APIUtility.prototype.device_name_from_id = function(id){
+	var finder = this.finder;
 	var new_name = 'None';
-	this.finder.id = parseInt(id);
+	finder.id = parseInt(id);
 	if(id > 0){
-		new_name = this.finder.get('name').slice(0,40);
+		new_name = finder.get('name').slice(0,40);
 		/*var new_name = [];
-		new_name.unshift(this.finder.get('name'));
-		this.finder.goto('canonical_parent');
-		//this._this.finder.goto('canonical_parent');
+		new_name.unshift(finder.get('name'));
+		finder.goto('canonical_parent');
+		//finder.goto('canonical_parent');
 		new_name.unshift(' || ');
-		new_name.unshift(this.finder.get('name'));
+		new_name.unshift(finder.get('name'));
 		new_name = new_name.join('');
 		new_name = new_name.slice(0, 40);*/
 	}
@@ -109,28 +119,31 @@ APIUtility.prototype.device_name_from_id = function(id){
 }
 
 APIUtility.prototype.container_name_from_id = function(id){
+	var finder = this.finder;
 	var new_name = 'None';
-	this.finder.id = parseInt(id);
+	finder.id = parseInt(id);
 	if(id > 0){
-		var new_name = this.finder.get('name').slice(0, 40);
+		var new_name = finder.get('name').slice(0, 40);
 	}
 	return new_name;
 }
 
 APIUtility.prototype.name_from_id = function(id){
+	var finder = this.finder;
 	var new_name = 'None';
-	this.finder.id = parseInt(id);
+	finder.id = parseInt(id);
 	if(id > 0){
-		var new_name = this.finder.get('name').slice(0, 40);
+		var new_name = finder.get('name').slice(0, 40);
 	}
 	return new_name;
 }
 
 APIUtility.prototype.device_input_from_id = function(id){
+	var finder = this.finder;
 	if(id==this.device_id){
-		this.finder.id = parseInt(this.container_from_id(id));
+		finder.id = parseInt(this.container_from_id(id));
 		var new_name = [':Track Input'];
-		new_name.unshift(this.finder.get('name'));
+		new_name.unshift(finder.get('name'));
 		new_name = new_name.join('');
 		new_name = new_name.slice(0, 40);
 		return new_name;
@@ -141,10 +154,11 @@ APIUtility.prototype.device_input_from_id = function(id){
 }
 
 APIUtility.prototype.device_output_from_id = function(id){
+	var finder = this.finder;
 	if(id==this.device_id){
-		this.finder.id = parseInt(this.container_id);
+		finder.id = parseInt(this.container_id);
 		var new_name = [':Track Output'];
-		new_name.unshift(this.finder.get('name'));
+		new_name.unshift(finder.get('name'));
 		new_name = new_name.join('');
 		new_name = new_name.slice(0, 40);
 		return new_name;
@@ -155,34 +169,36 @@ APIUtility.prototype.device_output_from_id = function(id){
 }
 
 APIUtility.prototype.drum_output_note_from_drumchain = function(id){
+	var finder = this.finder;
 	var note = undefined;
-	this.finder.id = id;
-	if(this.finder.type=='DrumChain'){
-		note = this.finder.get('out_note')
+	finder.id = id;
+	if(finder.type=='DrumChain'){
+		note = finder.get('out_note')
 	}
 	debug('drum_note_from_chain', finder.path, note);
 	return note;
 }
 
 APIUtility.prototype.drum_input_note_from_drumchain = function(id){
+	var finder = this.finder;
 	var note = undefined;
 	var drumchain_id = id;
-	this.finder.id = drumchain_id;
-	if(this.finder.type=='DrumChain'){
-		this.finder.goto('canonical_parent');
-		var drumrack_id = parseInt(this.finder.id);
+	finder.id = drumchain_id;
+	if(finder.type=='DrumChain'){
+		finder.goto('canonical_parent');
+		var drumrack_id = parseInt(finder.id);
 		for(var i=0;i<127;i++){
-			this.finder.id = drumrack_id;
-			this.finder.goto('drum_pads', i);
-			var count = this.finder.getcount('chains');
+			finder.id = drumrack_id;
+			finder.goto('drum_pads', i);
+			var count = finder.getcount('chains');
 			//debug('count', count);
 			if(count){
-				var chains = this.finder.get('chains').filter(function(element){return element !== 'id';});
+				var chains = finder.get('chains').filter(function(element){return element !== 'id';});
 				//debug('chains', chains, drumrack_id);
 				var index = chains.indexOf(drumchain_id);
 				if((index >-1)||(chains==drumchain_id)){
 					//debug('found chain!');
-					note = this.finder.get('note');
+					note = finder.get('note');
 					break;
 				}
 			}
@@ -265,16 +281,17 @@ APIUtility.prototype.device_ids_from_parent = function(id){
 }
 
 APIUtility.prototype.find_control_surface = function(control_surface_type){
-	this.finder.goto('control_surfaces');
-	var number_children = parseInt(this.finder.children[0]);
+	var finder = this.finder;
+	finder.goto('control_surfaces');
+	var number_children = parseInt(finder.children[0]);
 	lcl_debug('control_surfaces length:', number_children);
 	for(var i=0;i<number_children;i++)
 	{
 		lcl_debug('Checking control surface #:', i);
-		this.finder.goto('control_surfaces', i);
-		if(this.finder.type == control_surface_type)
+		finder.goto('control_surfaces', i);
+		if(finder.type == control_surface_type)
 		{
-			return parseInt(this.finder.id);
+			return parseInt(finder.id);
 		}
 	}
 	return 0

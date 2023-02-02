@@ -52,7 +52,10 @@ function ModComponent(parent, type, unique, legacy, args){
 			}
 		}
 	}
-	this.add_bound_properties(this, [
+	this.add_bound_properties(this,
+		['modClientID',
+		'modFunctions',
+		'modAddresses',
 		'legacy',
 		'unique',
 		'callback',
@@ -60,7 +63,9 @@ function ModComponent(parent, type, unique, legacy, args){
 		'finder',
 		'dissolve',
 		'restart',
-		'disconnect'
+		'disconnect',
+		'list_addresses',
+		'list_functions'
 	]);
 	ModComponent.super_.call(this, parent._name, args);
 
@@ -224,11 +229,11 @@ ModComponent.prototype.anything = function(){
 }
 
 ModComponent.prototype.list_functions = function(){
-	return modFunctions;
+	return this.modFunctions;
 }
 
 ModComponent.prototype.list_addresses = function(){
-	return modAddresses;
+	return this.modAddresses;
 }
 
 ModComponent.prototype.send_stored_messages = function(){
@@ -254,7 +259,7 @@ ModComponent.prototype.SendDirect = function(){
 		this.finder.call.apply(this.finder, args);
 	}
 	catch(err){
-		this.debug('SendDirect error:', err, args);
+		this.debug('SendDirect error:', JSON.stringify(err), args);
 	}
 }
 
@@ -264,7 +269,7 @@ ModComponent.prototype.Send = function(){
 		this[args[0]].apply(this, args.slice(1));
 	}
 	catch(err){
-		this.debug('Send error:', err, args);
+		this.debug('Send error:', JSON.stringify(err), args);
 		this.anything(arguments);
 	}
 }

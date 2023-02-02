@@ -3,7 +3,7 @@
 var util = require('aumhaa_util');
 util.inject(this, util);
 
-var LOCAL_DEBUG = true;
+var LOCAL_DEBUG = false;
 var lcl_debug = LOCAL_DEBUG && util.Debug ? util.Debug : function(){}
 
 var Bindable = require('aumhaa_bindable').Bindable;
@@ -72,7 +72,7 @@ EventEmitter.prototype.emit = function(event){
     }
 		catch(e){
 			e.message = 'emit error' + e.message;
-			util.report_error(e);
+			LOCAL_DEBUG && util.report_error(e);
 		}
 };
 
