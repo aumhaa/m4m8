@@ -1,0 +1,3 @@
+[submodule "javascript/aumhaa_js"]
+	path = javascript/aumhaa_js
+	url = https://github.com/aumhaa/aumhaa_js
