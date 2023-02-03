@@ -240,11 +240,11 @@ var current_rule = 0;
 var handlers = [];
 var codec_handler = false;
 
-var Protos = require('protos');
+// var Protos = require('_deprecated_protos');
 //var ButtonClass = require('ButtonClass');
 //include('protos');
 
-var controlRegistry = new Protos.ControlRegistry();
+var controlRegistry = new ControlRegistry();
 debug('controlRegistry is:', controlRegistry);
 var buttonControls = [];
 for(var x=0;x<16;x++)
@@ -253,7 +253,7 @@ for(var x=0;x<16;x++)
 	for(var y=0;y<16;y++)
 	{
 		var id = x+(y*16);
-		buttonControls[x][y] = new Protos.Button(id, 'Button_'+id);
+		buttonControls[x][y] = new ButtonClass(id, 'Button_'+id);
 		controlRegistry.register_control(id, buttonControls[x][y]);
 	}
 }
@@ -3864,7 +3864,7 @@ function _select_chain(chain_num)
 	{
 		debug( 'send_explicit', 'receive_device_proxy', 'set_mod_device_parent', 'id', devices[selected.channel] );
 		mod.Send( 'send_explicit', 'receive_device_proxy', 'set_mod_device_parent', 'id', devices[selected.channel]);
-		mod.Send( 'receive_device_proxy', 'set_mod_drum_pad', Math.max(0, Math.min(chain_num + global_offset - global_chain_offset, 112)));
+		mod.Send( 'send_explicit', 'receive_device_proxy', 'set_mod_drum_pad', Math.max(0, Math.min(chain_num + global_offset - global_chain_offset, 112)));
 	}
 	else
 	{
